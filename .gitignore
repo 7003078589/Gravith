@@ -6,7 +6,7 @@ yarn-error.log*
 
 # Next.js
 .next/
-# out/  # Temporarily commented for GitHub Pages deployment
+out/
 build/
 dist/
 
@@ -81,3 +81,20 @@ jspm_packages/
 
 # TernJS port file
 .tern-port
+
+# Deployment files (to prevent antivirus issues)
+*.zip
+gravith-deploy-files.zip
+hostinger-clean-deployment.zip
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Large files that might trigger antivirus
+*.exe
+*.msi
+*.dmg
+*.pkg
