@@ -50,10 +50,10 @@ export default function Header() {
     return 'Site-Focused Management'; // Default for dashboard
   };
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4">
+    <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
       <div className="flex items-center justify-between">
-        {/* Left - Logo */}
-        <div className="flex items-center space-x-3">
+        {/* Left - Logo (Hidden on mobile when sidebar is present) */}
+        <div className="flex items-center space-x-3 lg:block hidden">
           <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
             <Building2 className="h-6 w-6 text-white" />
           </div>
@@ -63,17 +63,18 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Center - Dynamic Title */}
-        <div className="flex-1 text-center">
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
-            {getCenterTitle()}
+        {/* Center - Dynamic Title (Responsive) */}
+        <div className="flex-1 text-center px-2">
+          <button className="px-2 sm:px-4 py-2 bg-blue-600 text-white rounded-lg text-xs sm:text-sm font-medium hover:bg-blue-700 transition-colors">
+            <span className="hidden sm:inline">{getCenterTitle()}</span>
+            <span className="sm:hidden">Gavith Build</span>
           </button>
         </div>
 
         {/* Right side */}
-        <div className="flex items-center space-x-4">
-          {/* Live and AD indicators */}
-          <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          {/* Live and AD indicators (Hidden on small mobile) */}
+          <div className="hidden sm:flex items-center space-x-2">
             <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">Live</span>
             <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">AD</span>
           </div>
@@ -84,8 +85,8 @@ export default function Header() {
             <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
           </button>
 
-          {/* Settings */}
-          <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+          {/* Settings (Hidden on small mobile) */}
+          <button className="hidden sm:block p-2 text-gray-400 hover:text-gray-600 transition-colors">
             <Settings className="h-5 w-5" />
           </button>
 
@@ -93,7 +94,7 @@ export default function Header() {
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center space-x-2 sm:space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
                 <User className="h-4 w-4 text-white" />

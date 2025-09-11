@@ -920,29 +920,29 @@ export default function MaterialManagement() {
   );
 
   return (
-    <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 bg-gray-50 min-h-screen">
       {/* Company Title */}
       <div className="text-center mb-4">
-        <h1 className="text-xl font-bold text-gray-900">Gavith Construction Pvt. Ltd.</h1>
+        <h1 className="text-lg sm:text-xl font-bold text-gray-900">Gavith Construction Pvt. Ltd.</h1>
       </div>
 
       {/* Page Title and Actions */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 space-y-4 sm:space-y-0">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900">Material Management</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Material Management</h2>
           <p className="text-gray-600">Global overview of inventory across all construction sites.</p>
         </div>
-        <div className="flex space-x-3">
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
           <button 
             onClick={() => setShowConsumptionModal(true)}
-            className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+            className="flex items-center justify-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
           >
             <Minus className="h-4 w-4" />
             <span>Record Consumption</span>
           </button>
           <button 
             onClick={() => setShowPurchaseModal(true)}
-            className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+            className="flex items-center justify-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
           >
             <Plus className="h-4 w-4" />
             <span>+ New Purchase</span>
@@ -951,7 +951,7 @@ export default function MaterialManagement() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <div className="bg-white rounded-lg border border-gray-200 p-4 flex items-center space-x-4">
           <div className="p-3 bg-blue-100 rounded-lg">
             <Package className="h-6 w-6 text-blue-600" />
