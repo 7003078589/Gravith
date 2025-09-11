@@ -42,7 +42,7 @@ export default function Layout({ children }: LayoutProps) {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50 overflow-hidden">
       {/* Desktop Sidebar */}
       <div className="hidden lg:block">
         <Sidebar />
@@ -55,8 +55,10 @@ export default function Layout({ children }: LayoutProps) {
       
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
-        <main className="flex-1 overflow-y-auto">
-          {children}
+        <main className="flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="h-full">
+            {children}
+          </div>
         </main>
       </div>
     </div>

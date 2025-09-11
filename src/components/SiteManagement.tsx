@@ -16,7 +16,9 @@ import {
   Clock,
   Truck,
   Package,
-  BarChart3
+  BarChart3,
+  X,
+  ChevronDown
 } from 'lucide-react';
 import SiteDashboard from './SiteDashboard';
 import SiteVehicles from './SiteVehicles';
@@ -99,6 +101,16 @@ export default function SiteManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [siteForm, setSiteForm] = useState({
+    siteName: 'Residential Complex A',
+    location: 'Sector 15, Navi Mumbai',
+    startDate: '',
+    expectedEndDate: '',
+    totalBudget: '50000000',
+    projectManager: 'Rajesh Kumar',
+    description: 'Premium residential complex with 200 units'
+  });
 
   const filteredSites = sites.filter(site => {
     const matchesSearch = site.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -114,15 +126,42 @@ export default function SiteManagement() {
     { id: 'expenses', name: 'Expenses', icon: DollarSign }
   ];
 
+  const handleFormInputChange = (field: string, value: string) => {
+    setSiteForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleAddSite = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Here you would typically save the site data
+    console.log('New site data:', siteForm);
+    setShowAddModal(false);
+    // Reset form
+    setSiteForm({
+      siteName: '',
+      location: '',
+      startDate: '',
+      expectedEndDate: '',
+      totalBudget: '',
+      projectManager: '',
+      description: ''
+    });
+  };
+
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Site Management</h1>
-          <p className="text-gray-600">Manage and monitor all construction sites with integrated workflows</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Site Management</h1>
+          <p className="text-sm sm:text-base text-gray-600">Manage and monitor all construction sites with integrated workflows</p>
         </div>
-        <button className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+        <button 
+          onClick={() => setShowAddModal(true)}
+          className="flex items-center justify-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+        >
           <Plus className="h-4 w-4" />
           <span>Add New Site</span>
         </button>
@@ -276,12 +315,12 @@ export default function SiteManagement() {
 
             {/* Tab Navigation */}
             <div className="border-b border-gray-200">
-              <nav className="flex space-x-8 px-6">
+              <nav className="flex space-x-2 sm:space-x-8 px-4 sm:px-6 overflow-x-auto">
                 {tabs.map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm ${
+                    className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
                       activeTab === tab.id
                         ? 'border-blue-500 text-blue-600'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -304,6 +343,151 @@ export default function SiteManagement() {
           </div>
         </div>
       </div>
+
+      {/* Add New Site Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Add New Construction Site</h2>
+                <p className="text-sm text-gray-600">Create a new construction project site</p>
+              </div>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="h-5 w-5 text-gray-500" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddSite} className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                {/* Left Column */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Site Name
+                    </label>
+                    <input
+                      type="text"
+                      value={siteForm.siteName}
+                      onChange={(e) => handleFormInputChange('siteName', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                      placeholder="Enter site name"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Location
+                    </label>
+                    <input
+                      type="text"
+                      value={siteForm.location}
+                      onChange={(e) => handleFormInputChange('location', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                      placeholder="Enter location"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Start Date
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="date"
+                        value={siteForm.startDate}
+                        onChange={(e) => handleFormInputChange('startDate', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                        style={{ colorScheme: 'light' }}
+                      />
+                      <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Expected End Date
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="date"
+                        value={siteForm.expectedEndDate}
+                        onChange={(e) => handleFormInputChange('expectedEndDate', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                        style={{ colorScheme: 'light' }}
+                      />
+                      <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Total Budget (₹)
+                    </label>
+                    <input
+                      type="number"
+                      value={siteForm.totalBudget}
+                      onChange={(e) => handleFormInputChange('totalBudget', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                      placeholder="Enter total budget"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Project Manager
+                    </label>
+                    <input
+                      type="text"
+                      value={siteForm.projectManager}
+                      onChange={(e) => handleFormInputChange('projectManager', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                      placeholder="Enter project manager name"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Description - Full Width */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description
+                </label>
+                <textarea
+                  value={siteForm.description}
+                  onChange={(e) => handleFormInputChange('description', e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                  placeholder="Enter project description"
+                />
+              </div>
+
+              {/* Form Actions */}
+              <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Add Site
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

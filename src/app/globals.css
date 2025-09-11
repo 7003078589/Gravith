@@ -24,6 +24,21 @@ body {
       rgb(var(--background-end-rgb))
     )
     rgb(var(--background-start-rgb));
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Prevent mobile scrolling issues */
+html, body {
+  height: 100%;
+  overflow-x: hidden;
+}
+
+/* Fix for mobile viewport */
+@supports (-webkit-touch-callout: none) {
+  body {
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 @layer utilities {
