@@ -254,52 +254,123 @@ export default function MaterialManagement() {
   };
 
   const renderCurrentInventory = () => {
-    const filteredMaterials = viewMode === 'site' && selectedSite !== 'All Sites' 
-      ? materials.filter(material => material.site === selectedSite)
-      : materials;
+    if (viewMode === 'site') {
+      // Group materials by site for Site-Based View
+      const materialsBySite = materials.reduce((acc, material) => {
+        if (!acc[material.site]) {
+          acc[material.site] = [];
+        }
+        acc[material.site].push(material);
+        return acc;
+      }, {} as Record<string, typeof materials>);
 
+      return (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900">Material Inventory</h3>
+            <div className="flex items-center space-x-4">
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setViewMode('overall')}
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200"
+                >
+                  Overall View
+                </button>
+                <button
+                  onClick={() => setViewMode('site')}
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-blue-600 text-white"
+                >
+                  Site-Based View
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Site-Based View - Grouped by Site */}
+          <div className="space-y-6">
+            {Object.entries(materialsBySite).map(([siteName, siteMaterials]) => {
+              const totalValue = siteMaterials.reduce((sum, material) => sum + material.stockValue, 0);
+              const materialCount = siteMaterials.length;
+
+              return (
+                <div key={siteName} className="bg-white border border-gray-200 rounded-lg p-6">
+                  {/* Site Header */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      <FileText className="h-5 w-5 text-gray-600" />
+                      <h4 className="text-lg font-semibold text-gray-900">{siteName}</h4>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-medium text-gray-900">Total Value ₹{totalValue.toLocaleString()}</div>
+                      <div className="text-sm text-gray-600">Materials {materialCount}</div>
+                    </div>
+                  </div>
+
+                  {/* Site Materials Table */}
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Material</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Balance</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit Rate</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Value</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {siteMaterials.map((material) => (
+                          <tr key={material.id}>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900">{material.name}</div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {material.balance.toLocaleString()} {material.unit}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              ₹{material.unitRate}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              ₹{material.stockValue.toLocaleString()}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                {material.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    // Overall View - Single table with all materials
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-900">Material Inventory</h3>
           <div className="flex items-center space-x-4">
             <div className="flex space-x-2">
-              <button
-                onClick={() => setViewMode('overall')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  viewMode === 'overall' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Overall View
-              </button>
-              <button
-                onClick={() => setViewMode('site')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  viewMode === 'site' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Site-Based View
-              </button>
-            </div>
-            {viewMode === 'site' && (
-              <div className="relative">
-                <select
-                  value={selectedSite}
-                  onChange={(e) => setSelectedSite(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white pr-8"
+                <button
+                  onClick={() => setViewMode('overall')}
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-blue-600 text-white"
                 >
-                  <option value="All Sites">All Sites</option>
-                  {sites.map(site => (
-                    <option key={site} value={site}>{site}</option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-              </div>
-            )}
+                  Overall View
+                </button>
+                <button
+                  onClick={() => setViewMode('site')}
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200"
+                >
+                  Site-Based View
+                </button>
+            </div>
           </div>
         </div>
 
@@ -317,48 +388,48 @@ export default function MaterialManagement() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredMaterials.map((material) => (
-              <tr key={material.id}>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div>
-                    <div className="text-sm font-medium text-gray-900">{material.name}</div>
-                    <div className="text-sm text-gray-500 flex items-center">
-                      <MapPin className="h-3 w-3 mr-1" />
-                      {material.site}
+              {materials.map((material) => (
+                <tr key={material.id}>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">{material.name}</div>
+                      <div className="text-sm text-gray-500 flex items-center">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        {material.site}
+                      </div>
                     </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {material.purchased.toLocaleString()} {material.unit}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {material.consumed.toLocaleString()} {material.unit}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div>
-                    <div className="text-sm text-gray-900">{material.balance.toLocaleString()} {material.unit}</div>
-                    <div className="text-xs text-gray-500">
-                      {Math.round((material.balance / material.purchased) * 100)}% remaining
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {material.purchased.toLocaleString()} {material.unit}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {material.consumed.toLocaleString()} {material.unit}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div>
+                      <div className="text-sm text-gray-900">{material.balance.toLocaleString()} {material.unit}</div>
+                      <div className="text-xs text-gray-500">
+                        {Math.round((material.balance / material.purchased) * 100)}% remaining
+                      </div>
                     </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  ₹{material.unitRate}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  ₹{material.stockValue.toLocaleString()}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                    {material.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    ₹{material.unitRate}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    ₹{material.stockValue.toLocaleString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                      {material.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
     );
   };
 
