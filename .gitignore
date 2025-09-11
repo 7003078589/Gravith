@@ -6,7 +6,7 @@ yarn-error.log*
 
 # Next.js
 .next/
-out/
+# out/  # Temporarily commented for GitHub Pages deployment
 build/
 dist/
 
