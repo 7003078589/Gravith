@@ -18,7 +18,8 @@ import {
   FileText,
   Download,
   ChevronDown,
-  Info
+  Info,
+  X
 } from 'lucide-react';
 
 // Sample expense data matching your design
@@ -119,6 +120,18 @@ export default function ExpenseManagement() {
   const [viewMode, setViewMode] = useState('overall');
   const [selectedSite, setSelectedSite] = useState('All Sites');
   const [selectedStatus, setSelectedStatus] = useState('All Status');
+  const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
+  const [expenseForm, setExpenseForm] = useState({
+    category: 'Labour',
+    subcategory: '',
+    description: '',
+    amount: '125000',
+    date: '',
+    vendor: '',
+    site: '',
+    receiptNumber: 'RCT001',
+    approvedBy: ''
+  });
 
   // Calculate summary data
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
@@ -128,6 +141,33 @@ export default function ExpenseManagement() {
   const paidCount = expenses.filter(e => e.status === 'paid').length;
   const pendingCount = expenses.filter(e => e.status === 'pending').length;
   const overdueCount = expenses.filter(e => e.status === 'overdue').length;
+
+  // Handle form input changes
+  const handleFormInputChange = (field: string, value: string) => {
+    setExpenseForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // Handle form submission
+  const handleAddExpense = () => {
+    // Here you would typically add the expense to your data
+    console.log('Adding expense:', expenseForm);
+    setShowAddExpenseModal(false);
+    // Reset form
+    setExpenseForm({
+      category: 'Labour',
+      subcategory: '',
+      description: '',
+      amount: '125000',
+      date: '',
+      vendor: '',
+      site: '',
+      receiptNumber: 'RCT001',
+      approvedBy: ''
+    });
+  };
 
   // Filter expenses based on active tab
   const getFilteredExpenses = () => {
@@ -161,117 +201,236 @@ export default function ExpenseManagement() {
     };
   };
 
-  const renderAllExpenses = () => (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900">All Expense Records</h3>
-        <div className="flex items-center space-x-4">
-          <div className="flex space-x-2">
-            <button
-              onClick={() => setViewMode('overall')}
-              className="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-blue-600 text-white"
-            >
-              Overall View
-            </button>
-            <button
-              onClick={() => setViewMode('site')}
-              className="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200"
-            >
-              Site-Based View
-            </button>
-          </div>
-          <div className="flex space-x-2">
-            <div className="relative">
-              <select
-                value={selectedSite}
-                onChange={(e) => setSelectedSite(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white pr-8"
-              >
-                <option value="All Sites">All Sites</option>
-                {sites.map(site => (
-                  <option key={site} value={site}>{site}</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-            </div>
-            <div className="relative">
-              <select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white pr-8"
-              >
-                <option value="All Status">All Status</option>
-                <option value="paid">Paid</option>
-                <option value="pending">Pending</option>
-                <option value="overdue">Overdue</option>
-              </select>
-              <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-            </div>
-            <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-              <Download className="h-4 w-4" />
-              <span>Export</span>
-            </button>
-          </div>
-        </div>
-      </div>
+  const renderAllExpenses = () => {
+    if (viewMode === 'site') {
+      // Group expenses by site for Site-Based View
+      const expensesBySite = filteredExpenses.reduce((acc, expense) => {
+        if (!acc[expense.site]) {
+          acc[expense.site] = [];
+        }
+        acc[expense.site].push(expense);
+        return acc;
+      }, {} as Record<string, typeof filteredExpenses>);
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category & Description</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Site</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredExpenses.map((expense) => {
-              const IconComponent = categoryIcons[expense.category as keyof typeof categoryIcons];
+      return (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900">Expense Records</h3>
+            <div className="flex items-center space-x-4">
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setViewMode('overall')}
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200"
+                >
+                  Overall View
+                </button>
+                <button
+                  onClick={() => setViewMode('site')}
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-blue-600 text-white"
+                >
+                  Site-Based View
+                </button>
+              </div>
+              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                <Download className="h-4 w-4" />
+                <span>Export</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Site-Based View - Grouped by Site */}
+          <div className="space-y-6">
+            {Object.entries(expensesBySite).map(([siteName, siteExpenses]) => {
+              const totalValue = siteExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+              const expenseCount = siteExpenses.length;
+
               return (
-                <tr key={expense.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                <div key={siteName} className="bg-white border border-gray-200 rounded-lg p-6">
+                  {/* Site Header */}
+                  <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-gray-100 rounded-lg">
-                        <IconComponent className="h-4 w-4 text-gray-600" />
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">{expense.title}</div>
-                        <div className="text-sm text-gray-500">{expense.description}</div>
-                        <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full inline-block mt-1">
-                          {expense.category}
-                        </div>
-                      </div>
+                      <Building2 className="h-5 w-5 text-gray-600" />
+                      <h4 className="text-lg font-semibold text-gray-900">{siteName}</h4>
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">₹{expense.amount.toLocaleString()}</div>
-                    <div className="text-xs text-gray-500">{expense.receipt}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {expense.date}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {expense.vendor}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {expense.site}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColors[expense.status as keyof typeof statusColors]}`}>
-                      {expense.status}
-                    </span>
-                  </td>
-                </tr>
+                    <div className="text-right">
+                      <div className="text-sm font-medium text-gray-900">Total Value ₹{totalValue.toLocaleString()}</div>
+                      <div className="text-sm text-gray-600">Expenses {expenseCount}</div>
+                    </div>
+                  </div>
+
+                  {/* Site Expenses Table */}
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Receipt</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {siteExpenses.map((expense) => {
+                          const IconComponent = categoryIcons[expense.category as keyof typeof categoryIcons];
+                          return (
+                            <tr key={expense.id}>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-medium text-gray-900">{expense.title}</div>
+                                <div className="text-sm text-gray-500">{expense.description}</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center space-x-2">
+                                  <IconComponent className="h-4 w-4 text-gray-600" />
+                                  <span className="text-sm text-gray-900">{expense.category}</span>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                ₹{expense.amount.toLocaleString()}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {expense.date}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {expense.vendor}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColors[expense.status as keyof typeof statusColors]}`}>
+                                  {expense.status}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {expense.receipt}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               );
             })}
-          </tbody>
-        </table>
+          </div>
+        </div>
+      );
+    }
+
+    // Overall View - Single table with all expenses
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-900">Expense Records</h3>
+          <div className="flex items-center space-x-4">
+            <div className="flex space-x-2">
+              <button
+                onClick={() => setViewMode('overall')}
+                className="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-blue-600 text-white"
+              >
+                Overall View
+              </button>
+              <button
+                onClick={() => setViewMode('site')}
+                className="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200"
+              >
+                Site-Based View
+              </button>
+            </div>
+            <div className="flex space-x-2">
+              <div className="relative">
+                <select
+                  value={selectedSite}
+                  onChange={(e) => setSelectedSite(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white pr-8"
+                >
+                  <option value="All Sites">All Sites</option>
+                  {sites.map(site => (
+                    <option key={site} value={site}>{site}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+              </div>
+              <div className="relative">
+                <select
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white pr-8"
+                >
+                  <option value="All Status">All Status</option>
+                  <option value="paid">Paid</option>
+                  <option value="pending">Pending</option>
+                  <option value="overdue">Overdue</option>
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+              </div>
+              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                <Download className="h-4 w-4" />
+                <span>Export</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Site</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Receipt</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredExpenses.map((expense) => {
+                const IconComponent = categoryIcons[expense.category as keyof typeof categoryIcons];
+                return (
+                  <tr key={expense.id}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">{expense.title}</div>
+                      <div className="text-sm text-gray-500">{expense.description}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center space-x-2">
+                        <IconComponent className="h-4 w-4 text-gray-600" />
+                        <span className="text-sm text-gray-900">{expense.category}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      ₹{expense.amount.toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {expense.date}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {expense.vendor}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {expense.site}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColors[expense.status as keyof typeof statusColors]}`}>
+                        {expense.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {expense.receipt}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderCategoryView = (category: string) => {
     const categoryData = getCategoryData(category);
@@ -479,10 +638,19 @@ export default function ExpenseManagement() {
           <h1 className="text-2xl font-bold text-gray-900">Expense Management</h1>
           <p className="text-gray-600">Comprehensive expense tracking with categorized views and analytics</p>
         </div>
-        <button className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-          <Plus className="h-4 w-4" />
-          <span>Add Expense</span>
-        </button>
+        <div className="flex items-center space-x-3">
+          <button 
+            onClick={() => setShowAddExpenseModal(true)}
+            className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Record Expense</span>
+          </button>
+          <button className="flex items-center space-x-2 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+            <Download className="h-4 w-4" />
+            <span>Export</span>
+          </button>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -561,6 +729,181 @@ export default function ExpenseManagement() {
 
       {/* Content */}
       {renderContent()}
+
+      {/* Add Expense Modal */}
+      {showAddExpenseModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Add New Expense</h2>
+                <p className="text-sm text-gray-600">Record a new project expense</p>
+              </div>
+              <button
+                onClick={() => setShowAddExpenseModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="h-5 w-5 text-gray-500" />
+              </button>
+            </div>
+
+            {/* Modal Form */}
+            <div className="space-y-6">
+              {/* Two Column Layout */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left Column */}
+                <div className="space-y-4">
+                  {/* Category */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                    <div className="relative">
+                      <select
+                        value={expenseForm.category}
+                        onChange={(e) => handleFormInputChange('category', e.target.value)}
+                        className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white"
+                      >
+                        <option value="Labour">Labour</option>
+                        <option value="Materials">Materials</option>
+                        <option value="Equipment">Equipment</option>
+                        <option value="Transport">Transport</option>
+                        <option value="Utilities">Utilities</option>
+                        <option value="Other">Other</option>
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+                    </div>
+                  </div>
+
+                  {/* Vendor */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Vendor</label>
+                    <input
+                      type="text"
+                      value={expenseForm.vendor}
+                      onChange={(e) => handleFormInputChange('vendor', e.target.value)}
+                      placeholder="Vendor name"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                    />
+                  </div>
+
+                  {/* Receipt Number */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Receipt Number</label>
+                    <input
+                      type="text"
+                      value={expenseForm.receiptNumber}
+                      onChange={(e) => handleFormInputChange('receiptNumber', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                    />
+                  </div>
+                </div>
+
+                {/* Right Column */}
+                <div className="space-y-4">
+                  {/* Subcategory */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Subcategory</label>
+                    <input
+                      type="text"
+                      value={expenseForm.subcategory}
+                      onChange={(e) => handleFormInputChange('subcategory', e.target.value)}
+                      placeholder="e.g., Mason Work, Steel, Excavator Rental"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                    />
+                  </div>
+
+                  {/* Date */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                    <div className="relative">
+                      <input
+                        type="date"
+                        value={expenseForm.date}
+                        onChange={(e) => handleFormInputChange('date', e.target.value)}
+                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                        style={{ colorScheme: 'light' }}
+                      />
+                      <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+                    </div>
+                  </div>
+
+                  {/* Site */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Site</label>
+                    <div className="relative">
+                      <select
+                        value={expenseForm.site}
+                        onChange={(e) => handleFormInputChange('site', e.target.value)}
+                        className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white"
+                      >
+                        <option value="">Select site</option>
+                        {sites.map(site => (
+                          <option key={site} value={site}>{site}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+                    </div>
+                  </div>
+
+                  {/* Approved By */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Approved By</label>
+                    <input
+                      type="text"
+                      value={expenseForm.approvedBy}
+                      onChange={(e) => handleFormInputChange('approvedBy', e.target.value)}
+                      placeholder="Project Manager name"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Full Width Fields */}
+              <div className="space-y-4">
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                  <textarea
+                    value={expenseForm.description}
+                    onChange={(e) => handleFormInputChange('description', e.target.value)}
+                    placeholder="Detailed description of the expense"
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                  />
+                </div>
+
+                {/* Amount */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Amount (₹)</label>
+                  <input
+                    type="number"
+                    value={expenseForm.amount}
+                    onChange={(e) => handleFormInputChange('amount', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex justify-end space-x-3 mt-8">
+              <button
+                onClick={() => setShowAddExpenseModal(false)}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddExpense}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Add Expense
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
