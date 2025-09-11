@@ -31,7 +31,7 @@ export default function Login() {
         }));
         
         // Redirect to main dashboard
-        router.push('/');
+        window.location.href = '/dashboard';
       } else {
         setError('Invalid username or password');
       }
@@ -135,7 +135,7 @@ export default function Login() {
         {/* Back to Homepage */}
         <div className="text-center mt-6">
           <button
-            onClick={() => router.push('/landing')}
+            onClick={() => window.location.href = '/landing'}
             className="text-gray-600 hover:text-blue-600 text-sm font-medium"
           >
             ← Back to Homepage
