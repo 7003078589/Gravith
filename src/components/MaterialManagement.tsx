@@ -15,7 +15,9 @@ import {
   Users,
   BarChart3,
   Info,
-  Eye
+  Eye,
+  X,
+  ChevronDown
 } from 'lucide-react';
 
 const materials = [
@@ -185,11 +187,71 @@ export default function MaterialManagement() {
   const [activeTab, setActiveTab] = useState('inventory');
   const [viewMode, setViewMode] = useState('overall');
   const [selectedSite, setSelectedSite] = useState('All Sites');
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [showConsumptionModal, setShowConsumptionModal] = useState(false);
+  const [purchaseForm, setPurchaseForm] = useState({
+    materialName: '',
+    site: '',
+    quantity: '100',
+    unit: '',
+    unitRate: '425',
+    vendor: '',
+    invoiceNumber: 'INV-2024-001',
+    purchaseDate: ''
+  });
+  const [consumptionForm, setConsumptionForm] = useState({
+    material: '',
+    quantity: ''
+  });
 
   const totalMaterials = materials.length;
   const stockValue = materials.reduce((sum, material) => sum + material.stockValue, 0);
   const totalPurchases = purchaseHistory.reduce((sum, purchase) => sum + purchase.totalAmount, 0);
   const lowStockItems = materials.filter(material => (material.balance / material.purchased) < 0.2).length;
+
+  const units = ['Bags', 'Kilograms', 'Cubic Meters', 'Tons', 'Pieces'];
+
+  const handlePurchaseInputChange = (field: string, value: string) => {
+    setPurchaseForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleConsumptionInputChange = (field: string, value: string) => {
+    setConsumptionForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handlePurchaseSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Purchase form submitted:', purchaseForm);
+    setShowPurchaseModal(false);
+    // Reset form
+    setPurchaseForm({
+      materialName: '',
+      site: '',
+      quantity: '100',
+      unit: '',
+      unitRate: '425',
+      vendor: '',
+      invoiceNumber: 'INV-2024-001',
+      purchaseDate: ''
+    });
+  };
+
+  const handleConsumptionSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Consumption form submitted:', consumptionForm);
+    setShowConsumptionModal(false);
+    // Reset form
+    setConsumptionForm({
+      material: '',
+      quantity: ''
+    });
+  };
 
   const renderCurrentInventory = () => (
     <div className="space-y-6">
@@ -789,11 +851,17 @@ export default function MaterialManagement() {
           <p className="text-gray-600">Global overview of inventory across all construction sites.</p>
         </div>
         <div className="flex space-x-3">
-          <button className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+          <button 
+            onClick={() => setShowConsumptionModal(true)}
+            className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+          >
             <Minus className="h-4 w-4" />
             <span>Record Consumption</span>
           </button>
-          <button className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+          <button 
+            onClick={() => setShowPurchaseModal(true)}
+            className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+          >
             <Plus className="h-4 w-4" />
             <span>+ New Purchase</span>
           </button>
@@ -876,6 +944,245 @@ export default function MaterialManagement() {
           {activeTab === 'analytics' && renderAnalytics()}
         </div>
       </div>
+
+      {/* Record Material Purchase Modal */}
+      {showPurchaseModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Record Material Purchase</h2>
+                <p className="text-gray-600">Add a new material purchase to inventory.</p>
+              </div>
+              <button
+                onClick={() => setShowPurchaseModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="h-5 w-5 text-gray-500" />
+              </button>
+            </div>
+
+            <form onSubmit={handlePurchaseSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left Column */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Material Name
+                    </label>
+                    <input
+                      type="text"
+                      value={purchaseForm.materialName}
+                      onChange={(e) => handlePurchaseInputChange('materialName', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="e.g., Cement (OPC 53)"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Site
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={purchaseForm.site}
+                        onChange={(e) => handlePurchaseInputChange('site', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white"
+                      >
+                        <option value="">Select site</option>
+                        {sites.map((site) => (
+                          <option key={site} value={site}>{site}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Quantity
+                    </label>
+                    <input
+                      type="number"
+                      value={purchaseForm.quantity}
+                      onChange={(e) => handlePurchaseInputChange('quantity', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="100"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Unit
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={purchaseForm.unit}
+                        onChange={(e) => handlePurchaseInputChange('unit', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white"
+                      >
+                        <option value="">Select unit</option>
+                        {units.map((unit) => (
+                          <option key={unit} value={unit}>{unit}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Unit Rate (₹)
+                    </label>
+                    <input
+                      type="number"
+                      value={purchaseForm.unitRate}
+                      onChange={(e) => handlePurchaseInputChange('unitRate', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="425"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Vendor
+                    </label>
+                    <input
+                      type="text"
+                      value={purchaseForm.vendor}
+                      onChange={(e) => handlePurchaseInputChange('vendor', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Vendor Name"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Invoice Number
+                    </label>
+                    <input
+                      type="text"
+                      value={purchaseForm.invoiceNumber}
+                      onChange={(e) => handlePurchaseInputChange('invoiceNumber', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="INV-2024-001"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Purchase Date
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="date"
+                        value={purchaseForm.purchaseDate}
+                        onChange={(e) => handlePurchaseInputChange('purchaseDate', e.target.value)}
+                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                        style={{ colorScheme: 'light' }}
+                      />
+                      <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Form Actions */}
+              <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => setShowPurchaseModal(false)}
+                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Record Purchase
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Record Material Consumption Modal */}
+      {showConsumptionModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Record Material Consumption</h2>
+                <p className="text-gray-600">Update material usage and consumption tracking.</p>
+              </div>
+              <button
+                onClick={() => setShowConsumptionModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="h-5 w-5 text-gray-500" />
+              </button>
+            </div>
+
+            <form onSubmit={handleConsumptionSubmit} className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Material
+                </label>
+                <div className="relative">
+                  <select
+                    value={consumptionForm.material}
+                    onChange={(e) => handleConsumptionInputChange('material', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white"
+                  >
+                    <option value="">Choose material</option>
+                    {materials.map((material) => (
+                      <option key={material.id} value={material.id}>
+                        {material.name} - {material.site} (Available: {material.balance} {material.unit})
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Quantity Consumed
+                </label>
+                <input
+                  type="number"
+                  value={consumptionForm.quantity}
+                  onChange={(e) => handleConsumptionInputChange('quantity', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter quantity"
+                />
+              </div>
+
+              {/* Form Actions */}
+              <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => setShowConsumptionModal(false)}
+                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Record Consumption
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
