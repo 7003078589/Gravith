@@ -20,6 +20,9 @@ import {
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Site Management', href: '/sites', icon: MapPin },
+  { name: 'Vehicle & Equipment', href: '/vehicles', icon: Truck },
+  { name: 'Material Management', href: '/materials', icon: Package },
+  { name: 'Expense Management', href: '/expenses', icon: DollarSign },
   { name: 'Payment Tracking', href: '/payments', icon: CreditCard },
   { name: 'Vendor Management', href: '/vendors', icon: Users },
   { name: 'Reports & Analytics', href: '/analytics', icon: BarChart3 },
