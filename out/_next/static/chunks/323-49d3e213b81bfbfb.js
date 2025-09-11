@@ -1,9 +1,4 @@
-(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[707],{3523:function(e,t,n){"use strict";n.d(t,{Z:function(){return r}});/**
- * @license lucide-react v0.294.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */let r=(0,n(2898).Z)("ChevronDown",[["path",{d:"m6 9 6 6 6-6",key:"qrunsl"}]])},2112:function(e,t,n){"use strict";n.d(t,{Z:function(){return r}});/**
+(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[323],{2112:function(e,t,n){"use strict";n.d(t,{Z:function(){return r}});/**
  * @license lucide-react v0.294.0 - ISC
  *
  * This source code is licensed under the ISC license.
