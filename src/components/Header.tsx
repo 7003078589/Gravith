@@ -17,12 +17,12 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Center - Dynamic Title */}
-        <div className="flex-1 text-center">
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
-            Global Vehicle Overview
-          </button>
-        </div>
+               {/* Center - Dynamic Title */}
+               <div className="flex-1 text-center">
+                 <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+                   Global Material Overview
+                 </button>
+               </div>
 
         {/* Right side */}
         <div className="flex items-center space-x-4">

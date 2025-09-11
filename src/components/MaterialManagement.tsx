@@ -4,375 +4,876 @@ import { useState } from 'react';
 import { 
   Package, 
   Plus, 
-  Search, 
-  Filter, 
-  MoreVertical,
-  AlertTriangle,
-  CheckCircle,
+  Minus,
   TrendingUp,
-  TrendingDown,
-  Building2,
-  Calendar
+  ShoppingCart,
+  AlertCircle,
+  MapPin,
+  FileText,
+  Calendar,
+  Download,
+  Users,
+  BarChart3,
+  Info,
+  Eye
 } from 'lucide-react';
 
 const materials = [
   {
     id: 1,
-    name: 'Portland Cement',
-    category: 'cement',
-    quantity: 150,
-    unit: 'bags',
-    costPerUnit: 350,
-    supplier: 'ACC Limited',
-    siteId: 'site-1',
-    lastUpdated: '2024-01-20',
-    minThreshold: 50,
-    status: 'low'
+    name: 'Cement (OPC 53)',
+    site: 'Residential Complex A',
+    purchased: 500,
+    consumed: 320,
+    balance: 180,
+    unitRate: 425,
+    stockValue: 76500,
+    status: 'Adequate',
+    unit: 'bags'
   },
   {
     id: 2,
-    name: 'Steel Rods (12mm)',
-    category: 'steel',
-    quantity: 2500,
-    unit: 'kg',
-    costPerUnit: 65,
-    supplier: 'Tata Steel',
-    siteId: 'site-2',
-    lastUpdated: '2024-01-18',
-    minThreshold: 1000,
-    status: 'good'
+    name: 'Steel Bars (12mm)',
+    site: 'Residential Complex A',
+    purchased: 15000,
+    consumed: 8500,
+    balance: 6500,
+    unitRate: 65,
+    stockValue: 422500,
+    status: 'Adequate',
+    unit: 'kg'
   },
   {
     id: 3,
-    name: 'Red Bricks',
-    category: 'bricks',
-    quantity: 5000,
-    unit: 'pieces',
-    costPerUnit: 8,
-    supplier: 'Local Supplier',
-    siteId: 'site-1',
-    lastUpdated: '2024-01-19',
-    minThreshold: 2000,
-    status: 'good'
+    name: 'Ready Mix Concrete',
+    site: 'Commercial Plaza B',
+    purchased: 800,
+    consumed: 650,
+    balance: 150,
+    unitRate: 4500,
+    stockValue: 675000,
+    status: 'Adequate',
+    unit: 'cubic meters'
   },
   {
     id: 4,
-    name: 'Fine Sand',
-    category: 'sand',
-    quantity: 80,
-    unit: 'cubic meters',
-    costPerUnit: 1200,
-    supplier: 'River Sand Co.',
-    siteId: 'site-3',
-    lastUpdated: '2024-01-17',
-    minThreshold: 30,
-    status: 'critical'
+    name: 'Cement (OPC 53)',
+    site: 'Commercial Plaza B',
+    purchased: 300,
+    consumed: 180,
+    balance: 120,
+    unitRate: 430,
+    stockValue: 51600,
+    status: 'Adequate',
+    unit: 'bags'
+  },
+  {
+    id: 5,
+    name: 'Bricks',
+    site: 'Highway Bridge Project',
+    purchased: 50000,
+    consumed: 35000,
+    balance: 15000,
+    unitRate: 8,
+    stockValue: 120000,
+    status: 'Adequate',
+    unit: 'pieces'
   }
 ];
 
-const statusColors = {
-  good: 'bg-green-100 text-green-800',
-  low: 'bg-yellow-100 text-yellow-800',
-  critical: 'bg-red-100 text-red-800'
-};
+const purchaseHistory = [
+  {
+    id: 1,
+    material: 'Cement (OPC 53)',
+    site: 'Residential Complex A',
+    quantity: 200,
+    unitRate: 425,
+    totalAmount: 85000,
+    vendor: 'Cement Corp Ltd',
+    date: '25/01/2024',
+    invoice: 'INV-2024-001'
+  },
+  {
+    id: 2,
+    material: 'Steel Bars (12mm)',
+    site: 'Residential Complex A',
+    quantity: 5000,
+    unitRate: 65,
+    totalAmount: 325000,
+    vendor: 'Steel Industries',
+    date: '20/01/2024',
+    invoice: 'SI-2024-045'
+  },
+  {
+    id: 3,
+    material: 'Ready Mix Concrete',
+    site: 'Commercial Plaza B',
+    quantity: 200,
+    unitRate: 4500,
+    totalAmount: 900000,
+    vendor: 'RMC Solutions',
+    date: '01/02/2024',
+    invoice: 'RMC-2024-012'
+  }
+];
 
-const categoryIcons = {
-  cement: '🏗️',
-  steel: '🔩',
-  bricks: '🧱',
-  sand: '🏖️',
-  aggregate: '🪨',
-  other: '📦'
-};
+const periodicEntries = [
+  {
+    id: 1,
+    period: 'Week 6, 2024',
+    material: 'Cement (OPC 53)',
+    site: 'Residential Complex A',
+    received: '200 bags',
+    used: '150 bags',
+    balance: '50 bags',
+    entryDate: '2024-02-10',
+    type: 'weekly'
+  },
+  {
+    id: 2,
+    period: 'Jan 2024',
+    material: 'Steel Bars (12mm)',
+    site: 'Commercial Plaza B',
+    received: '5000 kg',
+    used: '4200 kg',
+    balance: '800 kg',
+    entryDate: '2024-01-31',
+    type: 'monthly'
+  }
+];
+
+const vendors = [
+  {
+    id: 1,
+    name: 'Cement Corp Ltd',
+    orders: 1,
+    totalValue: 85000,
+    avgOrder: 85000
+  },
+  {
+    id: 2,
+    name: 'Steel Industries',
+    orders: 1,
+    totalValue: 325000,
+    avgOrder: 325000
+  },
+  {
+    id: 3,
+    name: 'RMC Solutions',
+    orders: 1,
+    totalValue: 900000,
+    avgOrder: 900000
+  }
+];
+
+const sites = [
+  'Residential Complex A',
+  'Commercial Plaza B',
+  'Highway Bridge Project'
+];
+
+const tabs = [
+  { id: 'inventory', name: 'Current Inventory', icon: Package },
+  { id: 'purchase', name: 'Purchase History', icon: ShoppingCart },
+  { id: 'periodic', name: 'Periodic Entry', icon: Calendar },
+  { id: 'reports', name: 'Reports & Export', icon: FileText },
+  { id: 'vendor', name: 'Vendor Summary', icon: Users },
+  { id: 'analytics', name: 'Analytics', icon: BarChart3 }
+];
 
 export default function MaterialManagement() {
-  const [selectedMaterial, setSelectedMaterial] = useState(materials[0]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [activeTab, setActiveTab] = useState('inventory');
+  const [viewMode, setViewMode] = useState('overall');
+  const [selectedSite, setSelectedSite] = useState('All Sites');
 
-  const filteredMaterials = materials.filter(material => {
-    const matchesSearch = material.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         material.supplier.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = categoryFilter === 'all' || material.category === categoryFilter;
-    const matchesStatus = statusFilter === 'all' || material.status === statusFilter;
-    return matchesSearch && matchesCategory && matchesStatus;
-  });
+  const totalMaterials = materials.length;
+  const stockValue = materials.reduce((sum, material) => sum + material.stockValue, 0);
+  const totalPurchases = purchaseHistory.reduce((sum, purchase) => sum + purchase.totalAmount, 0);
+  const lowStockItems = materials.filter(material => (material.balance / material.purchased) < 0.2).length;
 
-  const totalValue = materials.reduce((sum, material) => sum + (material.quantity * material.costPerUnit), 0);
-  const lowStockCount = materials.filter(m => m.status === 'low' || m.status === 'critical').length;
-
-  return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
+  const renderCurrentInventory = () => (
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Material Management</h1>
-          <p className="text-gray-600">Track inventory and manage construction materials</p>
+        <h3 className="text-lg font-semibold text-gray-900">Material Inventory</h3>
+        <div className="flex items-center space-x-4">
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setViewMode('overall')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                viewMode === 'overall' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Overall View
+            </button>
+            <button
+              onClick={() => setViewMode('site')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                viewMode === 'site' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Site-Based View
+            </button>
+          </div>
+          <select
+            value={selectedSite}
+            onChange={(e) => setSelectedSite(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="All Sites">All Sites</option>
+            {sites.map(site => (
+              <option key={site} value={site}>{site}</option>
+            ))}
+          </select>
         </div>
-        <button className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-          <Plus className="h-4 w-4" />
-          <span>Add Material</span>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Material & Site</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Purchased</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Consumed</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Balance</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit Rate</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock Value</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {materials.map((material) => (
+              <tr key={material.id}>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div>
+                    <div className="text-sm font-medium text-gray-900">{material.name}</div>
+                    <div className="text-sm text-gray-500 flex items-center">
+                      <MapPin className="h-3 w-3 mr-1" />
+                      {material.site}
+                    </div>
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {material.purchased.toLocaleString()} {material.unit}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {material.consumed.toLocaleString()} {material.unit}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div>
+                    <div className="text-sm text-gray-900">{material.balance.toLocaleString()} {material.unit}</div>
+                    <div className="text-xs text-gray-500">
+                      {Math.round((material.balance / material.purchased) * 100)}% remaining
+                    </div>
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  ₹{material.unitRate}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  ₹{material.stockValue.toLocaleString()}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                    {material.status}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderPurchaseHistory = () => (
+    <div className="space-y-6">
+      <h3 className="text-lg font-semibold text-gray-900">Purchase History</h3>
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Material & Site</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit Rate</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Amount</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {purchaseHistory.map((purchase) => (
+              <tr key={purchase.id}>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div>
+                    <div className="text-sm font-medium text-gray-900">{purchase.material}</div>
+                    <div className="text-sm text-gray-500 flex items-center">
+                      <MapPin className="h-3 w-3 mr-1" />
+                      {purchase.site}
+                    </div>
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {purchase.quantity.toLocaleString()}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  ₹{purchase.unitRate}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  ₹{purchase.totalAmount.toLocaleString()}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {purchase.vendor}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {purchase.date}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 flex items-center">
+                  <FileText className="h-3 w-3 mr-1" />
+                  {purchase.invoice}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderPeriodicEntry = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-gray-900">Periodic Material Entry</h3>
+        <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-700">
+          <Calendar className="h-4 w-4" />
+          <span className="text-sm font-medium">Weekly & Monthly Tracking</span>
         </button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Package className="h-5 w-5 text-blue-600" />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Weekly Material Entry */}
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <Calendar className="h-5 w-5 mr-2" />
+            Weekly Material Entry
+          </h4>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Select Week</label>
+              <input
+                type="text"
+                placeholder="Week --, ----"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
             </div>
             <div>
-              <p className="text-sm text-gray-600">Total Materials</p>
-              <p className="text-2xl font-bold text-gray-900">{materials.length}</p>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Material</label>
+              <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option>Choose material</option>
+                <option>Cement (OPC 53)</option>
+                <option>Steel Bars (12mm)</option>
+                <option>Ready Mix Concrete</option>
+                <option>Bricks</option>
+              </select>
             </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Quantity Received</label>
+                <input
+                  type="number"
+                  defaultValue="100"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Quantity Used</label>
+                <input
+                  type="number"
+                  defaultValue="80"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+              <textarea
+                placeholder="Weekly consumption notes"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows={3}
+              />
+            </div>
+            <button className="w-full flex items-center justify-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+              <Plus className="h-4 w-4" />
+              <span>Add Weekly Entry</span>
+            </button>
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <TrendingUp className="h-5 w-5 text-green-600" />
+
+        {/* Monthly Material Summary */}
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <Calendar className="h-5 w-5 mr-2" />
+            Monthly Material Summary
+          </h4>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Select Month</label>
+              <input
+                type="text"
+                placeholder="--------, ----"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
             </div>
             <div>
-              <p className="text-sm text-gray-600">Total Value</p>
-              <p className="text-2xl font-bold text-gray-900">₹{(totalValue / 100000).toFixed(1)}L</p>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Site</label>
+              <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option>Choose site</option>
+                {sites.map(site => (
+                  <option key={site} value={site}>{site}</option>
+                ))}
+              </select>
             </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-orange-100 rounded-lg">
-              <AlertTriangle className="h-5 w-5 text-orange-600" />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Total Received</label>
+                <input
+                  type="number"
+                  defaultValue="2000"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Total Consumed</label>
+                <input
+                  type="number"
+                  defaultValue="1800"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Low Stock</p>
-              <p className="text-2xl font-bold text-gray-900">{lowStockCount}</p>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Monthly Summary</label>
+              <textarea
+                placeholder="Monthly consumption summary"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows={3}
+              />
             </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <Building2 className="h-5 w-5 text-purple-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Active Sites</p>
-              <p className="text-2xl font-bold text-gray-900">3</p>
-            </div>
+            <button className="w-full flex items-center justify-center space-x-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+              <FileText className="h-4 w-4" />
+              <span>Generate Monthly Report</span>
+            </button>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Material List */}
-        <div className="lg:col-span-1 space-y-4">
-          {/* Search and Filter */}
-          <div className="space-y-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search materials..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="all">All Categories</option>
-              <option value="cement">Cement</option>
-              <option value="steel">Steel</option>
-              <option value="bricks">Bricks</option>
-              <option value="sand">Sand</option>
-              <option value="aggregate">Aggregate</option>
-            </select>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="all">All Status</option>
-              <option value="good">Good Stock</option>
-              <option value="low">Low Stock</option>
-              <option value="critical">Critical</option>
-            </select>
-          </div>
+      {/* Recent Periodic Entries */}
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <h4 className="text-lg font-semibold text-gray-900 mb-4">Recent Periodic Entries</h4>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Period</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Material</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Site</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Received</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Used</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Balance</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Entry Date</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {periodicEntries.map((entry) => (
+                <tr key={entry.id}>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                      entry.type === 'weekly' 
+                        ? 'bg-blue-100 text-blue-800' 
+                        : 'bg-green-100 text-green-800'
+                    }`}>
+                      {entry.period}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.material}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.site}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.received}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.used}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.balance}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.entryDate}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
 
-          {/* Material Cards */}
-          <div className="space-y-2">
-            {filteredMaterials.map((material) => (
-              <div
-                key={material.id}
-                onClick={() => setSelectedMaterial(material)}
-                className={`p-4 rounded-lg border cursor-pointer transition-all ${
-                  selectedMaterial.id === material.id
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-lg">{categoryIcons[material.category as keyof typeof categoryIcons]}</span>
-                      <h3 className="font-medium text-gray-900 text-sm">{material.name}</h3>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">{material.supplier}</p>
-                    <div className="flex items-center space-x-2 mt-2">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[material.status as keyof typeof statusColors]}`}>
-                        {material.status}
-                      </span>
-                    </div>
-                  </div>
-                  <MoreVertical className="h-4 w-4 text-gray-400" />
-                </div>
-                <div className="mt-3">
-                  <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
-                    <span>Stock Level</span>
-                    <span>{material.quantity} {material.unit}</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className={`h-2 rounded-full ${
-                        material.status === 'critical' ? 'bg-red-500' : 
-                        material.status === 'low' ? 'bg-yellow-500' : 'bg-green-500'
-                      }`}
-                      style={{ 
-                        width: `${Math.min(100, (material.quantity / (material.minThreshold * 2)) * 100)}%` 
-                      }}
-                    ></div>
-                  </div>
-                </div>
+  const renderReportsExport = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-gray-900">Reports & Export</h3>
+        <button className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+          <Download className="h-4 w-4" />
+          <span>Generate PDF Reports</span>
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Custom Date Range Export */}
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <FileText className="h-5 w-5 mr-2" />
+            Custom Date Range Export
+          </h4>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">From Date</label>
+                <input
+                  type="date"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
               </div>
-            ))}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">To Date</label>
+                <input
+                  type="date"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Report Type</label>
+              <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option>Choose report type</option>
+                <option>Material Inventory</option>
+                <option>Purchase History</option>
+                <option>Consumption Report</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Site Filter (Optional)</label>
+              <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option>All sites</option>
+                {sites.map(site => (
+                  <option key={site} value={site}>{site}</option>
+                ))}
+              </select>
+            </div>
+            <button className="w-full flex items-center justify-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+              <Download className="h-4 w-4" />
+              <span>Generate PDF Report</span>
+            </button>
           </div>
         </div>
 
-        {/* Material Details */}
-        <div className="lg:col-span-3">
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-3">
-                <span className="text-3xl">{categoryIcons[selectedMaterial.category as keyof typeof categoryIcons]}</span>
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900">{selectedMaterial.name}</h2>
-                  <p className="text-gray-600">{selectedMaterial.supplier}</p>
-                </div>
+        {/* Monthly Reports */}
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <Calendar className="h-5 w-5 mr-2" />
+            Monthly Reports
+          </h4>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Select Month</label>
+              <input
+                type="text"
+                placeholder="---, ----"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Report Format</label>
+              <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option>Choose format</option>
+                <option>PDF</option>
+                <option>Excel</option>
+                <option>CSV</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Include Charts</label>
+              <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option>Chart options</option>
+                <option>Yes</option>
+                <option>No</option>
+              </select>
+            </div>
+            <button className="w-full flex items-center justify-center space-x-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+              <Download className="h-4 w-4" />
+              <span>Download Monthly Report</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Export Options */}
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <h4 className="text-lg font-semibold text-gray-900 mb-4">Quick Export Options</h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-4 border border-gray-200 rounded-lg text-center hover:bg-gray-50 cursor-pointer">
+            <Calendar className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+            <h5 className="font-medium text-gray-900">Current Week</h5>
+            <p className="text-sm text-gray-600">PDF Export</p>
+          </div>
+          <div className="p-4 border border-gray-200 rounded-lg text-center hover:bg-gray-50 cursor-pointer">
+            <FileText className="h-8 w-8 text-green-600 mx-auto mb-2" />
+            <h5 className="font-medium text-gray-900">Current Month</h5>
+            <p className="text-sm text-gray-600">PDF Export</p>
+          </div>
+          <div className="p-4 border border-gray-200 rounded-lg text-center hover:bg-gray-50 cursor-pointer">
+            <Download className="h-8 w-8 text-orange-600 mx-auto mb-2" />
+            <h5 className="font-medium text-gray-900">Last Quarter</h5>
+            <p className="text-sm text-gray-600">PDF Export</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Exports */}
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <h4 className="text-lg font-semibold text-gray-900 mb-4">Recent Exports</h4>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report Name</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Range</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Generated On</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              <tr>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Material Inventory Summary</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Dec 2023 - Mar 2024</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2024-02-05 14:30</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2.4 MB</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <div className="flex space-x-2">
+                    <button className="text-blue-600 hover:text-blue-700">
+                      <Download className="h-4 w-4" />
+                    </button>
+                    <button className="text-gray-600 hover:text-gray-700">
+                      <Eye className="h-4 w-4" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderVendorSummary = () => (
+    <div className="space-y-6">
+      <h3 className="text-lg font-semibold text-gray-900">Vendor Performance Summary</h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {vendors.map((vendor) => (
+          <div key={vendor.id} className="bg-white border border-gray-200 rounded-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="text-lg font-semibold text-gray-900">{vendor.name}</h4>
+              <Users className="h-5 w-5 text-gray-400" />
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">Orders:</span>
+                <span className="text-sm font-medium text-gray-900">{vendor.orders}</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColors[selectedMaterial.status as keyof typeof statusColors]}`}>
-                  {selectedMaterial.status} stock
-                </span>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">Total Value:</span>
+                <span className="text-sm font-medium text-gray-900">₹{vendor.totalValue.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">Avg Order:</span>
+                <span className="text-sm font-medium text-gray-900">₹{vendor.avgOrder.toLocaleString()}</span>
               </div>
             </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
-            {/* Material Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex items-center space-x-2">
-                  <Package className="h-5 w-5 text-blue-600" />
-                  <div>
-                    <p className="text-sm text-gray-600">Current Stock</p>
-                    <p className="text-lg font-bold text-gray-900">{selectedMaterial.quantity} {selectedMaterial.unit}</p>
-                  </div>
+  const renderAnalytics = () => (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Material Category Distribution */}
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            Material Category Distribution
+            <Info className="h-4 w-4 ml-2 text-gray-400" />
+          </h4>
+          <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+            <div className="text-center">
+              <div className="w-32 h-32 mx-auto mb-4 relative">
+                {/* Pie Chart Placeholder */}
+                <div className="w-full h-full rounded-full border-8 border-orange-300 relative">
+                  <div className="absolute inset-0 rounded-full border-8 border-blue-300 transform rotate-90"></div>
+                  <div className="absolute inset-0 rounded-full border-8 border-yellow-300 transform rotate-180"></div>
+                  <div className="absolute inset-0 rounded-full border-8 border-teal-300 transform rotate-270"></div>
                 </div>
               </div>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex items-center space-x-2">
-                  <TrendingDown className="h-5 w-5 text-orange-600" />
-                  <div>
-                    <p className="text-sm text-gray-600">Min Threshold</p>
-                    <p className="text-lg font-bold text-gray-900">{selectedMaterial.minThreshold} {selectedMaterial.unit}</p>
-                  </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="w-3 h-3 bg-orange-300 rounded-full"></div>
+                  <span className="text-sm text-gray-600">Bricks</span>
                 </div>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex items-center space-x-2">
-                  <TrendingUp className="h-5 w-5 text-green-600" />
-                  <div>
-                    <p className="text-sm text-gray-600">Cost per Unit</p>
-                    <p className="text-lg font-bold text-gray-900">₹{selectedMaterial.costPerUnit}</p>
-                  </div>
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="w-3 h-3 bg-blue-300 rounded-full"></div>
+                  <span className="text-sm text-gray-600">Cement</span>
                 </div>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex items-center space-x-2">
-                  <Building2 className="h-5 w-5 text-purple-600" />
-                  <div>
-                    <p className="text-sm text-gray-600">Total Value</p>
-                    <p className="text-lg font-bold text-gray-900">₹{(selectedMaterial.quantity * selectedMaterial.costPerUnit).toLocaleString()}</p>
-                  </div>
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="w-3 h-3 bg-yellow-300 rounded-full"></div>
+                  <span className="text-sm text-gray-600">Concrete</span>
                 </div>
-              </div>
-            </div>
-
-            {/* Stock Level Indicator */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-700">Stock Level</span>
-                <span className="text-sm font-bold text-gray-900">
-                  {selectedMaterial.quantity} / {selectedMaterial.minThreshold * 2} {selectedMaterial.unit}
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
-                <div
-                  className={`h-3 rounded-full transition-all duration-300 ${
-                    selectedMaterial.status === 'critical' ? 'bg-red-500' : 
-                    selectedMaterial.status === 'low' ? 'bg-yellow-500' : 'bg-green-500'
-                  }`}
-                  style={{ 
-                    width: `${Math.min(100, (selectedMaterial.quantity / (selectedMaterial.minThreshold * 2)) * 100)}%` 
-                  }}
-                ></div>
-              </div>
-              <div className="flex justify-between text-xs text-gray-500 mt-1">
-                <span>Empty</span>
-                <span>Min Threshold</span>
-                <span>Full Stock</span>
-              </div>
-            </div>
-
-            {/* Material Info */}
-            <div className="border-t border-gray-200 pt-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Material Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Category</span>
-                    <span className="text-sm font-medium text-gray-900 capitalize">{selectedMaterial.category}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Unit</span>
-                    <span className="text-sm font-medium text-gray-900">{selectedMaterial.unit}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Supplier</span>
-                    <span className="text-sm font-medium text-gray-900">{selectedMaterial.supplier}</span>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Last Updated</span>
-                    <span className="text-sm font-medium text-gray-900">{selectedMaterial.lastUpdated}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Site Location</span>
-                    <span className="text-sm font-medium text-gray-900">Site {selectedMaterial.siteId.split('-')[1].toUpperCase()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Status</span>
-                    <span className={`text-sm font-medium ${statusColors[selectedMaterial.status as keyof typeof statusColors]}`}>
-                      {selectedMaterial.status}
-                    </span>
-                  </div>
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="w-3 h-3 bg-teal-300 rounded-full"></div>
+                  <span className="text-sm text-gray-600">Steel</span>
                 </div>
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Site-wise Material Value */}
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            Site-wise Material Value
+            <Info className="h-4 w-4 ml-2 text-gray-400" />
+          </h4>
+          <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+            <div className="text-center">
+              <div className="text-sm text-gray-500 mb-4">Bar Chart: Site-wise Material Value</div>
+              <div className="flex items-end space-x-4 h-32">
+                <div className="flex flex-col items-center">
+                  <div className="w-8 bg-blue-500 rounded-t" style={{ height: '60%' }}></div>
+                  <span className="text-xs text-gray-600 mt-2">Residential A</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <div className="w-8 bg-blue-500 rounded-t" style={{ height: '80%' }}></div>
+                  <span className="text-xs text-gray-600 mt-2">Commercial B</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <div className="w-8 bg-blue-500 rounded-t" style={{ height: '20%' }}></div>
+                  <span className="text-xs text-gray-600 mt-2">Highway Bridge</span>
+                </div>
+              </div>
+              <div className="text-xs text-gray-500 mt-2">Values in ₹Lakhs</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+      {/* Company Title */}
+      <div className="text-center mb-4">
+        <h1 className="text-xl font-bold text-gray-900">Gavith Construction Pvt. Ltd.</h1>
+      </div>
+
+      {/* Page Title and Actions */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-3xl font-bold text-gray-900">Material Management</h2>
+          <p className="text-gray-600">Global overview of inventory across all construction sites.</p>
+        </div>
+        <div className="flex space-x-3">
+          <button className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+            <Minus className="h-4 w-4" />
+            <span>Record Consumption</span>
+          </button>
+          <button className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+            <Plus className="h-4 w-4" />
+            <span>+ New Purchase</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 flex items-center space-x-4">
+          <div className="p-3 bg-blue-100 rounded-lg">
+            <Package className="h-6 w-6 text-blue-600" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Total Materials</p>
+            <p className="text-2xl font-bold text-gray-900">{totalMaterials} <span className="text-sm text-gray-500">Across 3 sites</span></p>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg border border-gray-200 p-4 flex items-center space-x-4">
+          <div className="p-3 bg-green-100 rounded-lg">
+            <TrendingUp className="h-6 w-6 text-green-600" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Stock Value</p>
+            <p className="text-2xl font-bold text-gray-900">₹{(stockValue / 100000).toFixed(1)}Cr</p>
+            <p className="text-xs text-gray-500">Current inventory</p>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg border border-gray-200 p-4 flex items-center space-x-4">
+          <div className="p-3 bg-orange-100 rounded-lg">
+            <ShoppingCart className="h-6 w-6 text-orange-600" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Total Purchases</p>
+            <p className="text-2xl font-bold text-gray-900">₹{(totalPurchases / 100000).toFixed(1)}Cr</p>
+            <p className="text-xs text-gray-500">All time</p>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg border border-gray-200 p-4 flex items-center space-x-4">
+          <div className="p-3 bg-red-100 rounded-lg">
+            <AlertCircle className="h-6 w-6 text-red-600" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Low Stock Items</p>
+            <p className="text-2xl font-bold text-gray-900">{lowStockItems}</p>
+            <p className="text-xs text-gray-500">Need attention</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation Tabs */}
+      <div className="bg-white rounded-lg border border-gray-200">
+        <div className="border-b border-gray-200">
+          <nav className="flex space-x-8 px-6">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center space-x-2">
+                  <tab.icon className="h-4 w-4" />
+                  <span>{tab.name}</span>
+                </div>
+              </button>
+            ))}
+          </nav>
+        </div>
+
+        {/* Tab Content */}
+        <div className="p-6">
+          {activeTab === 'inventory' && renderCurrentInventory()}
+          {activeTab === 'purchase' && renderPurchaseHistory()}
+          {activeTab === 'periodic' && renderPeriodicEntry()}
+          {activeTab === 'reports' && renderReportsExport()}
+          {activeTab === 'vendor' && renderVendorSummary()}
+          {activeTab === 'analytics' && renderAnalytics()}
         </div>
       </div>
     </div>
