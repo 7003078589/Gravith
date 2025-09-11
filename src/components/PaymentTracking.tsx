@@ -287,13 +287,16 @@ export default function PaymentTracking() {
                 <button className="p-2 text-gray-400 hover:text-gray-600">
                   <Filter className="h-4 w-4" />
                 </button>
-                <select className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                  <option value="all">All Status</option>
-                  <option value="paid">Paid</option>
-                  <option value="partial">Partial</option>
-                  <option value="overdue">Overdue</option>
-                  <option value="pending">Pending</option>
-                </select>
+                <div className="relative">
+                  <select className="px-3 py-1 pr-8 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white">
+                    <option value="all">All Status</option>
+                    <option value="paid">Paid</option>
+                    <option value="partial">Partial</option>
+                    <option value="overdue">Overdue</option>
+                    <option value="pending">Pending</option>
+                  </select>
+                  <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+                </div>
               </div>
             </div>
           </div>
@@ -453,11 +456,16 @@ export default function PaymentTracking() {
             <Info className="h-4 w-4 text-gray-400" />
           </div>
           
-          {/* Pie Chart Placeholder */}
-          <div className="flex items-center justify-center h-48 bg-gray-50 rounded-lg mb-4">
+          {/* Pie Chart */}
+          <div className="flex items-center justify-center h-48 mb-4">
             <div className="text-center">
-              <div className="w-32 h-32 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
-                <span className="text-gray-500 text-sm">Pie Chart</span>
+              {/* Simple Pie Chart using CSS */}
+              <div className="relative w-32 h-32 mx-auto mb-4">
+                <div className="absolute inset-0 rounded-full border-8 border-green-500" style={{clipPath: 'polygon(50% 50%, 50% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 50%)'}}></div>
+                <div className="absolute inset-0 rounded-full border-8 border-orange-500" style={{clipPath: 'polygon(50% 50%, 100% 0%, 100% 50%)'}}></div>
+                <div className="absolute inset-0 rounded-full border-8 border-red-500" style={{clipPath: 'polygon(50% 50%, 100% 50%, 100% 100%)'}}></div>
+                <div className="absolute inset-0 rounded-full border-8 border-gray-500" style={{clipPath: 'polygon(50% 50%, 0% 50%, 0% 100%)'}}></div>
+                <div className="absolute inset-0 rounded-full border-8 border-white"></div>
               </div>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="flex items-center space-x-2">
@@ -488,21 +496,58 @@ export default function PaymentTracking() {
             <Info className="h-4 w-4 text-gray-400" />
           </div>
           
-          {/* Bar Chart Placeholder */}
-          <div className="flex items-center justify-center h-48 bg-gray-50 rounded-lg mb-4">
-            <div className="text-center">
-              <div className="w-full h-32 bg-gray-200 rounded mb-4 flex items-center justify-center">
-                <span className="text-gray-500 text-sm">Bar Chart</span>
+          {/* Bar Chart */}
+          <div className="h-48 mb-4">
+            <div className="flex items-end justify-between h-full px-4">
+              {/* Oct */}
+              <div className="flex flex-col items-center space-y-2">
+                <div className="flex flex-col space-y-1">
+                  <div className="w-8 bg-green-500 rounded-t" style={{height: '60px'}}></div>
+                  <div className="w-8 bg-orange-500 rounded-t" style={{height: '80px'}}></div>
+                </div>
+                <span className="text-xs text-gray-600">Oct</span>
               </div>
-              <div className="flex items-center space-x-2 text-xs">
-                <div className="flex items-center space-x-1">
-                  <div className="w-3 h-3 bg-orange-500 rounded"></div>
-                  <span>Due</span>
+              {/* Nov */}
+              <div className="flex flex-col items-center space-y-2">
+                <div className="flex flex-col space-y-1">
+                  <div className="w-8 bg-green-500 rounded-t" style={{height: '90px'}}></div>
+                  <div className="w-8 bg-orange-500 rounded-t" style={{height: '80px'}}></div>
                 </div>
-                <div className="flex items-center space-x-1">
-                  <div className="w-3 h-3 bg-green-500 rounded"></div>
-                  <span>Received</span>
+                <span className="text-xs text-gray-600">Nov</span>
+              </div>
+              {/* Dec */}
+              <div className="flex flex-col items-center space-y-2">
+                <div className="flex flex-col space-y-1">
+                  <div className="w-8 bg-green-500 rounded-t" style={{height: '70px'}}></div>
+                  <div className="w-8 bg-orange-500 rounded-t" style={{height: '100px'}}></div>
                 </div>
+                <span className="text-xs text-gray-600">Dec</span>
+              </div>
+              {/* Jan */}
+              <div className="flex flex-col items-center space-y-2">
+                <div className="flex flex-col space-y-1">
+                  <div className="w-8 bg-green-500 rounded-t" style={{height: '150px'}}></div>
+                  <div className="w-8 bg-orange-500 rounded-t" style={{height: '130px'}}></div>
+                </div>
+                <span className="text-xs text-gray-600">Jan</span>
+              </div>
+              {/* Feb */}
+              <div className="flex flex-col items-center space-y-2">
+                <div className="flex flex-col space-y-1">
+                  <div className="w-8 bg-green-500 rounded-t" style={{height: '30px'}}></div>
+                  <div className="w-8 bg-orange-500 rounded-t" style={{height: '120px'}}></div>
+                </div>
+                <span className="text-xs text-gray-600">Feb</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-center space-x-4 mt-4 text-xs">
+              <div className="flex items-center space-x-1">
+                <div className="w-3 h-3 bg-orange-500 rounded"></div>
+                <span>Due</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <div className="w-3 h-3 bg-green-500 rounded"></div>
+                <span>Received</span>
               </div>
             </div>
           </div>
@@ -516,18 +561,29 @@ export default function PaymentTracking() {
           <Info className="h-4 w-4 text-gray-400" />
         </div>
         
-        {/* Chart Placeholder */}
-        <div className="flex items-center justify-center h-48 bg-gray-50 rounded-lg">
-          <div className="text-center">
-            <div className="w-full h-32 bg-gray-200 rounded mb-4 flex items-center justify-center">
-              <span className="text-gray-500 text-sm">Client Analysis Chart</span>
+        {/* Client Analysis Chart */}
+        <div className="h-48">
+          <div className="flex items-end justify-between h-full px-4">
+            {/* Client bars */}
+            <div className="flex flex-col items-center space-y-2">
+              <div className="w-12 bg-blue-500 rounded-t" style={{height: '40px'}}></div>
+              <span className="text-xs text-gray-600 text-center">Residential<br/>Develope...</span>
             </div>
-            <div className="text-xs text-gray-500">
-              <div>Residential Develope...</div>
-              <div>City Infrastructure...</div>
-              <div>Skyline Construction...</div>
-              <div>Acme Real Estate Pvt...</div>
+            <div className="flex flex-col items-center space-y-2">
+              <div className="w-12 bg-blue-500 rounded-t" style={{height: '60px'}}></div>
+              <span className="text-xs text-gray-600 text-center">City<br/>Infrastructure...</span>
             </div>
+            <div className="flex flex-col items-center space-y-2">
+              <div className="w-12 bg-blue-500 rounded-t" style={{height: '80px'}}></div>
+              <span className="text-xs text-gray-600 text-center">Skyline<br/>Construction...</span>
+            </div>
+            <div className="flex flex-col items-center space-y-2">
+              <div className="w-12 bg-blue-500 rounded-t" style={{height: '100px'}}></div>
+              <span className="text-xs text-gray-600 text-center">Acme Real<br/>Estate Pvt...</span>
+            </div>
+          </div>
+          <div className="text-center mt-4 text-xs text-gray-500">
+            <span>₹0.0Cr</span>
           </div>
         </div>
       </div>
