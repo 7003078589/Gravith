@@ -4,97 +4,472 @@ import { useState } from 'react';
 import { 
   DollarSign, 
   Plus, 
-  Search, 
-  Filter, 
-  MoreVertical,
   TrendingUp,
-  TrendingDown,
+  Coins,
   Calendar,
   Building2,
   AlertTriangle,
   CheckCircle,
-  Clock
+  Clock,
+  Users,
+  Package,
+  Truck,
+  Zap,
+  FileText,
+  Download,
+  ChevronDown,
+  Info
 } from 'lucide-react';
 
+// Sample expense data matching your design
 const expenses = [
   {
     id: 1,
-    description: 'Cement purchase for Site A',
-    category: 'materials',
+    title: 'Mason Work',
+    description: 'Brickwork for ground floor',
+    category: 'Labour',
     amount: 125000,
-    date: '2024-01-20',
-    siteId: 'site-1',
-    vendor: 'ACC Limited',
-    status: 'approved',
-    receipt: 'REC-001'
+    date: '28/01/2024',
+    vendor: 'Local Contractors',
+    site: 'Residential Complex A',
+    status: 'paid',
+    receipt: 'RCT001'
   },
   {
     id: 2,
-    description: 'Labor wages for foundation work',
-    category: 'labor',
+    title: 'Excavator Rental',
+    description: 'Excavator rental for foundation',
+    category: 'Equipment',
     amount: 85000,
-    date: '2024-01-19',
-    siteId: 'site-2',
-    vendor: 'Local Contractor',
-    status: 'pending',
-    receipt: 'REC-002'
+    date: '30/01/2024',
+    vendor: 'Heavy Equipment Rentals',
+    site: 'Residential Complex A',
+    status: 'paid',
+    receipt: 'RCT002'
   },
   {
     id: 3,
-    description: 'Excavator fuel and maintenance',
-    category: 'equipment',
-    amount: 45000,
-    date: '2024-01-18',
-    siteId: 'site-1',
-    vendor: 'Equipment Services',
-    status: 'paid',
-    receipt: 'REC-003'
+    title: 'Steel',
+    description: 'Steel bars procurement',
+    category: 'Materials',
+    amount: 325000,
+    date: '10/02/2024',
+    vendor: 'Tata Steel',
+    site: 'Commercial Plaza B',
+    status: 'pending',
+    receipt: 'RCT003'
   },
   {
     id: 4,
-    description: 'Site electricity bill',
-    category: 'utilities',
+    title: 'Electrical Work',
+    description: 'Electrical wiring installation',
+    category: 'Labour',
+    amount: 95000,
+    date: '15/02/2024',
+    vendor: 'Spark Electricals',
+    site: 'Commercial Plaza B',
+    status: 'paid',
+    receipt: 'RCT004'
+  },
+  {
+    id: 5,
+    title: 'Material Transport',
+    description: 'Cement and steel transport',
+    category: 'Transport',
+    amount: 25000,
+    date: '12/02/2024',
+    vendor: 'City Transport',
+    site: 'Highway Bridge Project',
+    status: 'paid',
+    receipt: 'RCT005'
+  },
+  {
+    id: 6,
+    title: 'Electricity',
+    description: 'Site electricity charges',
+    category: 'Utilities',
     amount: 15000,
-    date: '2024-01-17',
-    siteId: 'site-3',
-    vendor: 'State Electricity Board',
-    status: 'approved',
-    receipt: 'REC-004'
+    date: '20/02/2024',
+    vendor: 'MSEB',
+    site: 'Residential Complex A',
+    status: 'overdue',
+    receipt: 'RCT006'
   }
 ];
 
+const sites = ['Residential Complex A', 'Commercial Plaza B', 'Highway Bridge Project'];
+
 const statusColors = {
+  paid: 'bg-green-100 text-green-800',
   pending: 'bg-yellow-100 text-yellow-800',
-  approved: 'bg-blue-100 text-blue-800',
-  paid: 'bg-green-100 text-green-800'
+  overdue: 'bg-red-100 text-red-800'
 };
 
 const categoryIcons = {
-  labor: '👷',
-  materials: '🏗️',
-  equipment: '🚜',
-  fuel: '⛽',
-  utilities: '⚡',
-  other: '📋'
+  Labour: Users,
+  Materials: Package,
+  Equipment: Truck,
+  Transport: Truck,
+  Utilities: Zap,
+  Other: FileText
 };
 
 export default function ExpenseManagement() {
-  const [selectedExpense, setSelectedExpense] = useState(expenses[0]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [activeTab, setActiveTab] = useState('All Expenses');
+  const [viewMode, setViewMode] = useState('overall');
+  const [selectedSite, setSelectedSite] = useState('All Sites');
+  const [selectedStatus, setSelectedStatus] = useState('All Status');
 
-  const filteredExpenses = expenses.filter(expense => {
-    const matchesSearch = expense.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         expense.vendor.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = categoryFilter === 'all' || expense.category === categoryFilter;
-    const matchesStatus = statusFilter === 'all' || expense.status === statusFilter;
-    return matchesSearch && matchesCategory && matchesStatus;
-  });
-
+  // Calculate summary data
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
-  const pendingAmount = expenses.filter(e => e.status === 'pending').reduce((sum, expense) => sum + expense.amount, 0);
-  const paidAmount = expenses.filter(e => e.status === 'paid').reduce((sum, expense) => sum + expense.amount, 0);
+  const paidExpenses = expenses.filter(e => e.status === 'paid').reduce((sum, expense) => sum + expense.amount, 0);
+  const pendingExpenses = expenses.filter(e => e.status === 'pending').reduce((sum, expense) => sum + expense.amount, 0);
+  const overdueExpenses = expenses.filter(e => e.status === 'overdue').reduce((sum, expense) => sum + expense.amount, 0);
+  const paidCount = expenses.filter(e => e.status === 'paid').length;
+  const pendingCount = expenses.filter(e => e.status === 'pending').length;
+  const overdueCount = expenses.filter(e => e.status === 'overdue').length;
+
+  // Filter expenses based on active tab
+  const getFilteredExpenses = () => {
+    let filtered = expenses;
+    
+    if (activeTab !== 'All Expenses') {
+      filtered = expenses.filter(expense => expense.category === activeTab);
+    }
+    
+    if (viewMode === 'site' && selectedSite !== 'All Sites') {
+      filtered = filtered.filter(expense => expense.site === selectedSite);
+    }
+    
+    if (selectedStatus !== 'All Status') {
+      filtered = filtered.filter(expense => expense.status === selectedStatus);
+    }
+    
+    return filtered;
+  };
+
+  const filteredExpenses = getFilteredExpenses();
+
+  // Get category-specific data
+  const getCategoryData = (category: string) => {
+    const categoryExpenses = expenses.filter(expense => expense.category === category);
+    const total = categoryExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+    return {
+      expenses: categoryExpenses,
+      total,
+      count: categoryExpenses.length
+    };
+  };
+
+  const renderAllExpenses = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-gray-900">All Expense Records</h3>
+        <div className="flex items-center space-x-4">
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setViewMode('overall')}
+              className="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-blue-600 text-white"
+            >
+              Overall View
+            </button>
+            <button
+              onClick={() => setViewMode('site')}
+              className="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200"
+            >
+              Site-Based View
+            </button>
+          </div>
+          <div className="flex space-x-2">
+            <div className="relative">
+              <select
+                value={selectedSite}
+                onChange={(e) => setSelectedSite(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white pr-8"
+              >
+                <option value="All Sites">All Sites</option>
+                {sites.map(site => (
+                  <option key={site} value={site}>{site}</option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+            </div>
+            <div className="relative">
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white pr-8"
+              >
+                <option value="All Status">All Status</option>
+                <option value="paid">Paid</option>
+                <option value="pending">Pending</option>
+                <option value="overdue">Overdue</option>
+              </select>
+              <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+            </div>
+            <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+              <Download className="h-4 w-4" />
+              <span>Export</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category & Description</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Site</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {filteredExpenses.map((expense) => {
+              const IconComponent = categoryIcons[expense.category as keyof typeof categoryIcons];
+              return (
+                <tr key={expense.id}>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-gray-100 rounded-lg">
+                        <IconComponent className="h-4 w-4 text-gray-600" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">{expense.title}</div>
+                        <div className="text-sm text-gray-500">{expense.description}</div>
+                        <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full inline-block mt-1">
+                          {expense.category}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">₹{expense.amount.toLocaleString()}</div>
+                    <div className="text-xs text-gray-500">{expense.receipt}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {expense.date}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {expense.vendor}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {expense.site}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColors[expense.status as keyof typeof statusColors]}`}>
+                      {expense.status}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderCategoryView = (category: string) => {
+    const categoryData = getCategoryData(category);
+    const IconComponent = categoryIcons[category as keyof typeof categoryIcons];
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <IconComponent className="h-5 w-5 text-gray-600" />
+            <h3 className="text-lg font-semibold text-gray-900">{category} Expenses ({categoryData.count})</h3>
+          </div>
+          <div className="text-right">
+            <div className="text-sm font-medium text-gray-900">Total: ₹{categoryData.total.toLocaleString()}</div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {categoryData.expenses.map((expense) => (
+            <div key={expense.id} className="bg-white border border-gray-200 rounded-lg p-6 relative">
+              <div className="absolute top-4 right-4">
+                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${statusColors[expense.status as keyof typeof statusColors]}`}>
+                  {expense.status}
+                </span>
+              </div>
+              
+              <div className="mb-4">
+                <h4 className="text-lg font-semibold text-gray-900 mb-1">{expense.title}</h4>
+                <p className="text-sm text-gray-600">{expense.description}</p>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Amount:</span>
+                  <span className="font-medium text-gray-900">₹{expense.amount.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Date:</span>
+                  <span className="font-medium text-gray-900">{expense.date}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Vendor:</span>
+                  <span className="font-medium text-gray-900">{expense.vendor}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Site:</span>
+                  <span className="font-medium text-gray-900">{expense.site}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Receipt:</span>
+                  <span className="font-medium text-gray-900">{expense.receipt}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderAnalytics = () => (
+    <div className="space-y-6">
+      <h3 className="text-lg font-semibold text-gray-900">Expense Analytics</h3>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Payment Status Overview */}
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <div className="flex items-center space-x-2 mb-4">
+            <h4 className="text-lg font-semibold text-gray-900">Payment Status Overview</h4>
+            <Info className="h-4 w-4 text-gray-400" />
+          </div>
+          
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <span className="text-sm text-gray-600">Paid</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <div className="w-32 bg-gray-200 rounded-full h-2">
+                  <div className="bg-blue-600 h-2 rounded-full" style={{ width: '49.3%' }}></div>
+                </div>
+                <span className="text-sm font-medium text-gray-900">₹3.3L</span>
+                <span className="text-sm text-gray-600">49.3%</span>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                <span className="text-sm text-gray-600">Pending</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <div className="w-32 bg-gray-200 rounded-full h-2">
+                  <div className="bg-blue-600 h-2 rounded-full" style={{ width: '48.5%' }}></div>
+                </div>
+                <span className="text-sm font-medium text-gray-900">₹3.3L</span>
+                <span className="text-sm text-gray-600">48.5%</span>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                <span className="text-sm text-gray-600">Overdue</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <div className="w-32 bg-gray-200 rounded-full h-2">
+                  <div className="bg-blue-600 h-2 rounded-full" style={{ width: '2.2%' }}></div>
+                </div>
+                <span className="text-sm font-medium text-gray-900">₹0.1L</span>
+                <span className="text-sm text-gray-600">2.2%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Top Categories */}
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <div className="flex items-center space-x-2 mb-4">
+            <h4 className="text-lg font-semibold text-gray-900">Top Categories</h4>
+            <Info className="h-4 w-4 text-gray-400" />
+          </div>
+          
+          <div className="space-y-3">
+            {[
+              { name: 'Materials', icon: Package, amount: 325000, items: 1 },
+              { name: 'Labour', icon: Users, amount: 220000, items: 2 },
+              { name: 'Equipment', icon: Truck, amount: 85000, items: 1 },
+              { name: 'Transport', icon: Truck, amount: 25000, items: 1 },
+              { name: 'Utilities', icon: Zap, amount: 15000, items: 1 }
+            ].map((category, index) => {
+              const IconComponent = category.icon;
+              return (
+                <div key={index} className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <IconComponent className="h-4 w-4 text-gray-600" />
+                    <span className="text-sm text-gray-600">{category.name}</span>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm font-medium text-gray-900">₹{(category.amount / 100000).toFixed(1)}L</div>
+                    <div className="text-xs text-gray-500">{category.items} item{category.items > 1 ? 's' : ''}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Activity */}
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="flex items-center space-x-2 mb-4">
+          <h4 className="text-lg font-semibold text-gray-900">Recent Activity</h4>
+          <Info className="h-4 w-4 text-gray-400" />
+        </div>
+        
+        <div className="space-y-3">
+          {expenses
+            .sort((a, b) => new Date(b.date.split('/').reverse().join('-')).getTime() - new Date(a.date.split('/').reverse().join('-')).getTime())
+            .slice(0, 5)
+            .map((expense) => {
+              const IconComponent = categoryIcons[expense.category as keyof typeof categoryIcons];
+              return (
+                <div key={expense.id} className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <IconComponent className="h-4 w-4 text-gray-600" />
+                    <span className="text-sm text-gray-600">{expense.title}</span>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm font-medium text-gray-900">₹{expense.amount.toLocaleString()}</div>
+                    <div className="text-xs text-gray-500">{expense.date}</div>
+                  </div>
+                </div>
+              );
+            })}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'All Expenses':
+        return renderAllExpenses();
+      case 'Labour':
+      case 'Materials':
+      case 'Equipment':
+      case 'Transport':
+      case 'Utilities':
+      case 'Other':
+        return renderCategoryView(activeTab);
+      case 'Analytics':
+        return renderAnalytics();
+      default:
+        return renderAllExpenses();
+    }
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -102,7 +477,7 @@ export default function ExpenseManagement() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Expense Management</h1>
-          <p className="text-gray-600">Track and manage all construction expenses</p>
+          <p className="text-gray-600">Comprehensive expense tracking with categorized views and analytics</p>
         </div>
         <button className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
           <Plus className="h-4 w-4" />
@@ -110,9 +485,9 @@ export default function ExpenseManagement() {
         </button>
       </div>
 
-      {/* Stats Cards */}
+      {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-blue-100 rounded-lg">
               <DollarSign className="h-5 w-5 text-blue-600" />
@@ -120,243 +495,72 @@ export default function ExpenseManagement() {
             <div>
               <p className="text-sm text-gray-600">Total Expenses</p>
               <p className="text-2xl font-bold text-gray-900">₹{(totalExpenses / 100000).toFixed(1)}L</p>
+              <p className="text-xs text-gray-500">{expenses.length} transactions</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-yellow-100 rounded-lg">
-              <Clock className="h-5 w-5 text-yellow-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Pending</p>
-              <p className="text-2xl font-bold text-gray-900">₹{(pendingAmount / 1000).toFixed(0)}K</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+        
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-green-100 rounded-lg">
-              <CheckCircle className="h-5 w-5 text-green-600" />
+              <TrendingUp className="h-5 w-5 text-green-600" />
             </div>
             <div>
               <p className="text-sm text-gray-600">Paid</p>
-              <p className="text-2xl font-bold text-gray-900">₹{(paidAmount / 1000).toFixed(0)}K</p>
+              <p className="text-2xl font-bold text-gray-900">₹{(paidExpenses / 100000).toFixed(1)}L</p>
+              <p className="text-xs text-gray-500">{Math.round((paidExpenses / totalExpenses) * 100)}% of total</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+        
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <TrendingUp className="h-5 w-5 text-purple-600" />
+            <div className="p-2 bg-yellow-100 rounded-lg">
+              <Coins className="h-5 w-5 text-yellow-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-600">This Month</p>
-              <p className="text-2xl font-bold text-gray-900">₹{(totalExpenses / 100000).toFixed(1)}L</p>
+              <p className="text-sm text-gray-600">Pending</p>
+              <p className="text-2xl font-bold text-gray-900">₹{(pendingExpenses / 100000).toFixed(1)}L</p>
+              <p className="text-xs text-gray-500">{pendingCount} items</p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-red-100 rounded-lg">
+              <Calendar className="h-5 w-5 text-red-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Overdue</p>
+              <p className="text-2xl font-bold text-gray-900">₹{(overdueExpenses / 100000).toFixed(1)}L</p>
+              <p className="text-xs text-gray-500">{overdueCount} items</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Expense List */}
-        <div className="lg:col-span-1 space-y-4">
-          {/* Search and Filter */}
-          <div className="space-y-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search expenses..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      {/* Navigation Tabs */}
+      <div className="border-b border-gray-200">
+        <nav className="-mb-px flex space-x-8">
+          {['All Expenses', 'Labour', 'Materials', 'Equipment', 'Transport', 'Utilities', 'Other', 'Analytics'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === tab
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
             >
-              <option value="all">All Categories</option>
-              <option value="labor">Labor</option>
-              <option value="materials">Materials</option>
-              <option value="equipment">Equipment</option>
-              <option value="fuel">Fuel</option>
-              <option value="utilities">Utilities</option>
-              <option value="other">Other</option>
-            </select>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="all">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
-              <option value="paid">Paid</option>
-            </select>
-          </div>
-
-          {/* Expense Cards */}
-          <div className="space-y-2">
-            {filteredExpenses.map((expense) => (
-              <div
-                key={expense.id}
-                onClick={() => setSelectedExpense(expense)}
-                className={`p-4 rounded-lg border cursor-pointer transition-all ${
-                  selectedExpense.id === expense.id
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-lg">{categoryIcons[expense.category as keyof typeof categoryIcons]}</span>
-                      <h3 className="font-medium text-gray-900 text-sm">{expense.description}</h3>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">{expense.vendor}</p>
-                    <div className="flex items-center space-x-2 mt-2">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[expense.status as keyof typeof statusColors]}`}>
-                        {expense.status}
-                      </span>
-                    </div>
-                  </div>
-                  <MoreVertical className="h-4 w-4 text-gray-400" />
-                </div>
-                <div className="mt-3">
-                  <div className="flex items-center justify-between text-xs text-gray-600">
-                    <span>Amount</span>
-                    <span className="font-bold">₹{expense.amount.toLocaleString()}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Expense Details */}
-        <div className="lg:col-span-3">
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-3">
-                <span className="text-3xl">{categoryIcons[selectedExpense.category as keyof typeof categoryIcons]}</span>
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900">{selectedExpense.description}</h2>
-                  <p className="text-gray-600">{selectedExpense.vendor}</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColors[selectedExpense.status as keyof typeof statusColors]}`}>
-                  {selectedExpense.status}
-                </span>
-              </div>
-            </div>
-
-            {/* Expense Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex items-center space-x-2">
-                  <DollarSign className="h-5 w-5 text-green-600" />
-                  <div>
-                    <p className="text-sm text-gray-600">Amount</p>
-                    <p className="text-lg font-bold text-gray-900">₹{selectedExpense.amount.toLocaleString()}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex items-center space-x-2">
-                  <Calendar className="h-5 w-5 text-blue-600" />
-                  <div>
-                    <p className="text-sm text-gray-600">Date</p>
-                    <p className="text-lg font-bold text-gray-900">{selectedExpense.date}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex items-center space-x-2">
-                  <Building2 className="h-5 w-5 text-purple-600" />
-                  <div>
-                    <p className="text-sm text-gray-600">Site</p>
-                    <p className="text-lg font-bold text-gray-900">Site {selectedExpense.siteId.split('-')[1].toUpperCase()}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="h-5 w-5 text-orange-600" />
-                  <div>
-                    <p className="text-sm text-gray-600">Receipt</p>
-                    <p className="text-lg font-bold text-gray-900">{selectedExpense.receipt}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Expense Details */}
-            <div className="border-t border-gray-200 pt-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Expense Details</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Category</span>
-                    <span className="text-sm font-medium text-gray-900 capitalize">{selectedExpense.category}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Vendor</span>
-                    <span className="text-sm font-medium text-gray-900">{selectedExpense.vendor}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Receipt Number</span>
-                    <span className="text-sm font-medium text-gray-900">{selectedExpense.receipt}</span>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Date</span>
-                    <span className="text-sm font-medium text-gray-900">{selectedExpense.date}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Site Location</span>
-                    <span className="text-sm font-medium text-gray-900">Site {selectedExpense.siteId.split('-')[1].toUpperCase()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Status</span>
-                    <span className={`text-sm font-medium ${statusColors[selectedExpense.status as keyof typeof statusColors]}`}>
-                      {selectedExpense.status}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="border-t border-gray-200 pt-6">
-              <div className="flex space-x-3">
-                {selectedExpense.status === 'pending' && (
-                  <>
-                    <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-                      Approve
-                    </button>
-                    <button className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
-                      Reject
-                    </button>
-                  </>
-                )}
-                {selectedExpense.status === 'approved' && (
-                  <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                    Mark as Paid
-                  </button>
-                )}
-                <button className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
-                  View Receipt
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+              {tab}
+            </button>
+          ))}
+        </nav>
       </div>
+
+      {/* Content */}
+      {renderContent()}
     </div>
   );
 }
