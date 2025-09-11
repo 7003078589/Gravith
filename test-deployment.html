@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deployment Test - Gravith</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-item {
+            background: #f5f5f5;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+        }
+        .success { border-left-color: #10b981; }
+        .error { border-left-color: #ef4444; }
+        .warning { border-left-color: #f59e0b; }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 Gravith Deployment Test</h1>
+    <p>This page helps verify that your deployment is working correctly.</p>
+    
+    <div class="test-item">
+        <h3>✅ Test 1: Root Redirect</h3>
+        <p>Click the button below to test if the root page redirects to landing page:</p>
+        <button onclick="testRootRedirect()">Test Root Redirect</button>
+        <div id="root-test-result"></div>
+    </div>
+    
+    <div class="test-item">
+        <h3>✅ Test 2: Landing Page</h3>
+        <p>Test if the landing page loads correctly:</p>
+        <button onclick="testLandingPage()">Test Landing Page</button>
+        <div id="landing-test-result"></div>
+    </div>
+    
+    <div class="test-item">
+        <h3>✅ Test 3: Login Page</h3>
+        <p>Test if the login page loads correctly:</p>
+        <button onclick="testLoginPage()">Test Login Page</button>
+        <div id="login-test-result"></div>
+    </div>
+    
+    <div class="test-item">
+        <h3>✅ Test 4: Dashboard Access</h3>
+        <p>Test if dashboard is accessible (should redirect to login if not authenticated):</p>
+        <button onclick="testDashboard()">Test Dashboard</button>
+        <div id="dashboard-test-result"></div>
+    </div>
+    
+    <div class="test-item">
+        <h3>📋 Demo Credentials</h3>
+        <p>Use these credentials to test the login functionality:</p>
+        <ul>
+            <li><strong>Admin:</strong> admin / admin123</li>
+            <li><strong>Manager:</strong> manager / manager123</li>
+            <li><strong>Engineer:</strong> engineer / engineer123</li>
+        </ul>
+    </div>
+    
+    <div class="test-item">
+        <h3>🔗 Quick Links</h3>
+        <button onclick="window.open('/', '_blank')">Home (Root)</button>
+        <button onclick="window.open('/landing/', '_blank')">Landing Page</button>
+        <button onclick="window.open('/login/', '_blank')">Login Page</button>
+        <button onclick="window.open('/dashboard/', '_blank')">Dashboard</button>
+    </div>
+
+    <script>
+        function testRootRedirect() {
+            const result = document.getElementById('root-test-result');
+            result.innerHTML = '<p>Testing root redirect...</p>';
+            
+            fetch('/')
+                .then(response => {
+                    if (response.redirected && response.url.includes('/landing/')) {
+                        result.innerHTML = '<p class="success">✅ Root redirect working correctly!</p>';
+                    } else {
+                        result.innerHTML = '<p class="warning">⚠️ Root redirect may not be working as expected</p>';
+                    }
+                })
+                .catch(error => {
+                    result.innerHTML = '<p class="error">❌ Error testing root redirect: ' + error.message + '</p>';
+                });
+        }
+        
+        function testLandingPage() {
+            const result = document.getElementById('landing-test-result');
+            result.innerHTML = '<p>Testing landing page...</p>';
+            
+            fetch('/landing/')
+                .then(response => {
+                    if (response.ok) {
+                        result.innerHTML = '<p class="success">✅ Landing page loads correctly!</p>';
+                    } else {
+                        result.innerHTML = '<p class="error">❌ Landing page failed to load (Status: ' + response.status + ')</p>';
+                    }
+                })
+                .catch(error => {
+                    result.innerHTML = '<p class="error">❌ Error testing landing page: ' + error.message + '</p>';
+                });
+        }
+        
+        function testLoginPage() {
+            const result = document.getElementById('login-test-result');
+            result.innerHTML = '<p>Testing login page...</p>';
+            
+            fetch('/login/')
+                .then(response => {
+                    if (response.ok) {
+                        result.innerHTML = '<p class="success">✅ Login page loads correctly!</p>';
+                    } else {
+                        result.innerHTML = '<p class="error">❌ Login page failed to load (Status: ' + response.status + ')</p>';
+                    }
+                })
+                .catch(error => {
+                    result.innerHTML = '<p class="error">❌ Error testing login page: ' + error.message + '</p>';
+                });
+        }
+        
+        function testDashboard() {
+            const result = document.getElementById('dashboard-test-result');
+            result.innerHTML = '<p>Testing dashboard access...</p>';
+            
+            fetch('/dashboard/')
+                .then(response => {
+                    if (response.ok) {
+                        result.innerHTML = '<p class="success">✅ Dashboard is accessible!</p>';
+                    } else if (response.status === 404) {
+                        result.innerHTML = '<p class="warning">⚠️ Dashboard not found (404) - check routing</p>';
+                    } else {
+                        result.innerHTML = '<p class="warning">⚠️ Dashboard returned status: ' + response.status + '</p>';
+                    }
+                })
+                .catch(error => {
+                    result.innerHTML = '<p class="error">❌ Error testing dashboard: ' + error.message + '</p>';
+                });
+        }
+        
+        // Auto-run tests on page load
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                testRootRedirect();
+                testLandingPage();
+                testLoginPage();
+                testDashboard();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
