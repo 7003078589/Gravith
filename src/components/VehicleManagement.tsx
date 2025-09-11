@@ -4,338 +4,456 @@ import { useState } from 'react';
 import { 
   Truck, 
   Plus, 
-  Search, 
-  Filter, 
-  MoreVertical,
-  Fuel,
-  Wrench,
+  Settings,
   MapPin,
-  User,
-  Calendar,
-  AlertTriangle,
-  CheckCircle,
-  Clock
+  Fuel,
+  DollarSign,
+  BarChart3,
+  TrendingUp,
+  PieChart
 } from 'lucide-react';
 
 const vehicles = [
   {
     id: 1,
-    name: 'Excavator EX-001',
-    type: 'excavator',
-    status: 'active',
-    location: 'Site A - Mumbai',
-    fuelLevel: 85,
-    lastService: '2024-01-15',
-    nextService: '2024-02-15',
-    operator: 'Rajesh Kumar',
-    siteId: 'site-1',
-    hours: 1250,
-    maintenance: 'good'
+    registration: 'MH-12-AB-1234',
+    type: 'Excavator',
+    provider: 'Heavy Equipment Rentals',
+    site: 'Residential Complex A',
+    rentalCost: 5324500,
+    rentalBreakdown: '601d × ₹8500 + 180h × ₹1200',
+    fuelCost: 36100,
+    fuelBreakdown: '380L × ₹95',
+    totalCost: 5360600,
+    status: 'active'
   },
   {
     id: 2,
-    name: 'Crane CR-002',
-    type: 'crane',
-    status: 'maintenance',
-    location: 'Site B - Delhi',
-    fuelLevel: 45,
-    lastService: '2024-01-20',
-    nextService: '2024-01-25',
-    operator: 'Priya Sharma',
-    siteId: 'site-2',
-    hours: 2100,
-    maintenance: 'due'
+    registration: 'MH-14-CD-5678',
+    type: 'Crane',
+    provider: 'City Crane Services',
+    site: 'Commercial Plaza B',
+    rentalCost: 7329000,
+    rentalBreakdown: '589d × ₹12000 + 145h × ₹1800',
+    fuelCost: 73500,
+    fuelBreakdown: '750L × ₹98',
+    totalCost: 7402500,
+    status: 'active'
   },
   {
     id: 3,
-    name: 'Concrete Mixer CM-003',
-    type: 'concrete-mixer',
-    status: 'idle',
-    location: 'Depot - Pune',
-    fuelLevel: 20,
-    lastService: '2024-01-10',
-    nextService: '2024-02-10',
-    operator: 'Amit Patel',
-    siteId: null,
-    hours: 800,
-    maintenance: 'good'
-  },
-  {
-    id: 4,
-    name: 'Bulldozer BD-004',
-    type: 'bulldozer',
-    status: 'active',
-    location: 'Site C - Bangalore',
-    fuelLevel: 70,
-    lastService: '2024-01-18',
-    nextService: '2024-02-18',
-    operator: 'Suresh Reddy',
-    siteId: 'site-3',
-    hours: 1500,
-    maintenance: 'good'
+    registration: 'GJ-05-EF-9012',
+    type: 'Generator',
+    provider: 'Power Solutions Ltd',
+    site: 'Residential Complex A',
+    rentalCost: 2246000,
+    rentalBreakdown: '596d × ₹3500 + 320h × ₹500',
+    fuelCost: 25760,
+    fuelBreakdown: '280L × ₹92',
+    totalCost: 2271760,
+    status: 'active'
   }
 ];
 
-const statusColors = {
-  active: 'bg-green-100 text-green-800',
-  maintenance: 'bg-orange-100 text-orange-800',
-  idle: 'bg-gray-100 text-gray-800'
-};
-
-const typeIcons = {
-  excavator: '🚜',
-  crane: '🏗️',
-  'concrete-mixer': '🚛',
-  bulldozer: '🚧',
-  truck: '🚚'
-};
+const tabs = [
+  { id: 'all', name: 'All Vehicles' },
+  { id: 'type', name: 'By Type' },
+  { id: 'site', name: 'By Site' },
+  { id: 'analytics', name: 'Analytics' }
+];
 
 export default function VehicleManagement() {
-  const [selectedVehicle, setSelectedVehicle] = useState(vehicles[0]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [typeFilter, setTypeFilter] = useState('all');
+  const [activeTab, setActiveTab] = useState('all');
 
-  const filteredVehicles = vehicles.filter(vehicle => {
-    const matchesSearch = vehicle.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         vehicle.location.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || vehicle.status === statusFilter;
-    const matchesType = typeFilter === 'all' || vehicle.type === typeFilter;
-    return matchesSearch && matchesStatus && matchesType;
-  });
+  const totalFleet = vehicles.length;
+  const totalRentalCost = vehicles.reduce((sum, vehicle) => sum + vehicle.rentalCost, 0);
+  const totalFuelCost = vehicles.reduce((sum, vehicle) => sum + vehicle.fuelCost, 0);
+  const totalCost = totalRentalCost + totalFuelCost;
+
+  const formatCurrency = (amount: number) => {
+    if (amount >= 10000000) {
+      return `₹${(amount / 10000000).toFixed(1)}Cr`;
+    } else if (amount >= 100000) {
+      return `₹${(amount / 100000).toFixed(1)}L`;
+    } else if (amount >= 1000) {
+      return `₹${(amount / 1000).toFixed(0)}K`;
+    }
+    return `₹${amount}`;
+  };
+
+  const formatDetailedCurrency = (amount: number) => {
+    return `₹${amount.toLocaleString()}`;
+  };
+
+  const getVehiclesByType = () => {
+    const grouped = vehicles.reduce((acc, vehicle) => {
+      if (!acc[vehicle.type]) {
+        acc[vehicle.type] = [];
+      }
+      acc[vehicle.type].push(vehicle);
+      return acc;
+    }, {} as Record<string, typeof vehicles>);
+    return grouped;
+  };
+
+  const getVehiclesBySite = () => {
+    const grouped = vehicles.reduce((acc, vehicle) => {
+      if (!acc[vehicle.site]) {
+        acc[vehicle.site] = [];
+      }
+      acc[vehicle.site].push(vehicle);
+      return acc;
+    }, {} as Record<string, typeof vehicles>);
+    return grouped;
+  };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Vehicle & Equipment Management</h1>
-          <p className="text-gray-600">Track and manage all construction vehicles and equipment</p>
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Gavith Construction Pvt. Ltd.</h1>
+        <h2 className="text-2xl font-semibold text-gray-800 mb-2">Vehicle & Equipment Management</h2>
+        <p className="text-gray-600">Comprehensive fleet tracking with costs and performance</p>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Total Fleet</p>
+              <p className="text-3xl font-bold text-gray-900">{totalFleet}</p>
+              <p className="text-xs text-gray-500">{totalFleet} active</p>
+            </div>
+            <div className="p-3 bg-blue-100 rounded-lg">
+              <Truck className="h-8 w-8 text-blue-600" />
+            </div>
+          </div>
         </div>
+
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Rental Costs</p>
+              <p className="text-3xl font-bold text-gray-900">{formatCurrency(totalRentalCost)}</p>
+              <p className="text-xs text-gray-500">Equipment hire</p>
+            </div>
+            <div className="p-3 bg-green-100 rounded-lg">
+              <DollarSign className="h-8 w-8 text-green-600" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Fuel Costs</p>
+              <p className="text-3xl font-bold text-gray-900">{formatCurrency(totalFuelCost)}</p>
+              <p className="text-xs text-gray-500">Diesel expenses</p>
+            </div>
+            <div className="p-3 bg-orange-100 rounded-lg">
+              <Fuel className="h-8 w-8 text-orange-600" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Total Cost</p>
+              <p className="text-3xl font-bold text-gray-900">{formatCurrency(totalCost)}</p>
+              <p className="text-xs text-gray-500">Rental + Fuel</p>
+            </div>
+            <div className="p-3 bg-purple-100 rounded-lg">
+              <TrendingUp className="h-8 w-8 text-purple-600" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex justify-end space-x-4">
+        <button className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+          <Settings className="h-4 w-4" />
+          <span>Custom Types</span>
+        </button>
         <button className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
           <Plus className="h-4 w-4" />
           <span>Add Vehicle</span>
         </button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Active Vehicles</p>
-              <p className="text-2xl font-bold text-gray-900">8</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-orange-100 rounded-lg">
-              <Wrench className="h-5 w-5 text-orange-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">In Maintenance</p>
-              <p className="text-2xl font-bold text-gray-900">3</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-red-100 rounded-lg">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Service Due</p>
-              <p className="text-2xl font-bold text-gray-900">2</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Fuel className="h-5 w-5 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Low Fuel</p>
-              <p className="text-2xl font-bold text-gray-900">1</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Vehicle List */}
-        <div className="lg:col-span-1 space-y-4">
-          {/* Search and Filter */}
-          <div className="space-y-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search vehicles..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="maintenance">Maintenance</option>
-              <option value="idle">Idle</option>
-            </select>
-            <select
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="all">All Types</option>
-              <option value="excavator">Excavator</option>
-              <option value="crane">Crane</option>
-              <option value="concrete-mixer">Concrete Mixer</option>
-              <option value="bulldozer">Bulldozer</option>
-            </select>
-          </div>
-
-          {/* Vehicle Cards */}
-          <div className="space-y-2">
-            {filteredVehicles.map((vehicle) => (
-              <div
-                key={vehicle.id}
-                onClick={() => setSelectedVehicle(vehicle)}
-                className={`p-4 rounded-lg border cursor-pointer transition-all ${
-                  selectedVehicle.id === vehicle.id
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
+      {/* Navigation Tabs */}
+      <div className="bg-white rounded-lg border border-gray-200">
+        <div className="border-b border-gray-200">
+          <nav className="flex space-x-8 px-6">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-lg">{typeIcons[vehicle.type as keyof typeof typeIcons]}</span>
-                      <h3 className="font-medium text-gray-900 text-sm">{vehicle.name}</h3>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">{vehicle.location}</p>
-                    <div className="flex items-center space-x-2 mt-2">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[vehicle.status as keyof typeof statusColors]}`}>
-                        {vehicle.status}
-                      </span>
-                    </div>
-                  </div>
-                  <MoreVertical className="h-4 w-4 text-gray-400" />
-                </div>
-                <div className="mt-3">
-                  <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
-                    <span>Fuel Level</span>
-                    <span>{vehicle.fuelLevel}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className={`h-2 rounded-full ${
-                        vehicle.fuelLevel > 50 ? 'bg-green-500' : 
-                        vehicle.fuelLevel > 25 ? 'bg-yellow-500' : 'bg-red-500'
-                      }`}
-                      style={{ width: `${vehicle.fuelLevel}%` }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
+                {tab.name}
+              </button>
             ))}
-          </div>
+          </nav>
         </div>
 
-        {/* Vehicle Details */}
-        <div className="lg:col-span-3">
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-3">
-                <span className="text-3xl">{typeIcons[selectedVehicle.type as keyof typeof typeIcons]}</span>
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900">{selectedVehicle.name}</h2>
-                  <p className="text-gray-600">{selectedVehicle.location}</p>
+        {/* Tab Content */}
+        <div className="p-6">
+          {activeTab === 'all' && (
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-gray-900">Complete Fleet Overview</h3>
+                <div className="flex space-x-4">
+                  <select className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option>All Types</option>
+                    <option>Excavator</option>
+                    <option>Crane</option>
+                    <option>Generator</option>
+                  </select>
+                  <select className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option>All Sites</option>
+                    <option>Residential Complex A</option>
+                    <option>Commercial Plaza B</option>
+                  </select>
                 </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColors[selectedVehicle.status as keyof typeof statusColors]}`}>
-                  {selectedVehicle.status}
-                </span>
-              </div>
-            </div>
 
-            {/* Vehicle Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex items-center space-x-2">
-                  <Fuel className="h-5 w-5 text-blue-600" />
-                  <div>
-                    <p className="text-sm text-gray-600">Fuel Level</p>
-                    <p className="text-lg font-bold text-gray-900">{selectedVehicle.fuelLevel}%</p>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex items-center space-x-2">
-                  <Clock className="h-5 w-5 text-green-600" />
-                  <div>
-                    <p className="text-sm text-gray-600">Operating Hours</p>
-                    <p className="text-lg font-bold text-gray-900">{selectedVehicle.hours.toLocaleString()}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex items-center space-x-2">
-                  <User className="h-5 w-5 text-purple-600" />
-                  <div>
-                    <p className="text-sm text-gray-600">Operator</p>
-                    <p className="text-lg font-bold text-gray-900">{selectedVehicle.operator}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex items-center space-x-2">
-                  <MapPin className="h-5 w-5 text-orange-600" />
-                  <div>
-                    <p className="text-sm text-gray-600">Current Site</p>
-                    <p className="text-lg font-bold text-gray-900">
-                      {selectedVehicle.siteId ? `Site ${selectedVehicle.siteId.split('-')[1].toUpperCase()}` : 'Depot'}
-                    </p>
-                  </div>
-                </div>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">Vehicle Details</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">Site Assignment</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">Rental Costs</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">Fuel Usage</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">Total Cost</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {vehicles.map((vehicle) => (
+                      <tr key={vehicle.id} className="border-b border-gray-100">
+                        <td className="py-4 px-4">
+                          <div className="flex items-center space-x-3">
+                            <div className="p-2 bg-blue-100 rounded-lg">
+                              <Truck className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-gray-900">{vehicle.registration}</p>
+                              <p className="text-sm text-gray-600">{vehicle.type}</p>
+                              <p className="text-xs text-gray-500">{vehicle.provider}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="flex items-center space-x-2">
+                            <MapPin className="h-4 w-4 text-gray-400" />
+                            <span className="text-sm text-gray-900">{vehicle.site}</span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div>
+                            <p className="font-semibold text-gray-900">{formatDetailedCurrency(vehicle.rentalCost)}</p>
+                            <p className="text-xs text-gray-500">{vehicle.rentalBreakdown}</p>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div>
+                            <p className="font-semibold text-gray-900">{formatDetailedCurrency(vehicle.fuelCost)}</p>
+                            <p className="text-xs text-gray-500">{vehicle.fuelBreakdown}</p>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <p className="font-semibold text-gray-900">{formatDetailedCurrency(vehicle.totalCost)}</p>
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                            {vehicle.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
+          )}
 
-            {/* Maintenance Schedule */}
-            <div className="border-t border-gray-200 pt-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Maintenance Schedule</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Calendar className="h-4 w-4 text-gray-600" />
-                    <span className="text-sm font-medium text-gray-700">Last Service</span>
+          {activeTab === 'type' && (
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">Vehicles Grouped by Type</h3>
+              <div className="space-y-6">
+                {Object.entries(getVehiclesByType()).map(([type, typeVehicles]) => (
+                  <div key={type}>
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <Truck className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <h4 className="text-lg font-semibold text-gray-900">{type} ({typeVehicles.length})</h4>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {typeVehicles.map((vehicle) => (
+                        <div key={vehicle.id} className="bg-white border border-gray-200 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <p className="font-semibold text-gray-900">{vehicle.registration}</p>
+                            <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                              {vehicle.status}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-1">{vehicle.site}</p>
+                          <p className="text-sm text-gray-500 mb-2">{vehicle.provider}</p>
+                          <p className="font-semibold text-gray-900">Total Cost: {formatDetailedCurrency(vehicle.totalCost)}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <p className="text-lg font-bold text-gray-900">{selectedVehicle.lastService}</p>
-                  <p className="text-xs text-gray-500">Completed</p>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'site' && (
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">Vehicles by Site Assignment</h3>
+              <div className="space-y-6">
+                {Object.entries(getVehiclesBySite()).map(([site, siteVehicles]) => (
+                  <div key={site}>
+                    <div className="flex items-center space-x-3 mb-4">
+                      <MapPin className="h-5 w-5 text-gray-400" />
+                      <h4 className="text-lg font-semibold text-gray-900">{site} ({siteVehicles.length})</h4>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {siteVehicles.map((vehicle) => (
+                        <div key={vehicle.id} className="bg-white border border-gray-200 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <p className="font-semibold text-gray-900">{vehicle.registration}</p>
+                            <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                              {vehicle.status}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-1">{vehicle.type}</p>
+                          <p className="text-sm text-gray-500 mb-2">{vehicle.provider}</p>
+                          <p className="font-semibold text-gray-900">Total Cost: {formatDetailedCurrency(vehicle.totalCost)}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'analytics' && (
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">Fleet Analytics</h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Fleet Distribution by Type</h4>
+                  <div className="flex items-center justify-center">
+                    <div className="w-48 h-48 relative">
+                      <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="40"
+                          fill="none"
+                          stroke="#e5e7eb"
+                          strokeWidth="8"
+                        />
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="40"
+                          fill="none"
+                          stroke="#3b82f6"
+                          strokeWidth="8"
+                          strokeDasharray="33 100"
+                          strokeDashoffset="0"
+                        />
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="40"
+                          fill="none"
+                          stroke="#10b981"
+                          strokeWidth="8"
+                          strokeDasharray="33 100"
+                          strokeDashoffset="-33"
+                        />
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="40"
+                          fill="none"
+                          stroke="#f59e0b"
+                          strokeWidth="8"
+                          strokeDasharray="33 100"
+                          strokeDashoffset="-66"
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-center">
+                          <p className="text-2xl font-bold text-gray-900">3</p>
+                          <p className="text-sm text-gray-600">Total</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                        <span className="text-sm text-gray-600">Excavator</span>
+                      </div>
+                      <span className="text-sm font-medium text-gray-900">33%</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <span className="text-sm text-gray-600">Crane</span>
+                      </div>
+                      <span className="text-sm font-medium text-gray-900">33%</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                        <span className="text-sm text-gray-600">Generator</span>
+                      </div>
+                      <span className="text-sm font-medium text-gray-900">33%</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Wrench className="h-4 w-4 text-gray-600" />
-                    <span className="text-sm font-medium text-gray-700">Next Service</span>
+
+                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Cost Breakdown by Vehicle</h4>
+                  <div className="space-y-4">
+                    {vehicles.map((vehicle, index) => (
+                      <div key={vehicle.id} className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm font-medium text-gray-900">{vehicle.registration}</span>
+                            <span className="text-sm font-medium text-gray-900">{formatDetailedCurrency(vehicle.totalCost)}</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div
+                              className="bg-blue-600 h-2 rounded-full"
+                              style={{ width: `${(vehicle.totalCost / Math.max(...vehicles.map(v => v.totalCost))) * 100}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <p className="text-lg font-bold text-gray-900">{selectedVehicle.nextService}</p>
-                  <p className="text-xs text-gray-500">
-                    {selectedVehicle.maintenance === 'due' ? 'Due Soon' : 'Scheduled'}
-                  </p>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

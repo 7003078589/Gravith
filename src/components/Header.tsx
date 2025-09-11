@@ -17,9 +17,11 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Center - Site-Focused Management */}
+        {/* Center - Dynamic Title */}
         <div className="flex-1 text-center">
-          <h2 className="text-lg font-semibold text-gray-900">Site-Focused Management</h2>
+          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+            Global Vehicle Overview
+          </button>
         </div>
 
         {/* Right side */}
