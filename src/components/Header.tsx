@@ -13,6 +13,8 @@ export default function Header() {
       return 'Global Material Overview';
     } else if (pathname === '/expenses') {
       return 'Global Expense Overview';
+    } else if (pathname === '/payments') {
+      return 'Global Payment Overview';
     }
     return 'Site-Focused Management'; // Default for dashboard
   };
