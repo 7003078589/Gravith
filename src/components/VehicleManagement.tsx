@@ -129,9 +129,11 @@ export default function VehicleManagement() {
   ];
 
   const sites = [
-    'Residential Complex A',
-    'Commercial Plaza B', 
-    'Highway Bridge Project'
+    { name: 'Residential Complex A', equipment: ['Excavator', 'Crane', 'Mixer'] },
+    { name: 'Commercial Plaza B', equipment: ['Dumper', 'Loader', 'Generator'] },
+    { name: 'Highway Bridge Project', equipment: ['Bulldozer', 'Compactor', 'Welding Machine'] },
+    { name: 'Industrial Zone C', equipment: ['Pump', 'Excavator', 'Crane'] },
+    { name: 'Shopping Mall D', equipment: ['Mixer', 'Generator', 'Loader'] }
   ];
 
   const handleInputChange = (field: string, value: string) => {
@@ -518,6 +520,33 @@ export default function VehicleManagement() {
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+            <style jsx>{`
+              input[type="date"]::-webkit-calendar-picker-indicator {
+                background: transparent;
+                bottom: 0;
+                color: transparent;
+                cursor: pointer;
+                height: auto;
+                left: 0;
+                position: absolute;
+                right: 0;
+                top: 0;
+                width: auto;
+                opacity: 0;
+              }
+              input[type="date"]::-webkit-datetime-edit-text {
+                color: #374151;
+              }
+              input[type="date"]::-webkit-datetime-edit-month-field {
+                color: #374151;
+              }
+              input[type="date"]::-webkit-datetime-edit-day-field {
+                color: #374151;
+              }
+              input[type="date"]::-webkit-datetime-edit-year-field {
+                color: #374151;
+              }
+            `}</style>
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">Add New Vehicle/Equipment</h2>
@@ -570,9 +599,10 @@ export default function VehicleManagement() {
                         type="date"
                         value={formData.rentalStartDate}
                         onChange={(e) => handleInputChange('rentalStartDate', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                        style={{ colorScheme: 'light' }}
                       />
-                      <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
                     </div>
                   </div>
 
@@ -613,14 +643,14 @@ export default function VehicleManagement() {
                       <select
                         value={formData.vehicleType}
                         onChange={(e) => handleInputChange('vehicleType', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white"
                       >
                         <option value="">Select type</option>
                         {vehicleTypes.map((type) => (
                           <option key={type} value={type}>{type}</option>
                         ))}
                       </select>
-                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
                     </div>
                   </div>
 
@@ -632,14 +662,16 @@ export default function VehicleManagement() {
                       <select
                         value={formData.assignedSite}
                         onChange={(e) => handleInputChange('assignedSite', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white"
                       >
                         <option value="">Select site</option>
                         {sites.map((site) => (
-                          <option key={site} value={site}>{site}</option>
+                          <option key={site.name} value={site.name}>
+                            {site.name} ({site.equipment.join(', ')})
+                          </option>
                         ))}
                       </select>
-                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
                     </div>
                   </div>
 
@@ -652,9 +684,10 @@ export default function VehicleManagement() {
                         type="date"
                         value={formData.rentalEndDate}
                         onChange={(e) => handleInputChange('rentalEndDate', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                        style={{ colorScheme: 'light' }}
                       />
-                      <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
                     </div>
                   </div>
 
