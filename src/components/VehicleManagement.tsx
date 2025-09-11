@@ -10,7 +10,10 @@ import {
   DollarSign,
   BarChart3,
   TrendingUp,
-  PieChart
+  PieChart,
+  X,
+  Calendar,
+  ChevronDown
 } from 'lucide-react';
 
 const vehicles = [
@@ -64,6 +67,19 @@ const tabs = [
 
 export default function VehicleManagement() {
   const [activeTab, setActiveTab] = useState('all');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [formData, setFormData] = useState({
+    vehicleNumber: 'MH-12-AB-1234',
+    vendor: 'Heavy Equipment Rentals',
+    rentalStartDate: '',
+    rentalEndDate: '',
+    perDayCost: '8500',
+    perHourCost: '1200',
+    odometerReading: '45230',
+    dieselCost: '95',
+    vehicleType: '',
+    assignedSite: ''
+  });
 
   const totalFleet = vehicles.length;
   const totalRentalCost = vehicles.reduce((sum, vehicle) => sum + vehicle.rentalCost, 0);
@@ -105,6 +121,44 @@ export default function VehicleManagement() {
       return acc;
     }, {} as Record<string, typeof vehicles>);
     return grouped;
+  };
+
+  const vehicleTypes = [
+    'Excavator', 'Crane', 'Dumper', 'Loader', 'Mixer', 
+    'Compactor', 'Bulldozer', 'Generator', 'Welding Machine', 'Pump'
+  ];
+
+  const sites = [
+    'Residential Complex A',
+    'Commercial Plaza B', 
+    'Highway Bridge Project'
+  ];
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle form submission here
+    console.log('Form submitted:', formData);
+    setShowAddModal(false);
+    // Reset form
+    setFormData({
+      vehicleNumber: 'MH-12-AB-1234',
+      vendor: 'Heavy Equipment Rentals',
+      rentalStartDate: '',
+      rentalEndDate: '',
+      perDayCost: '8500',
+      perHourCost: '1200',
+      odometerReading: '45230',
+      dieselCost: '95',
+      vehicleType: '',
+      assignedSite: ''
+    });
   };
 
   return (
@@ -177,7 +231,10 @@ export default function VehicleManagement() {
           <Settings className="h-4 w-4" />
           <span>Custom Types</span>
         </button>
-        <button className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+        <button 
+          onClick={() => setShowAddModal(true)}
+          className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+        >
           <Plus className="h-4 w-4" />
           <span>Add Vehicle</span>
         </button>
@@ -456,6 +513,199 @@ export default function VehicleManagement() {
           )}
         </div>
       </div>
+
+      {/* Add Vehicle Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Add New Vehicle/Equipment</h2>
+                <p className="text-gray-600">Register a new vehicle or equipment to your fleet.</p>
+              </div>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="h-5 w-5 text-gray-500" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left Column */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Vehicle Number
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.vehicleNumber}
+                      onChange={(e) => handleInputChange('vehicleNumber', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="MH-12-AB-1234"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Vendor/Rental Company
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.vendor}
+                      onChange={(e) => handleInputChange('vendor', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Heavy Equipment Rentals"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Rental Start Date
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="date"
+                        value={formData.rentalStartDate}
+                        onChange={(e) => handleInputChange('rentalStartDate', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                      <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Per Day Cost (₹)
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.perDayCost}
+                      onChange={(e) => handleInputChange('perDayCost', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="8500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Starting Odometer Reading (km)
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.odometerReading}
+                      onChange={(e) => handleInputChange('odometerReading', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="45230"
+                    />
+                  </div>
+                </div>
+
+                {/* Right Column */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Vehicle/Equipment Type
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={formData.vehicleType}
+                        onChange={(e) => handleInputChange('vehicleType', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+                      >
+                        <option value="">Select type</option>
+                        {vehicleTypes.map((type) => (
+                          <option key={type} value={type}>{type}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Assign to Site
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={formData.assignedSite}
+                        onChange={(e) => handleInputChange('assignedSite', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+                      >
+                        <option value="">Select site</option>
+                        {sites.map((site) => (
+                          <option key={site} value={site}>{site}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Rental End Date (Optional)
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="date"
+                        value={formData.rentalEndDate}
+                        onChange={(e) => handleInputChange('rentalEndDate', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                      <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Per Hour Cost (₹)
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.perHourCost}
+                      onChange={(e) => handleInputChange('perHourCost', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="1200"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Diesel Cost/L (₹)
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.dieselCost}
+                      onChange={(e) => handleInputChange('dieselCost', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="95"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Form Actions */}
+              <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Add Vehicle
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
