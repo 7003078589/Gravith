@@ -77,22 +77,6 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Footer */}
-      {!collapsed && (
-        <div className="absolute bottom-4 left-4 right-4">
-          <div className="bg-gray-50 rounded-lg p-3">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-medium">AK</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">Aman Kumar</p>
-                <p className="text-xs text-gray-500 truncate">Project Manager</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

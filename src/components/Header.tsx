@@ -17,6 +17,8 @@ export default function Header() {
       return 'Global Payment Overview';
     } else if (pathname === '/vendors') {
       return 'Global Vendor Overview';
+    } else if (pathname === '/analytics') {
+      return 'Global Analytics Overview';
     }
     return 'Site-Focused Management'; // Default for dashboard
   };
