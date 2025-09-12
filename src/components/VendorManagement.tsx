@@ -423,20 +423,21 @@ export default function VendorManagement() {
           <p className="text-gray-600">Comprehensive vendor management with payment analytics</p>
         </div>
         <div className="flex space-x-3">
-          <button 
+          <Button 
             onClick={() => setShowRecordPaymentModal(true)}
-            className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            variant="outline"
+            className="flex items-center space-x-2"
           >
             <DollarSign className="h-4 w-4" />
             <span>Record Payment</span>
-          </button>
-          <button 
+          </Button>
+          <Button 
             onClick={() => setShowAddVendorModal(true)}
-            className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+            className="flex items-center space-x-2"
           >
             <Plus className="h-4 w-4" />
             <span>Add Vendor</span>
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -771,18 +772,17 @@ export default function VendorManagement() {
 
             {/* Modal Footer */}
             <div className="flex justify-end space-x-3 mt-8">
-              <button
+              <Button
+                variant="outline"
                 onClick={() => setShowRecordPaymentModal(false)}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleRecordPayment}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Record Payment
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -984,18 +984,17 @@ export default function VendorManagement() {
 
             {/* Modal Footer */}
             <div className="flex justify-end space-x-3 mt-8">
-              <button
+              <Button
+                variant="outline"
                 onClick={() => setShowAddVendorModal(false)}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleAddVendor}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Add Vendor
-              </button>
+              </Button>
             </div>
           </div>
         </div>

@@ -621,6 +621,7 @@ export default function PaymentTracking() {
         <div className="flex items-center space-x-3">
           <Button 
             onClick={() => setShowRecordPaymentModal(true)}
+            variant="outline"
             className="flex items-center space-x-2"
           >
             <FileText className="h-4 w-4" />
@@ -628,8 +629,7 @@ export default function PaymentTracking() {
           </Button>
           <Button 
             onClick={() => setShowAddContractModal(true)}
-            variant="outline"
-            className="flex items-center space-x-2 bg-green-600 text-white hover:bg-green-700"
+            className="flex items-center space-x-2"
           >
             <Plus className="h-4 w-4" />
             <span>New Contract</span>
