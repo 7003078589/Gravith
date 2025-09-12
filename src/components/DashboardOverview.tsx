@@ -1,214 +1,342 @@
 'use client';
 
 import { useState } from 'react';
-import { Building2, MapPin as RoadIcon, Plus, User, MapPin, Calendar, TrendingUp, DollarSign, BarChart3 } from 'lucide-react';
+import { 
+  Building2, 
+  Truck, 
+  Leaf, 
+  DollarSign, 
+  Users, 
+  TrendingUp,
+  AlertTriangle,
+  Info,
+  Box,
+  CreditCard,
+  Calendar,
+  Clock,
+  CheckCircle,
+  ArrowRight,
+  ShoppingCart,
+  MapPin,
+  Target
+} from 'lucide-react';
 
 export default function DashboardOverview() {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [selectedSite, setSelectedSite] = useState('Residential Complex A');
+
+  const overviewCards = [
+    {
+      title: 'Active Sites',
+      value: '3',
+      icon: Building2,
+      color: 'bg-blue-500'
+    },
+    {
+      title: 'Vehicles',
+      value: '12',
+      icon: Truck,
+      color: 'bg-green-500'
+    },
+    {
+      title: 'Material Value',
+      value: '₹1.9Cr',
+      icon: Leaf,
+      color: 'bg-emerald-500'
+    },
+    {
+      title: 'Monthly Expenses',
+      value: '₹32.0L',
+      icon: DollarSign,
+      color: 'bg-yellow-500'
+    },
+    {
+      title: 'Active Vendors',
+      value: '8',
+      icon: Users,
+      color: 'bg-purple-500'
+    },
+    {
+      title: 'Completion Rate',
+      value: '78%',
+      icon: TrendingUp,
+      color: 'bg-indigo-500'
+    }
+  ];
+
+  const activeSites = [
+    {
+      name: 'Residential Complex A',
+      location: 'Bangalore North',
+      progress: 65,
+      status: 'On Track',
+      statusColor: 'text-green-600',
+      nextMilestone: 'Foundation Completion',
+      budget: '₹32.5L / ₹50.0L',
+      dueDate: '15/02/2024',
+      budgetUsed: 65
+    },
+    {
+      name: 'Commercial Plaza B',
+      location: 'Electronic City',
+      progress: 45,
+      status: 'Delayed',
+      statusColor: 'text-red-600',
+      nextMilestone: 'Structural Work',
+      budget: '₹42.0L / ₹80.0L',
+      dueDate: '20/02/2024',
+      budgetUsed: 53
+    },
+    {
+      name: 'Highway Bridge Project',
+      location: 'NH-44 Stretch',
+      progress: 80,
+      status: 'Ahead',
+      statusColor: 'text-blue-600',
+      nextMilestone: 'Final Inspection',
+      budget: '₹88.0L / ₹120.0L',
+      dueDate: '10/02/2024',
+      budgetUsed: 73
+    }
+  ];
+
+  const alerts = [
+    {
+      type: 'Low Stock Alert',
+      message: 'Cement running low at Residential Complex A - Only 45 bags remaining.',
+      action: 'Order Now',
+      icon: AlertTriangle,
+      color: 'text-orange-500'
+    },
+    {
+      type: 'Vehicle Maintenance Due',
+      message: '2 vehicles due for scheduled maintenance this week.',
+      action: 'Schedule',
+      icon: Truck,
+      color: 'text-blue-500'
+    },
+    {
+      type: 'Budget Performance',
+      message: 'Highway Bridge Project is 12% under budget this month.',
+      action: 'View Details',
+      icon: TrendingUp,
+      color: 'text-green-500'
+    }
+  ];
+
+  const recentActivities = [
+    {
+      action: 'Cement delivery received at Residential Complex A',
+      time: '2 hours ago',
+      amount: '₹85,000',
+      icon: Box,
+      color: 'text-blue-500'
+    },
+    {
+      action: 'Labour payment processed for Highway Bridge Project',
+      time: '4 hours ago',
+      amount: '₹125,000',
+      icon: DollarSign,
+      color: 'text-green-500'
+    },
+    {
+      action: 'Vehicle KA-01-AB-1234 maintenance completed',
+      time: '6 hours ago',
+      amount: '₹15,000',
+      icon: Truck,
+      color: 'text-purple-500'
+    }
+  ];
+
+  const quickActions = [
+    {
+      title: 'Record Expense',
+      subtitle: 'Add new expense entry',
+      icon: DollarSign,
+      color: 'bg-green-500',
+      href: '/expenses'
+    },
+    {
+      title: 'Add Material Purchase',
+      subtitle: 'Record material procurement',
+      icon: ShoppingCart,
+      color: 'bg-blue-500',
+      href: '/materials'
+    },
+    {
+      title: 'Vehicle Check-in',
+      subtitle: 'Update vehicle status',
+      icon: Truck,
+      color: 'bg-orange-500',
+      href: '/vehicles'
+    },
+    {
+      title: 'Site Update',
+      subtitle: 'Log site progress',
+      icon: MapPin,
+      color: 'bg-purple-500',
+      href: '/sites'
+    }
+  ];
 
   return (
-    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 bg-gray-50 min-h-screen">
-      <div className="text-center mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Site-Focused Management</h1>
-        <p className="text-sm sm:text-base text-gray-600 px-4">Comprehensive site management with integrated scheduling, materials, vehicles, expenses, and labour.</p>
+    <div className="p-4 sm:p-6 space-y-6 bg-gray-50 min-h-screen">
+      {/* Header */}
+      <div className="text-center mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Gavith Construction Pvt. Ltd.</h1>
+        <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">Welcome to Gavith Build</h2>
+        <p className="text-sm sm:text-base text-gray-600">Here's an overview of your construction projects and operations.</p>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Select Active Site</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="p-4 rounded-lg border-2 border-blue-500 bg-blue-50 cursor-pointer transition-all">
-            <div className="flex items-center space-x-3 mb-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Building2 className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">Residential Complex A</h3>
-                <p className="text-sm text-gray-600">Sector 15, Navi Mumbai</p>
-              </div>
+      {/* Overview Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        {overviewCards.map((card, index) => (
+          <div key={index} className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 text-center">
+            <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg ${card.color} mb-3`}>
+              <card.icon className="h-6 w-6 text-white" />
             </div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600">Status</span>
-              <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">active</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div className="bg-blue-600 h-2 rounded-full transition-all duration-300" style={{ width: '64%' }}></div>
-            </div>
-            <p className="text-sm text-gray-600 mt-1">64% complete</p>
+            <h3 className="text-sm font-medium text-gray-600 mb-1">{card.title}</h3>
+            <p className="text-2xl font-bold text-gray-900">{card.value}</p>
           </div>
-
-          <div className="p-4 rounded-lg border-2 border-gray-200 hover:border-gray-300 cursor-pointer transition-all">
-            <div className="flex items-center space-x-3 mb-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Building2 className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">Commercial Plaza B</h3>
-                <p className="text-sm text-gray-600">Business District, Pune</p>
-              </div>
-            </div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600">Status</span>
-              <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">active</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div className="bg-blue-600 h-2 rounded-full transition-all duration-300" style={{ width: '55%' }}></div>
-            </div>
-            <p className="text-sm text-gray-600 mt-1">55% complete</p>
-          </div>
-
-          <div className="p-4 rounded-lg border-2 border-gray-200 hover:border-gray-300 cursor-pointer transition-all">
-            <div className="flex items-center space-x-3 mb-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <RoadIcon className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">Highway Bridge Project</h3>
-                <p className="text-sm text-gray-600">Mumbai-Pune Highway</p>
-              </div>
-            </div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600">Status</span>
-              <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">active</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div className="bg-blue-600 h-2 rounded-full transition-all duration-300" style={{ width: '96%' }}></div>
-            </div>
-            <p className="text-sm text-gray-600 mt-1">96% complete</p>
-          </div>
-        </div>
+        ))}
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200">
-        <div className="border-b border-gray-200">
-          <nav className="flex space-x-8 px-6">
-            <button
-              onClick={() => setActiveTab('overview')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'overview'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <div className="flex items-center space-x-2">
-                <BarChart3 className="h-4 w-4" />
-                <span>Overview</span>
-              </div>
-            </button>
-            <button
-              onClick={() => setActiveTab('materials')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'materials'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <div className="flex items-center space-x-2">
-                <BarChart3 className="h-4 w-4" />
-                <span>Materials</span>
-              </div>
-            </button>
-          </nav>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Active Construction Sites */}
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">Active Construction Sites</h3>
+              <button className="text-blue-600 hover:text-blue-700 font-medium flex items-center">
+                View All <ArrowRight className="h-4 w-4 ml-1" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              {activeSites.map((site, index) => (
+                <div key={index} className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <h4 className="font-semibold text-gray-900">{site.name}</h4>
+                      <p className="text-sm text-gray-600">{site.location}</p>
+                    </div>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${site.statusColor}`}>
+                      {site.status}
+                    </span>
+                  </div>
+                  
+                  <div className="mb-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm text-gray-600">Progress</span>
+                      <span className="text-sm font-medium text-gray-900">{site.progress}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                        style={{ width: `${site.progress}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <span className="text-gray-600">Next Milestone:</span>
+                      <p className="font-medium text-gray-900">{site.nextMilestone}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Budget:</span>
+                      <p className="font-medium text-gray-900">{site.budget}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Due Date:</span>
+                      <p className="font-medium text-gray-900">{site.dueDate}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Budget Used:</span>
+                      <p className="font-medium text-green-600">{site.budgetUsed}% used</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="p-6">
-          {activeTab === 'overview' && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Budget</p>
-                      <p className="text-2xl font-bold text-gray-900">$ 5.0Cr</p>
-                      <p className="text-xs text-gray-500">Total allocated</p>
-                    </div>
-                    <div className="p-3 bg-blue-100 rounded-lg">
-                      <DollarSign className="h-6 w-6 text-blue-600" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Spent</p>
-                      <p className="text-2xl font-bold text-gray-900">₹ 3.2Cr</p>
-                      <p className="text-xs text-gray-500">64.0% used</p>
-                    </div>
-                    <div className="p-3 bg-green-100 rounded-lg">
-                      <TrendingUp className="h-6 w-6 text-green-600" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Progress</p>
-                      <p className="text-2xl font-bold text-gray-900">64%</p>
-                    </div>
-                    <div className="p-3 bg-purple-100 rounded-lg">
-                      <BarChart3 className="h-6 w-6 text-purple-600" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Timeline</p>
-                      <p className="text-sm font-bold text-gray-900">15/01/2024 to 15/12/2024</p>
-                    </div>
-                    <div className="p-3 bg-purple-100 rounded-lg">
-                      <Calendar className="h-6 w-6 text-purple-600" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Site Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                      <User className="h-5 w-5 text-gray-400" />
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">Project Manager</p>
-                        <p className="text-gray-900">Rajesh Kumar</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <MapPin className="h-5 w-5 text-gray-400" />
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">Location</p>
-                        <p className="text-gray-900">Sector 15, Navi Mumbai</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">Status</p>
-                        <p className="text-gray-900">Active</p>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Description</p>
-                      <p className="text-gray-900">Premium residential complex with 200 units</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+        {/* Right Column */}
+        <div className="space-y-6">
+          {/* Alerts & Notifications */}
+          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+            <div className="flex items-center mb-4">
+              <AlertTriangle className="h-5 w-5 text-orange-500 mr-2" />
+              <h3 className="text-lg font-semibold text-gray-900">Alerts & Notifications</h3>
             </div>
-          )}
-
-          {activeTab !== 'overview' && (
-            <div className="text-center py-12">
-              <BarChart3 className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Materials Content</h3>
-              <p className="text-gray-600">This section will contain detailed materials information for the selected site.</p>
+            
+            <div className="space-y-4">
+              {alerts.map((alert, index) => (
+                <div key={index} className="border border-gray-200 rounded-lg p-3">
+                  <div className="flex items-start space-x-3">
+                    <alert.icon className={`h-5 w-5 ${alert.color} mt-0.5`} />
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-900 text-sm">{alert.type}</h4>
+                      <p className="text-sm text-gray-600 mt-1">{alert.message}</p>
+                      <button className="mt-2 text-blue-600 hover:text-blue-700 text-sm font-medium">
+                        {alert.action}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
+          </div>
+
+          {/* Recent Activities */}
+          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center">
+                <Info className="h-5 w-5 text-blue-500 mr-2" />
+                <h3 className="text-lg font-semibold text-gray-900">Recent Activities</h3>
+              </div>
+              <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">View All</button>
+            </div>
+            
+            <div className="space-y-3">
+              {recentActivities.map((activity, index) => (
+                <div key={index} className="flex items-start space-x-3">
+                  <activity.icon className={`h-5 w-5 ${activity.color} mt-0.5`} />
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-900">{activity.action}</p>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-xs text-gray-500">{activity.time}</span>
+                      <span className="text-sm font-medium text-gray-900">{activity.amount}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+            <div className="flex items-center mb-4">
+              <Target className="h-5 w-5 text-purple-500 mr-2" />
+              <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {quickActions.map((action, index) => (
+                <button
+                  key={index}
+                  onClick={() => window.location.href = action.href}
+                  className="p-3 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors text-left"
+                >
+                  <div className={`inline-flex items-center justify-center w-8 h-8 rounded-lg ${action.color} mb-2`}>
+                    <action.icon className="h-4 w-4 text-white" />
+                  </div>
+                  <h4 className="font-medium text-gray-900 text-sm">{action.title}</h4>
+                  <p className="text-xs text-gray-600">{action.subtitle}</p>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>

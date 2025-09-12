@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Site Management', href: '/sites', icon: MapPin },
   { name: 'Vehicle & Equipment', href: '/vehicles', icon: Truck },
   { name: 'Material Management', href: '/materials', icon: Package },
