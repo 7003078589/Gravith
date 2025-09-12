@@ -20,6 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DatePicker } from '@/components/ui/date-picker';
 
 const vehicles = [
   {
@@ -76,8 +77,8 @@ export default function VehicleManagement() {
   const [formData, setFormData] = useState({
     vehicleNumber: 'MH-12-AB-1234',
     vendor: 'Heavy Equipment Rentals',
-    rentalStartDate: '',
-    rentalEndDate: '',
+    rentalStartDate: undefined as Date | undefined,
+    rentalEndDate: undefined as Date | undefined,
     perDayCost: '8500',
     perHourCost: '1200',
     odometerReading: '45230',
@@ -141,7 +142,7 @@ export default function VehicleManagement() {
     { name: 'Shopping Mall D', equipment: ['Mixer', 'Generator', 'Loader'] }
   ];
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | Date | undefined) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -157,8 +158,8 @@ export default function VehicleManagement() {
     setFormData({
       vehicleNumber: 'MH-12-AB-1234',
       vendor: 'Heavy Equipment Rentals',
-      rentalStartDate: '',
-      rentalEndDate: '',
+      rentalStartDate: undefined,
+      rentalEndDate: undefined,
       perDayCost: '8500',
       perHourCost: '1200',
       odometerReading: '45230',
@@ -611,16 +612,12 @@ export default function VehicleManagement() {
                     <Label htmlFor="rentalStartDate" className="text-sm font-medium text-gray-700">
                       Rental Start Date
                     </Label>
-                    <div className="relative mt-1">
-                      <Input
-                        id="rentalStartDate"
-                        type="date"
+                    <div className="mt-1">
+                      <DatePicker
                         value={formData.rentalStartDate}
-                        onChange={(e) => handleInputChange('rentalStartDate', e.target.value)}
-                        className="pr-10"
-                        style={{ colorScheme: 'light' }}
+                        onChange={(date) => handleInputChange('rentalStartDate', date)}
+                        placeholder="Select start date"
                       />
-                      <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
                     </div>
                   </div>
 
@@ -693,16 +690,12 @@ export default function VehicleManagement() {
                     <Label htmlFor="rentalEndDate" className="text-sm font-medium text-gray-700">
                       Rental End Date (Optional)
                     </Label>
-                    <div className="relative mt-1">
-                      <Input
-                        id="rentalEndDate"
-                        type="date"
+                    <div className="mt-1">
+                      <DatePicker
                         value={formData.rentalEndDate}
-                        onChange={(e) => handleInputChange('rentalEndDate', e.target.value)}
-                        className="pr-10"
-                        style={{ colorScheme: 'light' }}
+                        onChange={(date) => handleInputChange('rentalEndDate', date)}
+                        placeholder="Select end date (optional)"
                       />
-                      <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
                     </div>
                   </div>
 
