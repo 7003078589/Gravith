@@ -344,32 +344,28 @@ export default function ExpenseManagement() {
               </button>
             </div>
             <div className="flex space-x-2">
-              <div className="relative">
-                <select
-                  value={selectedSite}
-                  onChange={(e) => setSelectedSite(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white pr-8"
-                >
-                  <option value="All Sites">All Sites</option>
+              <Select value={selectedSite} onValueChange={setSelectedSite}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="All Sites" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="All Sites">All Sites</SelectItem>
                   {sites.map(site => (
-                    <option key={site} value={site}>{site}</option>
+                    <SelectItem key={site} value={site}>{site}</SelectItem>
                   ))}
-                </select>
-                <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-              </div>
-              <div className="relative">
-                <select
-                  value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white pr-8"
-                >
-                  <option value="All Status">All Status</option>
-                  <option value="paid">Paid</option>
-                  <option value="pending">Pending</option>
-                  <option value="overdue">Overdue</option>
-                </select>
-                <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-              </div>
+                </SelectContent>
+              </Select>
+              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="All Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="All Status">All Status</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="overdue">Overdue</SelectItem>
+                </SelectContent>
+              </Select>
               <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                 <Download className="h-4 w-4" />
                 <span>Export</span>
@@ -761,44 +757,50 @@ export default function ExpenseManagement() {
                 <div className="space-y-4">
                   {/* Category */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                    <div className="relative">
-                      <select
-                        value={expenseForm.category}
-                        onChange={(e) => handleFormInputChange('category', e.target.value)}
-                        className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white"
-                      >
-                        <option value="Labour">Labour</option>
-                        <option value="Materials">Materials</option>
-                        <option value="Equipment">Equipment</option>
-                        <option value="Transport">Transport</option>
-                        <option value="Utilities">Utilities</option>
-                        <option value="Other">Other</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-                    </div>
+                    <Label htmlFor="category" className="text-sm font-medium text-gray-700">
+                      Category
+                    </Label>
+                    <Select value={expenseForm.category} onValueChange={(value) => handleFormInputChange('category', value)}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Labour">Labour</SelectItem>
+                        <SelectItem value="Materials">Materials</SelectItem>
+                        <SelectItem value="Equipment">Equipment</SelectItem>
+                        <SelectItem value="Transport">Transport</SelectItem>
+                        <SelectItem value="Utilities">Utilities</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   {/* Vendor */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Vendor</label>
-                    <input
+                    <Label htmlFor="vendor" className="text-sm font-medium text-gray-700">
+                      Vendor
+                    </Label>
+                    <Input
+                      id="vendor"
                       type="text"
                       value={expenseForm.vendor}
                       onChange={(e) => handleFormInputChange('vendor', e.target.value)}
                       placeholder="Vendor name"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                      className="mt-1"
                     />
                   </div>
 
                   {/* Receipt Number */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Receipt Number</label>
-                    <input
+                    <Label htmlFor="receiptNumber" className="text-sm font-medium text-gray-700">
+                      Receipt Number
+                    </Label>
+                    <Input
+                      id="receiptNumber"
                       type="text"
                       value={expenseForm.receiptNumber}
                       onChange={(e) => handleFormInputChange('receiptNumber', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                      className="mt-1"
                     />
                   </div>
                 </div>
@@ -807,13 +809,16 @@ export default function ExpenseManagement() {
                 <div className="space-y-4">
                   {/* Subcategory */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Subcategory</label>
-                    <input
+                    <Label htmlFor="subcategory" className="text-sm font-medium text-gray-700">
+                      Subcategory
+                    </Label>
+                    <Input
+                      id="subcategory"
                       type="text"
                       value={expenseForm.subcategory}
                       onChange={(e) => handleFormInputChange('subcategory', e.target.value)}
                       placeholder="e.g., Mason Work, Steel, Excavator Rental"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                      className="mt-1"
                     />
                   </div>
 
@@ -833,31 +838,33 @@ export default function ExpenseManagement() {
 
                   {/* Site */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Site</label>
-                    <div className="relative">
-                      <select
-                        value={expenseForm.site}
-                        onChange={(e) => handleFormInputChange('site', e.target.value)}
-                        className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white"
-                      >
-                        <option value="">Select site</option>
+                    <Label htmlFor="site" className="text-sm font-medium text-gray-700">
+                      Site
+                    </Label>
+                    <Select value={expenseForm.site} onValueChange={(value) => handleFormInputChange('site', value)}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select site" />
+                      </SelectTrigger>
+                      <SelectContent>
                         {sites.map(site => (
-                          <option key={site} value={site}>{site}</option>
+                          <SelectItem key={site} value={site}>{site}</SelectItem>
                         ))}
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-                    </div>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   {/* Approved By */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Approved By</label>
-                    <input
+                    <Label htmlFor="approvedBy" className="text-sm font-medium text-gray-700">
+                      Approved By
+                    </Label>
+                    <Input
+                      id="approvedBy"
                       type="text"
                       value={expenseForm.approvedBy}
                       onChange={(e) => handleFormInputChange('approvedBy', e.target.value)}
                       placeholder="Project Manager name"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                      className="mt-1"
                     />
                   </div>
                 </div>
@@ -867,24 +874,30 @@ export default function ExpenseManagement() {
               <div className="space-y-4">
                 {/* Description */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                  <Label htmlFor="description" className="text-sm font-medium text-gray-700">
+                    Description
+                  </Label>
                   <textarea
+                    id="description"
                     value={expenseForm.description}
                     onChange={(e) => handleFormInputChange('description', e.target.value)}
                     placeholder="Detailed description of the expense"
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                    className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
                   />
                 </div>
 
                 {/* Amount */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Amount (₹)</label>
-                  <input
+                  <Label htmlFor="amount" className="text-sm font-medium text-gray-700">
+                    Amount (₹)
+                  </Label>
+                  <Input
+                    id="amount"
                     type="number"
                     value={expenseForm.amount}
                     onChange={(e) => handleFormInputChange('amount', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                    className="mt-1"
                   />
                 </div>
               </div>

@@ -19,6 +19,11 @@ import {
   Building2,
   Banknote
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 
 // Sample payment data matching your design
 const paymentHistory = [
@@ -287,16 +292,18 @@ export default function PaymentTracking() {
                 <button className="p-2 text-gray-400 hover:text-gray-600">
                   <Filter className="h-4 w-4" />
                 </button>
-                <div className="relative">
-                  <select className="px-3 py-1 pr-8 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white">
-                    <option value="all">All Status</option>
-                    <option value="paid">Paid</option>
-                    <option value="partial">Partial</option>
-                    <option value="overdue">Overdue</option>
-                    <option value="pending">Pending</option>
-                  </select>
-                  <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-                </div>
+                <Select defaultValue="all">
+                  <SelectTrigger className="w-[120px] h-8 text-sm">
+                    <SelectValue placeholder="All Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="paid">Paid</SelectItem>
+                    <SelectItem value="partial">Partial</SelectItem>
+                    <SelectItem value="overdue">Overdue</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>
