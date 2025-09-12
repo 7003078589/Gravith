@@ -19,6 +19,10 @@ import {
   X,
   ChevronDown
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const materials = [
   {
@@ -933,20 +937,21 @@ export default function MaterialManagement() {
           <p className="text-gray-600">Global overview of inventory across all construction sites.</p>
         </div>
         <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
-          <button 
+          <Button 
+            variant="outline"
             onClick={() => setShowConsumptionModal(true)}
-            className="flex items-center justify-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+            className="flex items-center space-x-2"
           >
             <Minus className="h-4 w-4" />
             <span>Record Consumption</span>
-          </button>
-          <button 
+          </Button>
+          <Button 
             onClick={() => setShowPurchaseModal(true)}
-            className="flex items-center justify-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+            className="flex items-center space-x-2"
           >
             <Plus className="h-4 w-4" />
             <span>+ New Purchase</span>
-          </button>
+          </Button>
         </div>
       </div>
 

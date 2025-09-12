@@ -21,6 +21,10 @@ import {
   Info,
   X
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 // Sample expense data matching your design
 const expenses = [
@@ -639,17 +643,17 @@ export default function ExpenseManagement() {
           <p className="text-gray-600">Comprehensive expense tracking with categorized views and analytics</p>
         </div>
         <div className="flex items-center space-x-3">
-          <button 
+          <Button 
             onClick={() => setShowAddExpenseModal(true)}
-            className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center space-x-2"
           >
             <Plus className="h-4 w-4" />
             <span>Record Expense</span>
-          </button>
-          <button className="flex items-center space-x-2 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+          </Button>
+          <Button variant="outline" className="flex items-center space-x-2">
             <Download className="h-4 w-4" />
             <span>Export</span>
-          </button>
+          </Button>
         </div>
       </div>
 

@@ -15,6 +15,11 @@ import {
   Calendar,
   ChevronDown
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const vehicles = [
   {
@@ -229,17 +234,17 @@ export default function VehicleManagement() {
 
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4">
-        <button className="flex items-center justify-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+        <Button variant="outline" className="flex items-center space-x-2">
           <Settings className="h-4 w-4" />
           <span>Custom Types</span>
-        </button>
-        <button 
+        </Button>
+        <Button 
           onClick={() => setShowAddModal(true)}
-          className="flex items-center justify-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          className="flex items-center space-x-2"
         >
           <Plus className="h-4 w-4" />
           <span>Add Vehicle</span>
-        </button>
+        </Button>
       </div>
 
       {/* Navigation Tabs */}
@@ -269,17 +274,27 @@ export default function VehicleManagement() {
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-gray-900">Complete Fleet Overview</h3>
                 <div className="flex space-x-4">
-                  <select className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option>All Types</option>
-                    <option>Excavator</option>
-                    <option>Crane</option>
-                    <option>Generator</option>
-                  </select>
-                  <select className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option>All Sites</option>
-                    <option>Residential Complex A</option>
-                    <option>Commercial Plaza B</option>
-                  </select>
+                  <Select>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="All Types" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Types</SelectItem>
+                      <SelectItem value="excavator">Excavator</SelectItem>
+                      <SelectItem value="crane">Crane</SelectItem>
+                      <SelectItem value="generator">Generator</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select>
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="All Sites" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Sites</SelectItem>
+                      <SelectItem value="residential">Residential Complex A</SelectItem>
+                      <SelectItem value="commercial">Commercial Plaza B</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
@@ -565,41 +580,44 @@ export default function VehicleManagement() {
                 {/* Left Column */}
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label htmlFor="vehicleNumber" className="text-sm font-medium text-gray-700">
                       Vehicle Number
-                    </label>
-                    <input
+                    </Label>
+                    <Input
+                      id="vehicleNumber"
                       type="text"
                       value={formData.vehicleNumber}
                       onChange={(e) => handleInputChange('vehicleNumber', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="MH-12-AB-1234"
+                      className="mt-1"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label htmlFor="vendor" className="text-sm font-medium text-gray-700">
                       Vendor/Rental Company
-                    </label>
-                    <input
+                    </Label>
+                    <Input
+                      id="vendor"
                       type="text"
                       value={formData.vendor}
                       onChange={(e) => handleInputChange('vendor', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Heavy Equipment Rentals"
+                      className="mt-1"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label htmlFor="rentalStartDate" className="text-sm font-medium text-gray-700">
                       Rental Start Date
-                    </label>
-                    <div className="relative">
-                      <input
+                    </Label>
+                    <div className="relative mt-1">
+                      <Input
+                        id="rentalStartDate"
                         type="date"
                         value={formData.rentalStartDate}
                         onChange={(e) => handleInputChange('rentalStartDate', e.target.value)}
-                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                        className="pr-10"
                         style={{ colorScheme: 'light' }}
                       />
                       <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
@@ -607,28 +625,30 @@ export default function VehicleManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label htmlFor="perDayCost" className="text-sm font-medium text-gray-700">
                       Per Day Cost (₹)
-                    </label>
-                    <input
+                    </Label>
+                    <Input
+                      id="perDayCost"
                       type="number"
                       value={formData.perDayCost}
                       onChange={(e) => handleInputChange('perDayCost', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="8500"
+                      className="mt-1"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label htmlFor="odometerReading" className="text-sm font-medium text-gray-700">
                       Starting Odometer Reading (km)
-                    </label>
-                    <input
+                    </Label>
+                    <Input
+                      id="odometerReading"
                       type="number"
                       value={formData.odometerReading}
                       onChange={(e) => handleInputChange('odometerReading', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="45230"
+                      className="mt-1"
                     />
                   </div>
                 </div>
@@ -636,55 +656,50 @@ export default function VehicleManagement() {
                 {/* Right Column */}
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label htmlFor="vehicleType" className="text-sm font-medium text-gray-700">
                       Vehicle/Equipment Type
-                    </label>
-                    <div className="relative">
-                      <select
-                        value={formData.vehicleType}
-                        onChange={(e) => handleInputChange('vehicleType', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white"
-                      >
-                        <option value="">Select type</option>
+                    </Label>
+                    <Select value={formData.vehicleType} onValueChange={(value) => handleInputChange('vehicleType', value)}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
                         {vehicleTypes.map((type) => (
-                          <option key={type} value={type}>{type}</option>
+                          <SelectItem key={type} value={type}>{type}</SelectItem>
                         ))}
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-                    </div>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label htmlFor="assignedSite" className="text-sm font-medium text-gray-700">
                       Assign to Site
-                    </label>
-                    <div className="relative">
-                      <select
-                        value={formData.assignedSite}
-                        onChange={(e) => handleInputChange('assignedSite', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white"
-                      >
-                        <option value="">Select site</option>
+                    </Label>
+                    <Select value={formData.assignedSite} onValueChange={(value) => handleInputChange('assignedSite', value)}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select site" />
+                      </SelectTrigger>
+                      <SelectContent>
                         {sites.map((site) => (
-                          <option key={site.name} value={site.name}>
+                          <SelectItem key={site.name} value={site.name}>
                             {site.name} ({site.equipment.join(', ')})
-                          </option>
+                          </SelectItem>
                         ))}
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-                    </div>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label htmlFor="rentalEndDate" className="text-sm font-medium text-gray-700">
                       Rental End Date (Optional)
-                    </label>
-                    <div className="relative">
-                      <input
+                    </Label>
+                    <div className="relative mt-1">
+                      <Input
+                        id="rentalEndDate"
                         type="date"
                         value={formData.rentalEndDate}
                         onChange={(e) => handleInputChange('rentalEndDate', e.target.value)}
-                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                        className="pr-10"
                         style={{ colorScheme: 'light' }}
                       />
                       <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
@@ -692,28 +707,30 @@ export default function VehicleManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label htmlFor="perHourCost" className="text-sm font-medium text-gray-700">
                       Per Hour Cost (₹)
-                    </label>
-                    <input
+                    </Label>
+                    <Input
+                      id="perHourCost"
                       type="number"
                       value={formData.perHourCost}
                       onChange={(e) => handleInputChange('perHourCost', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="1200"
+                      className="mt-1"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label htmlFor="dieselCost" className="text-sm font-medium text-gray-700">
                       Diesel Cost/L (₹)
-                    </label>
-                    <input
+                    </Label>
+                    <Input
+                      id="dieselCost"
                       type="number"
                       value={formData.dieselCost}
                       onChange={(e) => handleInputChange('dieselCost', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="95"
+                      className="mt-1"
                     />
                   </div>
                 </div>
@@ -721,19 +738,18 @@ export default function VehicleManagement() {
 
               {/* Form Actions */}
               <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
-                <button
+                <Button
                   type="button"
+                  variant="outline"
                   onClick={() => setShowAddModal(false)}
-                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   Add Vehicle
-                </button>
+                </Button>
               </div>
             </form>
           </div>
