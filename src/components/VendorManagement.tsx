@@ -20,6 +20,11 @@ import {
   FileText,
   Banknote
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 
 const vendors = [
   {
@@ -523,20 +528,18 @@ export default function VendorManagement() {
                 <button className="p-2 text-gray-400 hover:text-gray-600">
                   <Filter className="h-4 w-4" />
                 </button>
-                <div className="relative">
-                  <select
-                    value={categoryFilter}
-                    onChange={(e) => setCategoryFilter(e.target.value)}
-                    className="px-3 py-1 pr-8 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white"
-                  >
-                    <option value="all">All Categories</option>
-                    <option value="Equipment">Equipment</option>
-                    <option value="Materials">Materials</option>
-                    <option value="Labour">Labour</option>
-                    <option value="Transport">Transport</option>
-                  </select>
-                  <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-                </div>
+                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                  <SelectTrigger className="w-[140px] h-8 text-sm">
+                    <SelectValue placeholder="All Categories" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    <SelectItem value="Equipment">Equipment</SelectItem>
+                    <SelectItem value="Materials">Materials</SelectItem>
+                    <SelectItem value="Labour">Labour</SelectItem>
+                    <SelectItem value="Transport">Transport</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>
@@ -664,46 +667,45 @@ export default function VendorManagement() {
                 <div className="space-y-4">
                   {/* Vendor */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Vendor</label>
-                    <div className="relative">
-                      <select
-                        value={recordPaymentForm.vendor}
-                        onChange={(e) => handleRecordPaymentInputChange('vendor', e.target.value)}
-                        className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white"
-                      >
-                        <option value="">Select vendor</option>
+                    <Label htmlFor="vendor" className="text-sm font-medium text-gray-700">
+                      Vendor
+                    </Label>
+                    <Select value={recordPaymentForm.vendor} onValueChange={(value) => handleRecordPaymentInputChange('vendor', value)}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select vendor" />
+                      </SelectTrigger>
+                      <SelectContent>
                         {vendors.map(vendor => (
-                          <option key={vendor.id} value={vendor.name}>{vendor.name}</option>
+                          <SelectItem key={vendor.id} value={vendor.name}>{vendor.name}</SelectItem>
                         ))}
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-                    </div>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   {/* Base Amount */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Base Amount (₹)</label>
-                    <input
+                    <Label htmlFor="baseAmount" className="text-sm font-medium text-gray-700">
+                      Base Amount (₹)
+                    </Label>
+                    <Input
+                      id="baseAmount"
                       type="number"
                       value={recordPaymentForm.baseAmount}
                       onChange={(e) => handleRecordPaymentInputChange('baseAmount', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                      className="mt-1"
                     />
                   </div>
 
                   {/* Date */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
-                    <div className="relative">
-                      <input
-                        type="date"
-                        value={recordPaymentForm.date}
-                        onChange={(e) => handleRecordPaymentInputChange('date', e.target.value)}
-                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
-                        style={{ colorScheme: 'light' }}
-                      />
-                      <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-                    </div>
+                    <Label htmlFor="date" className="text-sm font-medium text-gray-700">
+                      Date
+                    </Label>
+                    <DatePicker
+                      value={recordPaymentForm.date ? new Date(recordPaymentForm.date) : undefined}
+                      onChange={(date) => handleRecordPaymentInputChange('date', date?.toISOString().split('T')[0] || '')}
+                      placeholder="Select payment date"
+                    />
                   </div>
                 </div>
 
@@ -711,35 +713,44 @@ export default function VendorManagement() {
                 <div className="space-y-4">
                   {/* GST Amount */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">GST Amount (₹)</label>
-                    <input
+                    <Label htmlFor="gstAmount" className="text-sm font-medium text-gray-700">
+                      GST Amount (₹)
+                    </Label>
+                    <Input
+                      id="gstAmount"
                       type="number"
                       value={recordPaymentForm.gstAmount}
                       onChange={(e) => handleRecordPaymentInputChange('gstAmount', e.target.value)}
                       placeholder="0 if exempt"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                      className="mt-1"
                     />
                   </div>
 
                   {/* Total Amount */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Total Amount</label>
-                    <input
+                    <Label htmlFor="totalAmount" className="text-sm font-medium text-gray-700">
+                      Total Amount
+                    </Label>
+                    <Input
+                      id="totalAmount"
                       type="text"
                       value={`₹${recordPaymentForm.totalAmount}`}
                       readOnly
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-900"
+                      className="mt-1 bg-gray-50"
                     />
                   </div>
 
                   {/* Invoice Number */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Invoice Number</label>
-                    <input
+                    <Label htmlFor="invoiceNumber" className="text-sm font-medium text-gray-700">
+                      Invoice Number
+                    </Label>
+                    <Input
+                      id="invoiceNumber"
                       type="text"
                       value={recordPaymentForm.invoiceNumber}
                       onChange={(e) => handleRecordPaymentInputChange('invoiceNumber', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                      className="mt-1"
                     />
                   </div>
                 </div>
@@ -803,46 +814,58 @@ export default function VendorManagement() {
                 <div className="space-y-4">
                   {/* Vendor Name */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Vendor Name</label>
-                    <input
+                    <Label htmlFor="vendorName" className="text-sm font-medium text-gray-700">
+                      Vendor Name
+                    </Label>
+                    <Input
+                      id="vendorName"
                       type="text"
                       value={addVendorForm.vendorName}
                       onChange={(e) => handleAddVendorInputChange('vendorName', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                      className="mt-1"
                     />
                   </div>
 
                   {/* Contact Person */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Contact Person</label>
-                    <input
+                    <Label htmlFor="contactPerson" className="text-sm font-medium text-gray-700">
+                      Contact Person
+                    </Label>
+                    <Input
+                      id="contactPerson"
                       type="text"
                       value={addVendorForm.contactPerson}
                       onChange={(e) => handleAddVendorInputChange('contactPerson', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                      className="mt-1"
                     />
                   </div>
 
                   {/* Email */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                    <input
+                    <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                      Email
+                    </Label>
+                    <Input
+                      id="email"
                       type="email"
                       value={addVendorForm.email}
                       onChange={(e) => handleAddVendorInputChange('email', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                      className="mt-1"
                     />
                   </div>
 
                   {/* Address */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                    <Label htmlFor="address" className="text-sm font-medium text-gray-700">
+                      Address
+                    </Label>
                     <textarea
+                      id="address"
                       value={addVendorForm.address}
                       onChange={(e) => handleAddVendorInputChange('address', e.target.value)}
                       placeholder="Complete address with city and pincode"
                       rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
                     />
                   </div>
                 </div>
@@ -851,40 +874,46 @@ export default function VendorManagement() {
                 <div className="space-y-4">
                   {/* Category */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                    <div className="relative">
-                      <select
-                        value={addVendorForm.category}
-                        onChange={(e) => handleAddVendorInputChange('category', e.target.value)}
-                        className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white"
-                      >
+                    <Label htmlFor="category" className="text-sm font-medium text-gray-700">
+                      Category
+                    </Label>
+                    <Select value={addVendorForm.category} onValueChange={(value) => handleAddVendorInputChange('category', value)}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
                         {vendorCategoriesList.map(category => (
-                          <option key={category} value={category}>{category}</option>
+                          <SelectItem key={category} value={category}>{category}</SelectItem>
                         ))}
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-                    </div>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   {/* Phone */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
-                    <input
+                    <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
+                      Phone
+                    </Label>
+                    <Input
+                      id="phone"
                       type="tel"
                       value={addVendorForm.phone}
                       onChange={(e) => handleAddVendorInputChange('phone', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                      className="mt-1"
                     />
                   </div>
 
                   {/* Payment Terms */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Payment Terms</label>
-                    <input
+                    <Label htmlFor="paymentTerms" className="text-sm font-medium text-gray-700">
+                      Payment Terms
+                    </Label>
+                    <Input
+                      id="paymentTerms"
                       type="text"
                       value={addVendorForm.paymentTerms}
                       onChange={(e) => handleAddVendorInputChange('paymentTerms', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                      className="mt-1"
                     />
                   </div>
                 </div>
