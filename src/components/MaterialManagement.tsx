@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 
 const materials = [
   {
@@ -201,7 +202,7 @@ export default function MaterialManagement() {
     unitRate: '425',
     vendor: '',
     invoiceNumber: 'INV-2024-001',
-    purchaseDate: ''
+    purchaseDate: undefined as Date | undefined
   });
   const [consumptionForm, setConsumptionForm] = useState({
     material: '',
@@ -215,7 +216,7 @@ export default function MaterialManagement() {
 
   const units = ['Bags', 'Kilograms', 'Cubic Meters', 'Tons', 'Pieces'];
 
-  const handlePurchaseInputChange = (field: string, value: string) => {
+  const handlePurchaseInputChange = (field: string, value: string | Date | undefined) => {
     setPurchaseForm(prev => ({
       ...prev,
       [field]: value
@@ -242,7 +243,7 @@ export default function MaterialManagement() {
       unitRate: '425',
       vendor: '',
       invoiceNumber: 'INV-2024-001',
-      purchaseDate: ''
+      purchaseDate: undefined
     });
   };
 
@@ -1054,124 +1055,120 @@ export default function MaterialManagement() {
                 {/* Left Column */}
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label htmlFor="materialName" className="text-sm font-medium text-gray-700">
                       Material Name
-                    </label>
-                    <input
+                    </Label>
+                    <Input
+                      id="materialName"
                       type="text"
                       value={purchaseForm.materialName}
                       onChange={(e) => handlePurchaseInputChange('materialName', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="e.g., Cement (OPC 53)"
+                      className="mt-1"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label htmlFor="site" className="text-sm font-medium text-gray-700">
                       Site
-                    </label>
-                    <div className="relative">
-                      <select
-                        value={purchaseForm.site}
-                        onChange={(e) => handlePurchaseInputChange('site', e.target.value)}
-                        className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white"
-                      >
-                        <option value="">Select site</option>
+                    </Label>
+                    <Select value={purchaseForm.site} onValueChange={(value) => handlePurchaseInputChange('site', value)}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select site" />
+                      </SelectTrigger>
+                      <SelectContent>
                         {sites.map((site) => (
-                          <option key={site} value={site}>{site}</option>
+                          <SelectItem key={site} value={site}>{site}</SelectItem>
                         ))}
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-                    </div>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label htmlFor="quantity" className="text-sm font-medium text-gray-700">
                       Quantity
-                    </label>
-                    <input
+                    </Label>
+                    <Input
+                      id="quantity"
                       type="number"
                       value={purchaseForm.quantity}
                       onChange={(e) => handlePurchaseInputChange('quantity', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="100"
+                      className="mt-1"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label htmlFor="unit" className="text-sm font-medium text-gray-700">
                       Unit
-                    </label>
-                    <div className="relative">
-                      <select
-                        value={purchaseForm.unit}
-                        onChange={(e) => handlePurchaseInputChange('unit', e.target.value)}
-                        className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white"
-                      >
-                        <option value="">Select unit</option>
+                    </Label>
+                    <Select value={purchaseForm.unit} onValueChange={(value) => handlePurchaseInputChange('unit', value)}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select unit" />
+                      </SelectTrigger>
+                      <SelectContent>
                         {units.map((unit) => (
-                          <option key={unit} value={unit}>{unit}</option>
+                          <SelectItem key={unit} value={unit}>{unit}</SelectItem>
                         ))}
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-                    </div>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
                 {/* Right Column */}
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label htmlFor="unitRate" className="text-sm font-medium text-gray-700">
                       Unit Rate (₹)
-                    </label>
-                    <input
+                    </Label>
+                    <Input
+                      id="unitRate"
                       type="number"
                       value={purchaseForm.unitRate}
                       onChange={(e) => handlePurchaseInputChange('unitRate', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="425"
+                      className="mt-1"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label htmlFor="vendor" className="text-sm font-medium text-gray-700">
                       Vendor
-                    </label>
-                    <input
+                    </Label>
+                    <Input
+                      id="vendor"
                       type="text"
                       value={purchaseForm.vendor}
                       onChange={(e) => handlePurchaseInputChange('vendor', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Vendor Name"
+                      className="mt-1"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label htmlFor="invoiceNumber" className="text-sm font-medium text-gray-700">
                       Invoice Number
-                    </label>
-                    <input
+                    </Label>
+                    <Input
+                      id="invoiceNumber"
                       type="text"
                       value={purchaseForm.invoiceNumber}
                       onChange={(e) => handlePurchaseInputChange('invoiceNumber', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="INV-2024-001"
+                      className="mt-1"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label htmlFor="purchaseDate" className="text-sm font-medium text-gray-700">
                       Purchase Date
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="date"
+                    </Label>
+                    <div className="mt-1">
+                      <DatePicker
                         value={purchaseForm.purchaseDate}
-                        onChange={(e) => handlePurchaseInputChange('purchaseDate', e.target.value)}
-                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
-                        style={{ colorScheme: 'light' }}
+                        onChange={(date) => handlePurchaseInputChange('purchaseDate', date)}
+                        placeholder="Select purchase date"
                       />
-                      <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
                     </div>
                   </div>
                 </div>
@@ -1179,19 +1176,18 @@ export default function MaterialManagement() {
 
               {/* Form Actions */}
               <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
-                <button
+                <Button
                   type="button"
+                  variant="outline"
                   onClick={() => setShowPurchaseModal(false)}
-                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   Record Purchase
-                </button>
+                </Button>
               </div>
             </form>
           </div>
@@ -1217,54 +1213,51 @@ export default function MaterialManagement() {
 
             <form onSubmit={handleConsumptionSubmit} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Label htmlFor="material" className="text-sm font-medium text-gray-700">
                   Select Material
-                </label>
-                <div className="relative">
-                  <select
-                    value={consumptionForm.material}
-                    onChange={(e) => handleConsumptionInputChange('material', e.target.value)}
-                    className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white"
-                  >
-                    <option value="">Choose material</option>
+                </Label>
+                <Select value={consumptionForm.material} onValueChange={(value) => handleConsumptionInputChange('material', value)}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Choose material" />
+                  </SelectTrigger>
+                  <SelectContent>
                     {materials.map((material) => (
-                      <option key={material.id} value={material.id}>
+                      <SelectItem key={material.id} value={material.id.toString()}>
                         {material.name} - {material.site} (Available: {material.balance} {material.unit})
-                      </option>
+                      </SelectItem>
                     ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-                </div>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Label htmlFor="quantity" className="text-sm font-medium text-gray-700">
                   Quantity Consumed
-                </label>
-                <input
+                </Label>
+                <Input
+                  id="quantity"
                   type="number"
                   value={consumptionForm.quantity}
                   onChange={(e) => handleConsumptionInputChange('quantity', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Enter quantity"
+                  className="mt-1"
                 />
               </div>
 
               {/* Form Actions */}
               <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
-                <button
+                <Button
                   type="button"
+                  variant="outline"
                   onClick={() => setShowConsumptionModal(false)}
-                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   Record Consumption
-                </button>
+                </Button>
               </div>
             </form>
           </div>

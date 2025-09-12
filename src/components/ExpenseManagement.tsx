@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 
 // Sample expense data matching your design
 const expenses = [
@@ -130,7 +131,7 @@ export default function ExpenseManagement() {
     subcategory: '',
     description: '',
     amount: '125000',
-    date: '',
+    date: undefined as Date | undefined,
     vendor: '',
     site: '',
     receiptNumber: 'RCT001',
@@ -147,7 +148,7 @@ export default function ExpenseManagement() {
   const overdueCount = expenses.filter(e => e.status === 'overdue').length;
 
   // Handle form input changes
-  const handleFormInputChange = (field: string, value: string) => {
+  const handleFormInputChange = (field: string, value: string | Date | undefined) => {
     setExpenseForm(prev => ({
       ...prev,
       [field]: value
@@ -165,7 +166,7 @@ export default function ExpenseManagement() {
       subcategory: '',
       description: '',
       amount: '125000',
-      date: '',
+      date: undefined,
       vendor: '',
       site: '',
       receiptNumber: 'RCT001',
@@ -818,16 +819,15 @@ export default function ExpenseManagement() {
 
                   {/* Date */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
-                    <div className="relative">
-                      <input
-                        type="date"
+                    <Label htmlFor="date" className="text-sm font-medium text-gray-700">
+                      Date
+                    </Label>
+                    <div className="mt-1">
+                      <DatePicker
                         value={expenseForm.date}
-                        onChange={(e) => handleFormInputChange('date', e.target.value)}
-                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
-                        style={{ colorScheme: 'light' }}
+                        onChange={(date) => handleFormInputChange('date', date)}
+                        placeholder="Select expense date"
                       />
-                      <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
                     </div>
                   </div>
 
@@ -892,18 +892,17 @@ export default function ExpenseManagement() {
 
             {/* Modal Footer */}
             <div className="flex justify-end space-x-3 mt-8">
-              <button
+              <Button
+                variant="outline"
                 onClick={() => setShowAddExpenseModal(false)}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleAddExpense}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Add Expense
-              </button>
+              </Button>
             </div>
           </div>
         </div>
