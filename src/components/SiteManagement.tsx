@@ -163,13 +163,13 @@ export default function SiteManagement() {
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Site Management</h1>
           <p className="text-sm sm:text-base text-gray-600">Manage and monitor all construction sites with integrated workflows</p>
         </div>
-        <button 
+        <Button 
           onClick={() => setShowAddModal(true)}
-          className="flex items-center justify-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          className="flex items-center justify-center space-x-2"
         >
           <Plus className="h-4 w-4" />
           <span>Add New Site</span>
-        </button>
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -372,89 +372,83 @@ export default function SiteManagement() {
                 {/* Left Column */}
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label htmlFor="siteName" className="text-sm font-medium text-gray-700">
                       Site Name
-                    </label>
-                    <input
+                    </Label>
+                    <Input
+                      id="siteName"
                       type="text"
                       value={siteForm.siteName}
                       onChange={(e) => handleFormInputChange('siteName', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                       placeholder="Enter site name"
+                      className="mt-1"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label htmlFor="location" className="text-sm font-medium text-gray-700">
                       Location
-                    </label>
-                    <input
+                    </Label>
+                    <Input
+                      id="location"
                       type="text"
                       value={siteForm.location}
                       onChange={(e) => handleFormInputChange('location', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                       placeholder="Enter location"
+                      className="mt-1"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label htmlFor="startDate" className="text-sm font-medium text-gray-700">
                       Start Date
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="date"
-                        value={siteForm.startDate}
-                        onChange={(e) => handleFormInputChange('startDate', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
-                        style={{ colorScheme: 'light' }}
-                      />
-                      <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                    </div>
+                    </Label>
+                    <DatePicker
+                      value={siteForm.startDate ? new Date(siteForm.startDate) : undefined}
+                      onChange={(date) => handleFormInputChange('startDate', date?.toISOString().split('T')[0] || '')}
+                      placeholder="Select start date"
+                    />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label htmlFor="expectedEndDate" className="text-sm font-medium text-gray-700">
                       Expected End Date
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="date"
-                        value={siteForm.expectedEndDate}
-                        onChange={(e) => handleFormInputChange('expectedEndDate', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
-                        style={{ colorScheme: 'light' }}
-                      />
-                      <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                    </div>
+                    </Label>
+                    <DatePicker
+                      value={siteForm.expectedEndDate ? new Date(siteForm.expectedEndDate) : undefined}
+                      onChange={(date) => handleFormInputChange('expectedEndDate', date?.toISOString().split('T')[0] || '')}
+                      placeholder="Select expected end date"
+                    />
                   </div>
                 </div>
 
                 {/* Right Column */}
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label htmlFor="totalBudget" className="text-sm font-medium text-gray-700">
                       Total Budget (₹)
-                    </label>
-                    <input
+                    </Label>
+                    <Input
+                      id="totalBudget"
                       type="number"
                       value={siteForm.totalBudget}
                       onChange={(e) => handleFormInputChange('totalBudget', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                       placeholder="Enter total budget"
+                      className="mt-1"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Label htmlFor="projectManager" className="text-sm font-medium text-gray-700">
                       Project Manager
-                    </label>
-                    <input
+                    </Label>
+                    <Input
+                      id="projectManager"
                       type="text"
                       value={siteForm.projectManager}
                       onChange={(e) => handleFormInputChange('projectManager', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                       placeholder="Enter project manager name"
+                      className="mt-1"
                     />
                   </div>
                 </div>
@@ -462,33 +456,33 @@ export default function SiteManagement() {
 
               {/* Description - Full Width */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Label htmlFor="description" className="text-sm font-medium text-gray-700">
                   Description
-                </label>
+                </Label>
                 <textarea
+                  id="description"
                   value={siteForm.description}
                   onChange={(e) => handleFormInputChange('description', e.target.value)}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                   placeholder="Enter project description"
                 />
               </div>
 
               {/* Form Actions */}
               <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-                <button
+                <Button
                   type="button"
+                  variant="outline"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   Add Site
-                </button>
+                </Button>
               </div>
             </form>
           </div>

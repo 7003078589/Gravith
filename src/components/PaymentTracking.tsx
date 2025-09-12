@@ -619,20 +619,21 @@ export default function PaymentTracking() {
           <p className="text-gray-600">Track client payments, manage contracts, and analyze payment trends</p>
         </div>
         <div className="flex items-center space-x-3">
-          <button 
+          <Button 
             onClick={() => setShowRecordPaymentModal(true)}
-            className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center space-x-2"
           >
             <FileText className="h-4 w-4" />
             <span>Record Payment</span>
-          </button>
-          <button 
+          </Button>
+          <Button 
             onClick={() => setShowAddContractModal(true)}
-            className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+            variant="outline"
+            className="flex items-center space-x-2 bg-green-600 text-white hover:bg-green-700"
           >
             <Plus className="h-4 w-4" />
             <span>New Contract</span>
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -684,50 +685,52 @@ export default function PaymentTracking() {
                 <div className="space-y-4">
                   {/* Select Contract */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Select Contract</label>
-                    <div className="relative">
-                      <select
-                        value={recordPaymentForm.contract}
-                        onChange={(e) => handleRecordPaymentInputChange('contract', e.target.value)}
-                        className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white"
-                      >
-                        <option value="">Choose contract</option>
+                    <Label htmlFor="contract" className="text-sm font-medium text-gray-700">
+                      Select Contract
+                    </Label>
+                    <Select value={recordPaymentForm.contract} onValueChange={(value) => handleRecordPaymentInputChange('contract', value)}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Choose contract" />
+                      </SelectTrigger>
+                      <SelectContent>
                         {contracts.map(contract => (
-                          <option key={contract.id} value={contract.id}>
+                          <SelectItem key={contract.id} value={contract.id.toString()}>
                             {contract.client} - {contract.project} (Outstanding: ₹{(contract.outstanding / 10000000).toFixed(1)}Cr)
-                          </option>
+                          </SelectItem>
                         ))}
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-                    </div>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   {/* Amount Received */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Amount Received (₹)</label>
-                    <input
+                    <Label htmlFor="amount" className="text-sm font-medium text-gray-700">
+                      Amount Received (₹)
+                    </Label>
+                    <Input
+                      id="amount"
                       type="number"
                       value={recordPaymentForm.amount}
                       onChange={(e) => handleRecordPaymentInputChange('amount', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                      className="mt-1"
                     />
                   </div>
 
                   {/* Payment Method */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
-                    <div className="relative">
-                      <select
-                        value={recordPaymentForm.paymentMethod}
-                        onChange={(e) => handleRecordPaymentInputChange('paymentMethod', e.target.value)}
-                        className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white"
-                      >
+                    <Label htmlFor="paymentMethod" className="text-sm font-medium text-gray-700">
+                      Payment Method
+                    </Label>
+                    <Select value={recordPaymentForm.paymentMethod} onValueChange={(value) => handleRecordPaymentInputChange('paymentMethod', value)}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select payment method" />
+                      </SelectTrigger>
+                      <SelectContent>
                         {paymentMethods.map(method => (
-                          <option key={method} value={method}>{method}</option>
+                          <SelectItem key={method} value={method}>{method}</SelectItem>
                         ))}
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-                    </div>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
@@ -735,38 +738,41 @@ export default function PaymentTracking() {
                 <div className="space-y-4">
                   {/* Payment Date */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Payment Date</label>
-                    <div className="relative">
-                      <input
-                        type="date"
-                        value={recordPaymentForm.paymentDate}
-                        onChange={(e) => handleRecordPaymentInputChange('paymentDate', e.target.value)}
-                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
-                        style={{ colorScheme: 'light' }}
-                      />
-                      <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-                    </div>
+                    <Label htmlFor="paymentDate" className="text-sm font-medium text-gray-700">
+                      Payment Date
+                    </Label>
+                    <DatePicker
+                      value={recordPaymentForm.paymentDate ? new Date(recordPaymentForm.paymentDate) : undefined}
+                      onChange={(date) => handleRecordPaymentInputChange('paymentDate', date?.toISOString().split('T')[0] || '')}
+                      placeholder="Select payment date"
+                    />
                   </div>
 
                   {/* Transaction ID */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Transaction ID</label>
-                    <input
+                    <Label htmlFor="transactionId" className="text-sm font-medium text-gray-700">
+                      Transaction ID
+                    </Label>
+                    <Input
+                      id="transactionId"
                       type="text"
                       value={recordPaymentForm.transactionId}
                       onChange={(e) => handleRecordPaymentInputChange('transactionId', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                      className="mt-1"
                     />
                   </div>
 
                   {/* Received By */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Received By</label>
-                    <input
+                    <Label htmlFor="receivedBy" className="text-sm font-medium text-gray-700">
+                      Received By
+                    </Label>
+                    <Input
+                      id="receivedBy"
                       type="text"
                       value={recordPaymentForm.receivedBy}
                       onChange={(e) => handleRecordPaymentInputChange('receivedBy', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                      className="mt-1"
                     />
                   </div>
                 </div>
@@ -787,18 +793,17 @@ export default function PaymentTracking() {
 
             {/* Modal Footer */}
             <div className="flex justify-end space-x-3 mt-8">
-              <button
+              <Button
+                variant="outline"
                 onClick={() => setShowRecordPaymentModal(false)}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleRecordPayment}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Record Payment
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -830,42 +835,47 @@ export default function PaymentTracking() {
                 <div className="space-y-4">
                   {/* Client Name */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Client Name</label>
-                    <input
+                    <Label htmlFor="clientName" className="text-sm font-medium text-gray-700">
+                      Client Name
+                    </Label>
+                    <Input
+                      id="clientName"
                       type="text"
                       value={addContractForm.clientName}
                       onChange={(e) => handleAddContractInputChange('clientName', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                      className="mt-1"
                     />
                   </div>
 
                   {/* Contract Value */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Contract Value (₹)</label>
-                    <input
+                    <Label htmlFor="contractValue" className="text-sm font-medium text-gray-700">
+                      Contract Value (₹)
+                    </Label>
+                    <Input
+                      id="contractValue"
                       type="number"
                       value={addContractForm.contractValue}
                       onChange={(e) => handleAddContractInputChange('contractValue', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                      className="mt-1"
                     />
                   </div>
 
                   {/* Payment Terms */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Payment Terms</label>
-                    <div className="relative">
-                      <select
-                        value={addContractForm.paymentTerms}
-                        onChange={(e) => handleAddContractInputChange('paymentTerms', e.target.value)}
-                        className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-gray-900 bg-white"
-                      >
-                        <option value="">Select payment terms</option>
+                    <Label htmlFor="paymentTerms" className="text-sm font-medium text-gray-700">
+                      Payment Terms
+                    </Label>
+                    <Select value={addContractForm.paymentTerms} onValueChange={(value) => handleAddContractInputChange('paymentTerms', value)}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select payment terms" />
+                      </SelectTrigger>
+                      <SelectContent>
                         {paymentTerms.map(term => (
-                          <option key={term} value={term}>{term}</option>
+                          <SelectItem key={term} value={term}>{term}</SelectItem>
                         ))}
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-                    </div>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
@@ -873,38 +883,41 @@ export default function PaymentTracking() {
                 <div className="space-y-4">
                   {/* Project Name */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Project Name</label>
-                    <input
+                    <Label htmlFor="projectName" className="text-sm font-medium text-gray-700">
+                      Project Name
+                    </Label>
+                    <Input
+                      id="projectName"
                       type="text"
                       value={addContractForm.projectName}
                       onChange={(e) => handleAddContractInputChange('projectName', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                      className="mt-1"
                     />
                   </div>
 
                   {/* Due Date */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Due Date</label>
-                    <div className="relative">
-                      <input
-                        type="date"
-                        value={addContractForm.dueDate}
-                        onChange={(e) => handleAddContractInputChange('dueDate', e.target.value)}
-                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
-                        style={{ colorScheme: 'light' }}
-                      />
-                      <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-                    </div>
+                    <Label htmlFor="dueDate" className="text-sm font-medium text-gray-700">
+                      Due Date
+                    </Label>
+                    <DatePicker
+                      value={addContractForm.dueDate ? new Date(addContractForm.dueDate) : undefined}
+                      onChange={(date) => handleAddContractInputChange('dueDate', date?.toISOString().split('T')[0] || '')}
+                      placeholder="Select due date"
+                    />
                   </div>
 
                   {/* Invoice Number */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Invoice Number</label>
-                    <input
+                    <Label htmlFor="invoiceNumber" className="text-sm font-medium text-gray-700">
+                      Invoice Number
+                    </Label>
+                    <Input
+                      id="invoiceNumber"
                       type="text"
                       value={addContractForm.invoiceNumber}
                       onChange={(e) => handleAddContractInputChange('invoiceNumber', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                      className="mt-1"
                     />
                   </div>
                 </div>
@@ -925,18 +938,17 @@ export default function PaymentTracking() {
 
             {/* Modal Footer */}
             <div className="flex justify-end space-x-3 mt-8">
-              <button
+              <Button
+                variant="outline"
                 onClick={() => setShowAddContractModal(false)}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleAddContract}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Create Contract
-              </button>
+              </Button>
             </div>
           </div>
         </div>
