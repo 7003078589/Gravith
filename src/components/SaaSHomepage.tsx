@@ -50,7 +50,7 @@ export default function SaaSHomepage({ onGetStarted, onLogin }: SaaSHomepageProp
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <ImageWithFallback
-                src="figma:asset/06a706809a776ef95a726ac4de261e17620abf0b.png"
+                src="/Logo Horizontal.png"
                 alt="Gavith Build Logo"
                 width={40}
                 height={40}

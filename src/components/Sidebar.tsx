@@ -14,10 +14,10 @@ import {
   BarChart3,
   ChevronLeft,
   ChevronRight,
-  Building2,
   X,
   Menu
 } from 'lucide-react';
+import Image from 'next/image';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -79,10 +79,23 @@ export default function Sidebar() {
             {/* Sidebar */}
             <div className="fixed left-0 top-0 h-full w-64 bg-white shadow-xl">
               {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                <div className="flex items-center space-x-2">
-                  <Building2 className="h-8 w-8 text-blue-600" />
-                  <span className="text-xl font-bold text-gray-900">Gravith</span>
+              <div className="flex items-center justify-between px-2 py-1 border-b border-gray-200">
+                <div className="flex items-center bg-transparent">
+                  <Image
+                    src="/logo.png"
+                    alt="Gravith Build Logo"
+                    width={140}
+                    height={32}
+                    className="object-contain bg-transparent"
+                    style={{ 
+                      backgroundColor: 'transparent', 
+                      border: 'none', 
+                      outline: 'none',
+                      boxShadow: 'none',
+                      background: 'none',
+                      backgroundImage: 'none'
+                    }}
+                  />
                 </div>
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
@@ -125,11 +138,24 @@ export default function Sidebar() {
       collapsed ? 'w-16' : 'w-64'
     }`}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+      <div className="flex items-center justify-between px-2 py-1 border-b border-gray-200">
         {!collapsed && (
-          <div className="flex items-center space-x-2">
-            <Building2 className="h-8 w-8 text-blue-600" />
-            <span className="text-xl font-bold text-gray-900">Gravith</span>
+          <div className="flex items-center bg-transparent">
+            <Image
+              src="/logo.png"
+              alt="Gravith Build Logo"
+              width={140}
+              height={32}
+              className="object-contain bg-transparent"
+              style={{ 
+                backgroundColor: 'transparent', 
+                border: 'none', 
+                outline: 'none',
+                boxShadow: 'none',
+                background: 'none',
+                backgroundImage: 'none'
+              }}
+            />
           </div>
         )}
         <button

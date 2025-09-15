@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Bell, Settings, User, Building2, LogOut, ChevronDown } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import ImageWithFallback from './ImageWithFallback';
 
 export default function Header() {
   const pathname = usePathname();
@@ -54,9 +55,18 @@ export default function Header() {
       <div className="flex items-center justify-between">
         {/* Left - Logo (Hidden on mobile when sidebar is present) */}
         <div className="flex items-center space-x-3 lg:block hidden">
-          <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-            <Building2 className="h-6 w-6 text-white" />
-          </div>
+          <ImageWithFallback
+            src="/Logo Horizontal.png"
+            alt="Gavith Build Logo"
+            width={40}
+            height={40}
+            className="object-contain"
+            fallback={
+              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                <Building2 className="h-6 w-6 text-white" />
+              </div>
+            }
+          />
           <div>
             <h1 className="text-xl font-bold text-gray-900">Gavith Build</h1>
             <p className="text-xs text-gray-600">Construction Management System</p>

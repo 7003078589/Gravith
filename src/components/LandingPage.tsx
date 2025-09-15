@@ -18,6 +18,7 @@ import {
   Menu,
   X
 } from 'lucide-react';
+import ImageWithFallback from './ImageWithFallback';
 
 const features = [
   {
@@ -93,7 +94,14 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
-              <Building2 className="h-8 w-8 text-blue-600" />
+              <ImageWithFallback
+                src="/Logo Horizontal.png"
+                alt="Gravith Build Logo"
+                width={32}
+                height={32}
+                className="object-contain"
+                fallback={<Building2 className="h-8 w-8 text-blue-600" />}
+              />
               <span className="text-xl font-bold text-gray-900">Gravith</span>
             </div>
             

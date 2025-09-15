@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Building2 } from 'lucide-react';
+import ImageWithFallback from './ImageWithFallback';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -45,7 +46,14 @@ export default function Login() {
         {/* Logo and Company Info */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <Building2 className="h-20 w-20 text-blue-600" />
+            <ImageWithFallback
+              src="/Logo Horizontal.png"
+              alt="Gavith Build Logo"
+              width={80}
+              height={80}
+              className="object-contain"
+              fallback={<Building2 className="h-20 w-20 text-blue-600" />}
+            />
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent mb-2">
             Gavith Build
