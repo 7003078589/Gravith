@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Truck, 
   Plus, 
@@ -13,7 +13,10 @@ import {
   PieChart,
   X,
   Calendar,
-  ChevronDown
+  ChevronDown,
+  AlertTriangle,
+  CheckCircle,
+  Info
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,6 +24,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DatePicker } from '@/components/ui/date-picker';
+import { useSiteVehicle } from '@/contexts/SiteVehicleContext';
 
 const vehicles = [
   {
@@ -87,6 +91,67 @@ export default function VehicleManagement() {
     assignedSite: ''
   });
 
+  // Use shared context for interconnections
+  const {
+    selectedSite,
+    setSelectedSite,
+    availableSites,
+    addVehicleExpense,
+    validateSiteAssignment,
+    getSuggestedVehicleTypes,
+    calculateVehicleTotalCost,
+    getSiteVehicleExpenses,
+    totalVehicleExpenses
+  } = useSiteVehicle();
+
+  // State for form validation and suggestions
+  const [formValidation, setFormValidation] = useState({
+    siteCompatible: true,
+    suggestedTypes: [] as string[],
+    estimatedCost: 0,
+    warnings: [] as string[]
+  });
+
+  // Update suggestions when site or vehicle type changes
+  useEffect(() => {
+    if (formData.assignedSite) {
+      const suggestedTypes = getSuggestedVehicleTypes(formData.assignedSite);
+      setFormValidation(prev => ({
+        ...prev,
+        suggestedTypes
+      }));
+    }
+  }, [formData.assignedSite, getSuggestedVehicleTypes]);
+
+  // Validate site-vehicle compatibility
+  useEffect(() => {
+    if (formData.vehicleType && formData.assignedSite) {
+      const isCompatible = validateSiteAssignment(formData.vehicleType, formData.assignedSite);
+      setFormValidation(prev => ({
+        ...prev,
+        siteCompatible: isCompatible,
+        warnings: isCompatible ? [] : [`${formData.vehicleType} may not be suitable for ${formData.assignedSite}`]
+      }));
+    }
+  }, [formData.vehicleType, formData.assignedSite, validateSiteAssignment]);
+
+  // Calculate estimated cost when rental details change
+  useEffect(() => {
+    if (formData.rentalStartDate && formData.rentalEndDate && formData.perDayCost && formData.perHourCost && formData.dieselCost) {
+      const cost = calculateVehicleTotalCost(
+        parseFloat(formData.perDayCost),
+        parseFloat(formData.perHourCost),
+        formData.rentalStartDate,
+        formData.rentalEndDate,
+        parseFloat(formData.dieselCost)
+      );
+      setFormValidation(prev => ({
+        ...prev,
+        estimatedCost: cost
+      }));
+    }
+  }, [formData.rentalStartDate, formData.rentalEndDate, formData.perDayCost, formData.perHourCost, formData.dieselCost, calculateVehicleTotalCost]);
+
   const totalFleet = vehicles.length;
   const totalRentalCost = vehicles.reduce((sum, vehicle) => sum + vehicle.rentalCost, 0);
   const totalFuelCost = vehicles.reduce((sum, vehicle) => sum + vehicle.fuelCost, 0);
@@ -134,13 +199,13 @@ export default function VehicleManagement() {
     'Compactor', 'Bulldozer', 'Generator', 'Welding Machine', 'Pump'
   ];
 
-  const sites = [
-    { name: 'Residential Complex A', equipment: ['Excavator', 'Crane', 'Mixer'] },
-    { name: 'Commercial Plaza B', equipment: ['Dumper', 'Loader', 'Generator'] },
-    { name: 'Highway Bridge Project', equipment: ['Bulldozer', 'Compactor', 'Welding Machine'] },
-    { name: 'Industrial Zone C', equipment: ['Pump', 'Excavator', 'Crane'] },
-    { name: 'Shopping Mall D', equipment: ['Mixer', 'Generator', 'Loader'] }
-  ];
+  // Use sites from shared context
+  const sites = availableSites.map(site => ({
+    id: site.id,
+    name: site.name,
+    equipment: getSuggestedVehicleTypes(site.id),
+    currentExpenses: getSiteVehicleExpenses(site.id)
+  }));
 
   const handleInputChange = (field: string, value: string | Date | undefined) => {
     setFormData(prev => ({
@@ -151,9 +216,40 @@ export default function VehicleManagement() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log('Form submitted:', formData);
+    
+    // Calculate total vehicle cost
+    if (formData.rentalStartDate && formData.rentalEndDate && formData.perDayCost && formData.perHourCost && formData.dieselCost) {
+      const totalCost = calculateVehicleTotalCost(
+        parseFloat(formData.perDayCost),
+        parseFloat(formData.perHourCost),
+        formData.rentalStartDate,
+        formData.rentalEndDate,
+        parseFloat(formData.dieselCost)
+      );
+
+      // Add vehicle expense to the assigned site
+      if (formData.assignedSite) {
+        addVehicleExpense(formData.assignedSite, totalCost);
+        console.log(`Added vehicle expense of ₹${totalCost} to site ${formData.assignedSite}`);
+      }
+
+      // Auto-create expense entry (this would integrate with ExpenseManagement)
+      console.log('Auto-creating expense entry:', {
+        category: 'Equipment',
+        description: `${formData.vehicleType} rental - ${formData.vehicleNumber}`,
+        amount: totalCost,
+        vendor: formData.vendor,
+        siteId: formData.assignedSite,
+        date: formData.rentalStartDate?.toISOString().split('T')[0]
+      });
+    }
+
+    // Handle form submission
+    console.log('Vehicle form submitted:', formData);
+    console.log('Form validation warnings:', formValidation.warnings);
+    
     setShowAddModal(false);
+    
     // Reset form
     setFormData({
       vehicleNumber: 'MH-12-AB-1234',
@@ -166,6 +262,14 @@ export default function VehicleManagement() {
       dieselCost: '95',
       vehicleType: '',
       assignedSite: ''
+    });
+    
+    // Reset validation state
+    setFormValidation({
+      siteCompatible: true,
+      suggestedTypes: [],
+      estimatedCost: 0,
+      warnings: []
     });
   };
 
@@ -228,6 +332,20 @@ export default function VehicleManagement() {
             </div>
             <div className="p-3 bg-purple-100 rounded-lg">
               <TrendingUp className="h-8 w-8 text-purple-600" />
+            </div>
+          </div>
+        </div>
+
+        {/* Interconnected Vehicle Expenses */}
+        <div className="bg-blue-50 rounded-lg border border-blue-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-blue-600">Site-Connected Expenses</p>
+              <p className="text-3xl font-bold text-blue-900">{formatCurrency(totalVehicleExpenses)}</p>
+              <p className="text-xs text-blue-600">Auto-tracked across sites</p>
+            </div>
+            <div className="p-3 bg-blue-100 rounded-lg">
+              <MapPin className="h-8 w-8 text-blue-600" />
             </div>
           </div>
         </div>
@@ -678,12 +796,44 @@ export default function VehicleManagement() {
                       </SelectTrigger>
                       <SelectContent>
                         {sites.map((site) => (
-                          <SelectItem key={site.name} value={site.name}>
-                            {site.name} ({site.equipment.join(', ')})
+                          <SelectItem key={site.id} value={site.id}>
+                            <div className="flex flex-col">
+                              <span>{site.name}</span>
+                              <span className="text-xs text-gray-500">
+                                Current Vehicle Expenses: ₹{formatCurrency(site.currentExpenses)}
+                              </span>
+                              <span className="text-xs text-blue-600">
+                                Suggested: {site.equipment.slice(0, 3).join(', ')}
+                              </span>
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    
+                    {/* Site-Vehicle Compatibility Warning */}
+                    {!formValidation.siteCompatible && formData.vehicleType && formData.assignedSite && (
+                      <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
+                        <div className="flex items-center">
+                          <AlertTriangle className="h-4 w-4 text-yellow-600 mr-2" />
+                          <span className="text-sm text-yellow-800">
+                            {formValidation.warnings[0]}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Site Compatibility Success */}
+                    {formValidation.siteCompatible && formData.vehicleType && formData.assignedSite && (
+                      <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md">
+                        <div className="flex items-center">
+                          <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
+                          <span className="text-sm text-green-800">
+                            Vehicle type is suitable for selected site
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -727,6 +877,29 @@ export default function VehicleManagement() {
                     />
                   </div>
                 </div>
+
+                {/* Estimated Cost Display */}
+                {formValidation.estimatedCost > 0 && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <Info className="h-5 w-5 text-blue-600 mr-2" />
+                        <span className="text-sm font-medium text-blue-900">Estimated Total Cost</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-blue-900">
+                          {formatDetailedCurrency(formValidation.estimatedCost)}
+                        </div>
+                        <div className="text-xs text-blue-700">
+                          Includes rental + fuel costs
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-2 text-xs text-blue-700">
+                      This cost will be automatically added to the selected site's expenses
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Form Actions */}

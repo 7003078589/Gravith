@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import { SiteVehicleProvider } from '@/contexts/SiteVehicleContext';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -42,25 +43,27 @@ export default function Layout({ children }: LayoutProps) {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:block">
-        <Sidebar />
+    <SiteVehicleProvider>
+      <div className="flex h-screen bg-gray-50 overflow-hidden">
+        {/* Desktop Sidebar */}
+        <div className="hidden lg:block">
+          <Sidebar />
+        </div>
+        
+        {/* Mobile Sidebar */}
+        <div className="lg:hidden">
+          <Sidebar />
+        </div>
+        
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Header />
+          <main className="flex-1 overflow-y-auto overflow-x-hidden">
+            <div className="h-full">
+              {children}
+            </div>
+          </main>
+        </div>
       </div>
-      
-      {/* Mobile Sidebar */}
-      <div className="lg:hidden">
-        <Sidebar />
-      </div>
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        <main className="flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="h-full">
-            {children}
-          </div>
-        </main>
-      </div>
-    </div>
+    </SiteVehicleProvider>
   );
 }

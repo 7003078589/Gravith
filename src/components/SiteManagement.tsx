@@ -42,6 +42,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Site } from '@/types';
+import { useSiteVehicle } from '@/contexts/SiteVehicleContext';
 
 // Mock data for sites
 const mockSites: Site[] = [
@@ -449,6 +450,119 @@ export default function SiteManagement() {
   const [selectedSite, setSelectedSite] = useState<Site>(mockSites[0]);
   const [activeTab, setActiveTab] = useState('overview');
   const [isAddSiteModalOpen, setIsAddSiteModalOpen] = useState(false);
+  
+  // Use shared context for vehicle-site interconnections
+  const {
+    selectedSite: contextSelectedSite,
+    setSelectedSite: setContextSelectedSite,
+    getSiteVehicleExpenses,
+    totalVehicleExpenses
+  } = useSiteVehicle();
+  
+  // Shared state for form interconnections
+  const [sharedData, setSharedData] = useState({
+    totalSiteExpenses: 0,
+    availableVendors: ['City Transport Services', 'Power Solutions Inc', 'ABC Suppliers', 'XYZ Materials'],
+    availableSuppliers: ['Cement Corp', 'Steel Suppliers Ltd', 'Aggregate Co', 'Sand Suppliers'],
+    skillCategories: ['Excavator Operator', 'Crane Operator', 'Electrician', 'Plumber', 'Mason', 'Helper'],
+    materialCategories: ['cement', 'steel', 'bricks', 'sand', 'aggregate', 'other'],
+    vehicleTypes: ['excavator', 'crane', 'truck', 'concrete-mixer', 'bulldozer', 'generator']
+  });
+
+  // Form interconnection functions
+  const updateTotalExpenses = (amount: number) => {
+    setSharedData(prev => ({
+      ...prev,
+      totalSiteExpenses: prev.totalSiteExpenses + amount
+    }));
+  };
+
+  const getSuggestedMaterials = (activityCategory: string) => {
+    const suggestions: { [key: string]: string[] } = {
+      'foundation': ['cement', 'steel', 'aggregate'],
+      'concrete': ['cement', 'sand', 'aggregate'],
+      'electrical': ['steel', 'other'],
+      'plumbing': ['steel', 'other'],
+      'finishing': ['cement', 'sand', 'bricks']
+    };
+    return suggestions[activityCategory.toLowerCase()] || [];
+  };
+
+  const getSuggestedVehicles = (activityCategory: string) => {
+    const suggestions: { [key: string]: string[] } = {
+      'excavation': ['excavator', 'bulldozer'],
+      'concrete': ['concrete-mixer', 'crane'],
+      'transport': ['truck'],
+      'lifting': ['crane'],
+      'general': ['generator']
+    };
+    return suggestions[activityCategory.toLowerCase()] || [];
+  };
+
+  const getSuggestedSkills = (activityCategory: string) => {
+    const suggestions: { [key: string]: string[] } = {
+      'excavation': ['Excavator Operator'],
+      'concrete': ['Mason', 'Helper'],
+      'electrical': ['Electrician'],
+      'plumbing': ['Plumber'],
+      'lifting': ['Crane Operator'],
+      'general': ['Helper', 'Mason']
+    };
+    return suggestions[activityCategory.toLowerCase()] || [];
+  };
+
+  const autoCalculateVehicleCosts = () => {
+    const rental = parseFloat(vehicleForm.rentalCostPerDay) || 0;
+    const fuel = parseFloat(vehicleForm.fuelCostPerDay) || 0;
+    const startDate = new Date(vehicleForm.startDate);
+    const endDate = new Date(vehicleForm.endDate);
+    const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) || 0;
+    return (rental + fuel) * days;
+  };
+
+  // Timeline synchronization functions
+  const validateDateWithinSitePeriod = (date: string, fieldName: string) => {
+    if (!date || !selectedSite.startDate || !selectedSite.endDate) return true;
+    
+    const inputDate = new Date(date);
+    const siteStart = new Date(selectedSite.startDate);
+    const siteEnd = new Date(selectedSite.endDate);
+    
+    if (inputDate < siteStart || inputDate > siteEnd) {
+      console.log(`Warning: ${fieldName} date (${date}) is outside site period (${selectedSite.startDate} to ${selectedSite.endDate})`);
+      return false;
+    }
+    return true;
+  };
+
+  const syncActivityDatesWithVehicleRental = (activityStartDate: string, activityDuration: number) => {
+    if (!activityStartDate || !activityDuration) return;
+    
+    const startDate = new Date(activityStartDate);
+    const endDate = new Date(startDate.getTime() + (activityDuration * 24 * 60 * 60 * 1000));
+    
+    console.log(`Syncing vehicle rental period for activity: ${startDate.toISOString().split('T')[0]} to ${endDate.toISOString().split('T')[0]}`);
+    
+    // Auto-populate vehicle form dates if empty
+    if (!vehicleForm.startDate) {
+      setVehicleForm(prev => ({ ...prev, startDate: startDate.toISOString().split('T')[0] }));
+    }
+    if (!vehicleForm.endDate) {
+      setVehicleForm(prev => ({ ...prev, endDate: endDate.toISOString().split('T')[0] }));
+    }
+  };
+
+  const syncLabourJoinDateWithActivity = (activityStartDate: string) => {
+    if (!activityStartDate) return;
+    
+    console.log(`Syncing labour join date with activity start: ${activityStartDate}`);
+    
+    // Auto-populate labour join date if empty
+    if (!labourForm.joinDate) {
+      setLabourForm(prev => ({ ...prev, joinDate: activityStartDate }));
+    }
+  };
+
   const [siteForm, setSiteForm] = useState({
     siteName: '',
     location: '',
@@ -558,6 +672,112 @@ export default function SiteManagement() {
     setSiteForm(prev => ({ ...prev, [field]: value }));
   };
 
+  // Enhanced form change handlers with interconnections
+  const handleActivityFormChange = (field: string, value: string) => {
+    setActivityForm(prev => ({ ...prev, [field]: value }));
+    
+    // Provide real-time suggestions when category changes
+    if (field === 'category' && value) {
+      const suggestedMaterials = getSuggestedMaterials(value);
+      const suggestedVehicles = getSuggestedVehicles(value);
+      const suggestedSkills = getSuggestedSkills(value);
+      
+      console.log(`Real-time suggestions for "${value}":`);
+      console.log('Materials:', suggestedMaterials);
+      console.log('Vehicles:', suggestedVehicles);
+      console.log('Skills:', suggestedSkills);
+    }
+    
+    // Timeline synchronization
+    if (field === 'startDate') {
+      validateDateWithinSitePeriod(value, 'Activity Start Date');
+      syncLabourJoinDateWithActivity(value);
+    }
+    
+    if (field === 'duration' && activityForm.startDate) {
+      const duration = parseInt(value) || 0;
+      syncActivityDatesWithVehicleRental(activityForm.startDate, duration);
+    }
+    
+    // Auto-sync when both start date and duration are available
+    if (field === 'startDate' && activityForm.duration) {
+      const duration = parseInt(activityForm.duration) || 0;
+      syncActivityDatesWithVehicleRental(value, duration);
+    }
+  };
+
+  const handleMaterialFormChange = (field: string, value: string) => {
+    setMaterialForm(prev => ({ ...prev, [field]: value }));
+    
+    // Date validation for timeline synchronization
+    if (field === 'purchaseDate') {
+      validateDateWithinSitePeriod(value, 'Material Purchase Date');
+    }
+    
+    // Auto-calculate total cost when quantity or cost changes
+    if ((field === 'quantity' || field === 'costPerUnit') && 
+        materialForm.quantity && materialForm.costPerUnit) {
+      const totalCost = parseFloat(materialForm.quantity) * parseFloat(materialForm.costPerUnit);
+      console.log(`Estimated material cost: ₹${totalCost}`);
+    }
+  };
+
+  const handleVehicleFormChange = (field: string, value: string) => {
+    setVehicleForm(prev => ({ ...prev, [field]: value }));
+    
+    // Date validation for timeline synchronization
+    if (field === 'startDate') {
+      validateDateWithinSitePeriod(value, 'Vehicle Start Date');
+    }
+    if (field === 'endDate') {
+      validateDateWithinSitePeriod(value, 'Vehicle End Date');
+    }
+    
+    // Auto-calculate total cost when rental/fuel costs or dates change
+    if ((field === 'rentalCostPerDay' || field === 'fuelCostPerDay' || 
+         field === 'startDate' || field === 'endDate') && 
+        vehicleForm.rentalCostPerDay && vehicleForm.fuelCostPerDay && 
+        vehicleForm.startDate && vehicleForm.endDate) {
+      const totalCost = autoCalculateVehicleCosts();
+      console.log(`Estimated vehicle cost: ₹${totalCost}`);
+    }
+  };
+
+  const handleExpenseFormChange = (field: string, value: string) => {
+    setExpenseForm(prev => ({ ...prev, [field]: value }));
+    
+    // Date validation for timeline synchronization
+    if (field === 'date') {
+      validateDateWithinSitePeriod(value, 'Expense Date');
+    }
+    
+    // Validate vendor against available vendors
+    if (field === 'vendor' && value) {
+      const isVendorValid = sharedData.availableVendors.includes(value);
+      if (!isVendorValid) {
+        console.log(`Vendor "${value}" not found in approved vendors list`);
+      }
+    }
+  };
+
+  const handleLabourFormChange = (field: string, value: string) => {
+    setLabourForm(prev => ({ ...prev, [field]: value }));
+    
+    // Date validation for timeline synchronization
+    if (field === 'joinDate') {
+      validateDateWithinSitePeriod(value, 'Labour Join Date');
+    }
+    
+    // Auto-calculate monthly wage when daily wage changes
+    if (field === 'dailyWage' && value) {
+      const dailyWage = parseFloat(value);
+      if (dailyWage > 0) {
+        const monthlyWage = dailyWage * 26; // Assuming 26 working days
+        console.log(`Estimated monthly wage: ₹${monthlyWage}`);
+      }
+    }
+  };
+
   const handleAddSite = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('New site data:', siteForm);
@@ -605,6 +825,22 @@ export default function SiteManagement() {
 
   const handleActivitySubmit = () => {
     console.log('Adding activity:', activityForm);
+    
+    // Provide suggestions for related resources based on activity category
+    if (activityForm.category) {
+      const suggestedMaterials = getSuggestedMaterials(activityForm.category);
+      const suggestedVehicles = getSuggestedVehicles(activityForm.category);
+      const suggestedSkills = getSuggestedSkills(activityForm.category);
+      
+      console.log(`Activity "${activityForm.name}" suggestions:`);
+      console.log('Suggested Materials:', suggestedMaterials);
+      console.log('Suggested Vehicles:', suggestedVehicles);
+      console.log('Suggested Skills:', suggestedSkills);
+      
+      // You can use these suggestions to auto-populate related forms
+      // or show them as recommendations to the user
+    }
+    
     setIsActivityModalOpen(false);
     setActivityForm({
       name: '',
@@ -662,6 +898,14 @@ export default function SiteManagement() {
   // Materials helper functions
   const handleMaterialSubmit = () => {
     console.log('Adding material:', materialForm);
+    
+    // Auto-create expense entry for material purchase
+    const materialCost = parseFloat(materialForm.quantity) * parseFloat(materialForm.costPerUnit);
+    if (materialCost > 0) {
+      updateTotalExpenses(materialCost);
+      console.log(`Auto-created material expense: ₹${materialCost} for ${materialForm.name}`);
+    }
+    
     setIsMaterialModalOpen(false);
     setMaterialForm({
       name: '',
@@ -677,6 +921,14 @@ export default function SiteManagement() {
   // Vehicles helper functions
   const handleVehicleSubmit = () => {
     console.log('Adding vehicle:', vehicleForm);
+    
+    // Auto-calculate and create expense entries for vehicle costs
+    const totalVehicleCost = autoCalculateVehicleCosts();
+    if (totalVehicleCost > 0) {
+      updateTotalExpenses(totalVehicleCost);
+      console.log(`Auto-created vehicle expense: ₹${totalVehicleCost} for ${vehicleForm.name}`);
+    }
+    
     setIsVehicleModalOpen(false);
     setVehicleForm({
       name: '',
@@ -707,6 +959,13 @@ export default function SiteManagement() {
   // Expenses helper functions
   const handleExpenseSubmit = () => {
     console.log('Recording expense:', expenseForm);
+    
+    // Update total site expenses
+    const expenseAmount = parseFloat(expenseForm.amount);
+    if (expenseAmount > 0) {
+      updateTotalExpenses(expenseAmount);
+    }
+    
     setIsExpenseModalOpen(false);
     setExpenseForm({
       category: '',
@@ -721,6 +980,16 @@ export default function SiteManagement() {
   // Labour helper functions
   const handleLabourSubmit = () => {
     console.log('Adding labour:', labourForm);
+    
+    // Auto-create wage expense entry for labour
+    const dailyWage = parseFloat(labourForm.dailyWage);
+    if (dailyWage > 0) {
+      // Estimate monthly wage expense (assuming 26 working days)
+      const monthlyWage = dailyWage * 26;
+      updateTotalExpenses(monthlyWage);
+      console.log(`Auto-created labour expense: ₹${monthlyWage}/month for ${labourForm.name}`);
+    }
+    
     setIsLabourModalOpen(false);
     setLabourForm({
       name: '',
@@ -773,7 +1042,10 @@ export default function SiteManagement() {
             {mockSites.map((site) => (
               <div
                 key={site.id}
-                onClick={() => setSelectedSite(site)}
+                onClick={() => {
+                  setSelectedSite(site);
+                  setContextSelectedSite(site);
+                }}
                 className={`bg-white rounded-lg border-2 p-6 cursor-pointer transition-all hover:shadow-md ${
                   selectedSite.id === site.id 
                     ? 'border-blue-500 shadow-md' 
@@ -869,6 +1141,30 @@ export default function SiteManagement() {
                     <p className="text-xs text-orange-600">64.0% used</p>
                   </div>
                   <TrendingUp className="h-8 w-8 text-orange-600" />
+                </div>
+              </div>
+
+              {/* Interconnected Expense Tracking */}
+              <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-blue-600">Tracked Expenses</p>
+                    <p className="text-2xl font-bold text-blue-900">{formatCurrency(sharedData.totalSiteExpenses)}</p>
+                    <p className="text-xs text-blue-600">Auto-calculated from forms</p>
+                  </div>
+                  <BarChart3 className="h-8 w-8 text-blue-600" />
+                </div>
+              </div>
+
+              {/* Vehicle Expenses from Vehicle Management */}
+              <div className="bg-green-50 rounded-lg p-6 border border-green-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-green-600">Vehicle Expenses</p>
+                    <p className="text-2xl font-bold text-green-900">{formatCurrency(getSiteVehicleExpenses(selectedSite.id))}</p>
+                    <p className="text-xs text-green-600">From Vehicle Management</p>
+                  </div>
+                  <Truck className="h-8 w-8 text-green-600" />
                 </div>
               </div>
 
@@ -1179,7 +1475,7 @@ export default function SiteManagement() {
                             id="activity-name"
                             placeholder="Foundation Excavation"
                             value={activityForm.name}
-                            onChange={(e) => setActivityForm(prev => ({ ...prev, name: e.target.value }))}
+                            onChange={(e) => handleActivityFormChange('name', e.target.value)}
                           />
                         </div>
                         <div className="space-y-2">
@@ -1188,7 +1484,7 @@ export default function SiteManagement() {
                             id="activity-description"
                             placeholder="Detailed activity description..."
                             value={activityForm.description}
-                            onChange={(e) => setActivityForm(prev => ({ ...prev, description: e.target.value }))}
+                            onChange={(e) => handleActivityFormChange('description', e.target.value)}
                             rows={3}
                           />
                         </div>
@@ -1196,7 +1492,7 @@ export default function SiteManagement() {
                           <Label htmlFor="start-date">Start Date</Label>
                           <DatePicker
                             value={activityForm.startDate ? new Date(activityForm.startDate) : undefined}
-                            onChange={(date) => setActivityForm(prev => ({ ...prev, startDate: date?.toISOString().split('T')[0] || '' }))}
+                            onChange={(date) => handleActivityFormChange('startDate', date?.toISOString().split('T')[0] || '')}
                             placeholder="Select start date"
                           />
                         </div>
@@ -1207,7 +1503,7 @@ export default function SiteManagement() {
                             type="number"
                             placeholder="10"
                             value={activityForm.duration}
-                            onChange={(e) => setActivityForm(prev => ({ ...prev, duration: e.target.value }))}
+                            onChange={(e) => handleActivityFormChange('duration', e.target.value)}
                           />
                         </div>
                         <div className="space-y-2">
@@ -1216,7 +1512,7 @@ export default function SiteManagement() {
                             id="assigned-team"
                             placeholder="Foundation Team"
                             value={activityForm.assignedTeam}
-                            onChange={(e) => setActivityForm(prev => ({ ...prev, assignedTeam: e.target.value }))}
+                            onChange={(e) => handleActivityFormChange('assignedTeam', e.target.value)}
                           />
                         </div>
                         <div className="flex items-center space-x-2">
@@ -1231,7 +1527,7 @@ export default function SiteManagement() {
                       <div className="space-y-4">
                         <div className="space-y-2">
                           <Label htmlFor="category">Category</Label>
-                          <Select value={activityForm.category} onValueChange={(value) => setActivityForm(prev => ({ ...prev, category: value }))}>
+                          <Select value={activityForm.category} onValueChange={(value) => handleActivityFormChange('category', value)}>
                             <SelectTrigger>
                               <SelectValue placeholder="Select category" />
                             </SelectTrigger>
@@ -1265,7 +1561,7 @@ export default function SiteManagement() {
                             id="resources"
                             placeholder="Excavator, Dumper, Labor Team"
                             value={activityForm.resources}
-                            onChange={(e) => setActivityForm(prev => ({ ...prev, resources: e.target.value }))}
+                            onChange={(e) => handleActivityFormChange('resources', e.target.value)}
                           />
                         </div>
                       </div>
@@ -1598,7 +1894,7 @@ export default function SiteManagement() {
                           id="material-name"
                           placeholder="Cement (OPC 53)"
                           value={materialForm.name}
-                          onChange={(e) => setMaterialForm(prev => ({ ...prev, name: e.target.value }))}
+                          onChange={(e) => handleMaterialFormChange('name', e.target.value)}
                         />
                       </div>
                       <div className="space-y-2">
@@ -1607,7 +1903,7 @@ export default function SiteManagement() {
                           id="material-category"
                           placeholder="Cement"
                           value={materialForm.category}
-                          onChange={(e) => setMaterialForm(prev => ({ ...prev, category: e.target.value }))}
+                          onChange={(e) => handleMaterialFormChange('category', e.target.value)}
                         />
                       </div>
                     </div>
@@ -1618,7 +1914,7 @@ export default function SiteManagement() {
                           id="quantity"
                           type="number"
                           value={materialForm.quantity}
-                          onChange={(e) => setMaterialForm(prev => ({ ...prev, quantity: e.target.value }))}
+                          onChange={(e) => handleMaterialFormChange('quantity', e.target.value)}
                         />
                       </div>
                       <div className="space-y-2">
@@ -1627,7 +1923,7 @@ export default function SiteManagement() {
                           id="unit"
                           placeholder="bags"
                           value={materialForm.unit}
-                          onChange={(e) => setMaterialForm(prev => ({ ...prev, unit: e.target.value }))}
+                          onChange={(e) => handleMaterialFormChange('unit', e.target.value)}
                         />
                       </div>
                     </div>
@@ -1637,7 +1933,7 @@ export default function SiteManagement() {
                         id="cost-per-unit"
                         type="number"
                         value={materialForm.costPerUnit}
-                        onChange={(e) => setMaterialForm(prev => ({ ...prev, costPerUnit: e.target.value }))}
+                        onChange={(e) => handleMaterialFormChange('costPerUnit', e.target.value)}
                       />
                     </div>
                     <div className="space-y-2">
@@ -1646,14 +1942,14 @@ export default function SiteManagement() {
                         id="supplier"
                         placeholder="UltraTech"
                         value={materialForm.supplier}
-                        onChange={(e) => setMaterialForm(prev => ({ ...prev, supplier: e.target.value }))}
+                        onChange={(e) => handleMaterialFormChange('supplier', e.target.value)}
                       />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="purchase-date">Purchase Date</Label>
                       <DatePicker
                         value={materialForm.purchaseDate ? new Date(materialForm.purchaseDate) : undefined}
-                        onChange={(date) => setMaterialForm(prev => ({ ...prev, purchaseDate: date?.toISOString().split('T')[0] || '' }))}
+                        onChange={(date) => handleMaterialFormChange('purchaseDate', date?.toISOString().split('T')[0] || '')}
                         placeholder="Select purchase date"
                       />
                     </div>
@@ -1771,12 +2067,12 @@ export default function SiteManagement() {
                           id="vehicle-name"
                           placeholder="CAT 320D Excavator"
                           value={vehicleForm.name}
-                          onChange={(e) => setVehicleForm(prev => ({ ...prev, name: e.target.value }))}
+                          onChange={(e) => handleVehicleFormChange('name', e.target.value)}
                         />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="vehicle-type">Type</Label>
-                        <Select value={vehicleForm.type} onValueChange={(value) => setVehicleForm(prev => ({ ...prev, type: value }))}>
+                        <Select value={vehicleForm.type} onValueChange={(value) => handleVehicleFormChange('type', value)}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select type" />
                           </SelectTrigger>
@@ -1795,7 +2091,7 @@ export default function SiteManagement() {
                           id="registration-number"
                           placeholder="MH-12-AB-1234"
                           value={vehicleForm.registrationNumber}
-                          onChange={(e) => setVehicleForm(prev => ({ ...prev, registrationNumber: e.target.value }))}
+                          onChange={(e) => handleVehicleFormChange('registrationNumber', e.target.value)}
                         />
                       </div>
                       <div className="space-y-2">
@@ -1804,7 +2100,7 @@ export default function SiteManagement() {
                           id="operator"
                           placeholder="Ravi Kumar"
                           value={vehicleForm.operator}
-                          onChange={(e) => setVehicleForm(prev => ({ ...prev, operator: e.target.value }))}
+                          onChange={(e) => handleVehicleFormChange('operator', e.target.value)}
                         />
                       </div>
                       <div className="space-y-2">
@@ -1813,7 +2109,7 @@ export default function SiteManagement() {
                           id="rental-cost"
                           type="number"
                           value={vehicleForm.rentalCostPerDay}
-                          onChange={(e) => setVehicleForm(prev => ({ ...prev, rentalCostPerDay: e.target.value }))}
+                          onChange={(e) => handleVehicleFormChange('rentalCostPerDay', e.target.value)}
                         />
                       </div>
                     </div>
@@ -1824,14 +2120,14 @@ export default function SiteManagement() {
                           id="fuel-cost"
                           type="number"
                           value={vehicleForm.fuelCostPerDay}
-                          onChange={(e) => setVehicleForm(prev => ({ ...prev, fuelCostPerDay: e.target.value }))}
+                          onChange={(e) => handleVehicleFormChange('fuelCostPerDay', e.target.value)}
                         />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="start-date">Start Date</Label>
                         <DatePicker
                           value={vehicleForm.startDate ? new Date(vehicleForm.startDate) : undefined}
-                          onChange={(date) => setVehicleForm(prev => ({ ...prev, startDate: date?.toISOString().split('T')[0] || '' }))}
+                          onChange={(date) => handleVehicleFormChange('startDate', date?.toISOString().split('T')[0] || '')}
                           placeholder="Select start date"
                         />
                       </div>
@@ -1839,7 +2135,7 @@ export default function SiteManagement() {
                         <Label htmlFor="end-date">End Date</Label>
                         <DatePicker
                           value={vehicleForm.endDate ? new Date(vehicleForm.endDate) : undefined}
-                          onChange={(date) => setVehicleForm(prev => ({ ...prev, endDate: date?.toISOString().split('T')[0] || '' }))}
+                          onChange={(date) => handleVehicleFormChange('endDate', date?.toISOString().split('T')[0] || '')}
                           placeholder="Select end date"
                         />
                       </div>
@@ -1849,7 +2145,7 @@ export default function SiteManagement() {
                           id="vendor"
                           placeholder="Heavy Equipment Rentals"
                           value={vehicleForm.vendor}
-                          onChange={(e) => setVehicleForm(prev => ({ ...prev, vendor: e.target.value }))}
+                          onChange={(e) => handleVehicleFormChange('vendor', e.target.value)}
                         />
                       </div>
                       <div className="space-y-2">
@@ -1978,7 +2274,7 @@ export default function SiteManagement() {
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="expense-category">Category</Label>
-                      <Select value={expenseForm.category} onValueChange={(value) => setExpenseForm(prev => ({ ...prev, category: value }))}>
+                      <Select value={expenseForm.category} onValueChange={(value) => handleExpenseFormChange('category', value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
@@ -1997,7 +2293,7 @@ export default function SiteManagement() {
                         id="expense-amount"
                         type="number"
                         value={expenseForm.amount}
-                        onChange={(e) => setExpenseForm(prev => ({ ...prev, amount: e.target.value }))}
+                        onChange={(e) => handleExpenseFormChange('amount', e.target.value)}
                       />
                     </div>
                     <div className="space-y-2">
@@ -2006,7 +2302,7 @@ export default function SiteManagement() {
                         id="expense-description"
                         placeholder="Mason work - Week 3"
                         value={expenseForm.description}
-                        onChange={(e) => setExpenseForm(prev => ({ ...prev, description: e.target.value }))}
+                        onChange={(e) => handleExpenseFormChange('description', e.target.value)}
                         rows={3}
                       />
                     </div>
@@ -2014,7 +2310,7 @@ export default function SiteManagement() {
                       <Label htmlFor="expense-date">Date</Label>
                       <DatePicker
                         value={expenseForm.date ? new Date(expenseForm.date) : undefined}
-                        onChange={(date) => setExpenseForm(prev => ({ ...prev, date: date?.toISOString().split('T')[0] || '' }))}
+                        onChange={(date) => handleExpenseFormChange('date', date?.toISOString().split('T')[0] || '')}
                         placeholder="Select expense date"
                       />
                     </div>
@@ -2024,7 +2320,7 @@ export default function SiteManagement() {
                         id="expense-vendor"
                         placeholder="Local Contractors"
                         value={expenseForm.vendor}
-                        onChange={(e) => setExpenseForm(prev => ({ ...prev, vendor: e.target.value }))}
+                        onChange={(e) => handleExpenseFormChange('vendor', e.target.value)}
                       />
                     </div>
                     <div className="space-y-2">
@@ -2033,7 +2329,7 @@ export default function SiteManagement() {
                         id="receipt-number"
                         placeholder="RCT001"
                         value={expenseForm.receiptNumber}
-                        onChange={(e) => setExpenseForm(prev => ({ ...prev, receiptNumber: e.target.value }))}
+                        onChange={(e) => handleExpenseFormChange('receiptNumber', e.target.value)}
                       />
                     </div>
                   </div>
@@ -2134,7 +2430,7 @@ export default function SiteManagement() {
                         id="labour-name"
                         placeholder="Ramesh Patil"
                         value={labourForm.name}
-                        onChange={(e) => setLabourForm(prev => ({ ...prev, name: e.target.value }))}
+                        onChange={(e) => handleLabourFormChange('name', e.target.value)}
                       />
                     </div>
                     <div className="space-y-2">
@@ -2143,7 +2439,7 @@ export default function SiteManagement() {
                         id="labour-age"
                         type="number"
                         value={labourForm.age}
-                        onChange={(e) => setLabourForm(prev => ({ ...prev, age: e.target.value }))}
+                        onChange={(e) => handleLabourFormChange('age', e.target.value)}
                       />
                     </div>
                     <div className="space-y-2">
@@ -2152,7 +2448,7 @@ export default function SiteManagement() {
                         id="labour-contact"
                         placeholder="+91 98765 43210"
                         value={labourForm.contact}
-                        onChange={(e) => setLabourForm(prev => ({ ...prev, contact: e.target.value }))}
+                        onChange={(e) => handleLabourFormChange('contact', e.target.value)}
                       />
                     </div>
                     <div className="space-y-2">
@@ -2161,7 +2457,7 @@ export default function SiteManagement() {
                         id="daily-wage"
                         type="number"
                         value={labourForm.dailyWage}
-                        onChange={(e) => setLabourForm(prev => ({ ...prev, dailyWage: e.target.value }))}
+                        onChange={(e) => handleLabourFormChange('dailyWage', e.target.value)}
                       />
                     </div>
                     <div className="space-y-2">
@@ -2170,12 +2466,12 @@ export default function SiteManagement() {
                         id="hourly-rate"
                         type="number"
                         value={labourForm.hourlyRate}
-                        onChange={(e) => setLabourForm(prev => ({ ...prev, hourlyRate: e.target.value }))}
+                        onChange={(e) => handleLabourFormChange('hourlyRate', e.target.value)}
                       />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="skill-category">Skill Category</Label>
-                      <Select value={labourForm.skillCategory} onValueChange={(value) => setLabourForm(prev => ({ ...prev, skillCategory: value }))}>
+                      <Select value={labourForm.skillCategory} onValueChange={(value) => handleLabourFormChange('skillCategory', value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select skill category" />
                         </SelectTrigger>
@@ -2192,7 +2488,7 @@ export default function SiteManagement() {
                       <Label htmlFor="join-date">Join Date</Label>
                       <DatePicker
                         value={labourForm.joinDate ? new Date(labourForm.joinDate) : undefined}
-                        onChange={(date) => setLabourForm(prev => ({ ...prev, joinDate: date?.toISOString().split('T')[0] || '' }))}
+                        onChange={(date) => handleLabourFormChange('joinDate', date?.toISOString().split('T')[0] || '')}
                         placeholder="Select join date"
                       />
                     </div>
