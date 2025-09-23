@@ -34,107 +34,24 @@ import {
 } from 'lucide-react';
 
 // Sample data for comprehensive analytics
-const kpiData = [
-  {
-    title: 'Total Revenue',
-    value: '₹45.2Cr',
-    change: '+12.5%',
-    trend: 'up',
-    icon: DollarSign,
-    color: 'text-green-600',
-    bgColor: 'bg-gradient-to-br from-green-50 to-green-100',
-    borderColor: 'border-green-200'
-  },
-  {
-    title: 'Total Expenses',
-    value: '₹20.9Cr',
-    change: '+8.3%',
-    trend: 'up',
-    icon: TrendingDown,
-    color: 'text-red-600',
-    bgColor: 'bg-gradient-to-br from-red-50 to-red-100',
-    borderColor: 'border-red-200'
-  },
-  {
-    title: 'Active Projects',
-    value: '12',
-    change: '+2',
-    trend: 'up',
-    icon: Building2,
-    color: 'text-blue-600',
-    bgColor: 'bg-gradient-to-br from-blue-50 to-blue-100',
-    borderColor: 'border-blue-200'
-  },
-  {
-    title: 'Fleet Utilization',
-    value: '78%',
-    change: '+5.2%',
-    trend: 'up',
-    icon: Truck,
-    color: 'text-purple-600',
-    bgColor: 'bg-gradient-to-br from-purple-50 to-purple-100',
-    borderColor: 'border-purple-200'
-  },
-  {
-    title: 'Material Efficiency',
-    value: '92%',
-    change: '+3.1%',
-    trend: 'up',
-    icon: Target,
-    color: 'text-orange-600',
-    bgColor: 'bg-gradient-to-br from-orange-50 to-orange-100',
-    borderColor: 'border-orange-200'
-  },
-  {
-    title: 'Safety Score',
-    value: '98%',
-    change: '+1.2%',
-    trend: 'up',
-    icon: Shield,
-    color: 'text-emerald-600',
-    bgColor: 'bg-gradient-to-br from-emerald-50 to-emerald-100',
-    borderColor: 'border-emerald-200'
-  }
-];
+// Dummy kpiData array removed - now using real data from API
+// KPI data will be fetched from API
+const kpiData: any[] = [];
 
-const projectPerformance = [
-  { name: 'Residential Complex A', progress: 85, status: 'On Track', budget: '₹12.5Cr', spent: '₹10.2Cr', timeline: 'Q2 2024' },
-  { name: 'Commercial Tower B', progress: 92, status: 'Ahead', budget: '₹18.0Cr', spent: '₹16.5Cr', timeline: 'Q1 2024' },
-  { name: 'Infrastructure Project C', progress: 45, status: 'At Risk', budget: '₹25.0Cr', spent: '₹11.8Cr', timeline: 'Q3 2024' },
-  { name: 'Industrial Plant D', progress: 78, status: 'On Track', budget: '₹15.5Cr', spent: '₹12.1Cr', timeline: 'Q2 2024' },
-  { name: 'Hospital Complex E', progress: 23, status: 'Delayed', budget: '₹22.0Cr', spent: '₹5.1Cr', timeline: 'Q4 2024' }
-];
+// Project performance data will be fetched from API
+const projectPerformance: any[] = [];
 
-const expenseCategories = [
-  { name: 'Labor', value: 45, amount: '₹9.4Cr', color: '#3B82F6', trend: '+5.2%' },
-  { name: 'Materials', value: 30, amount: '₹6.3Cr', color: '#10B981', trend: '+2.1%' },
-  { name: 'Equipment', value: 15, amount: '₹3.1Cr', color: '#F59E0B', trend: '-1.8%' },
-  { name: 'Transport', value: 7, amount: '₹1.5Cr', color: '#8B5CF6', trend: '+3.4%' },
-  { name: 'Other', value: 3, amount: '₹0.6Cr', color: '#EF4444', trend: '+0.9%' }
-];
+// Expense categories data will be fetched from API
+const expenseCategories: any[] = [];
 
-const monthlyTrends = [
-  { month: 'Jan', revenue: 4200000, expenses: 1800000, profit: 2400000 },
-  { month: 'Feb', revenue: 4800000, expenses: 2100000, profit: 2700000 },
-  { month: 'Mar', revenue: 5200000, expenses: 2300000, profit: 2900000 },
-  { month: 'Apr', revenue: 5800000, expenses: 2500000, profit: 3300000 },
-  { month: 'May', revenue: 6200000, expenses: 2700000, profit: 3500000 },
-  { month: 'Jun', revenue: 6800000, expenses: 2900000, profit: 3900000 }
-];
+// Monthly trends data will be fetched from API
+const monthlyTrends: any[] = [];
 
-const sitePerformance = [
-  { name: 'Site A - Mumbai', efficiency: 94, safety: 98, budget: 87, timeline: 92 },
-  { name: 'Site B - Delhi', efficiency: 89, safety: 95, budget: 91, timeline: 88 },
-  { name: 'Site C - Bangalore', efficiency: 92, safety: 97, budget: 85, timeline: 94 },
-  { name: 'Site D - Chennai', efficiency: 87, safety: 96, budget: 89, timeline: 86 }
-];
+// Site performance data will be fetched from API
+const sitePerformance: any[] = [];
 
-const alerts = [
-  { type: 'warning', message: 'Material shortage detected at Site A', time: '2 hours ago', priority: 'High' },
-  { type: 'info', message: 'Equipment maintenance due for Excavator #3', time: '4 hours ago', priority: 'Medium' },
-  { type: 'success', message: 'Project B completed ahead of schedule', time: '1 day ago', priority: 'Low' },
-  { type: 'error', message: 'Budget overrun risk at Site C', time: '2 days ago', priority: 'High' }
-];
+// Alerts data will be fetched from API
+const alerts: any[] = [];
 
 export default function Analytics() {
   const [selectedPeriod, setSelectedPeriod] = useState('6months');

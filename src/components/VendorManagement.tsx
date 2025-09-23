@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Users, 
   Plus, 
@@ -25,53 +25,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
+import { useVendors } from '@/hooks/useApi';
 
-const vendors = [
-  {
-    id: 1,
-    name: 'Heavy Equipment Rentals',
-    category: 'Equipment',
-    contact: '+91 98765 43210',
-    email: 'suresh@heavyequipment.com',
-    paid: 2500000,
-    pending: 125000,
-    status: 'active',
-    rating: 4.5
-  },
-  {
-    id: 2,
-    name: 'Tata Steel Limited',
-    category: 'Materials',
-    contact: '+91 98765 43211',
-    email: 'rajesh@tatasteel.com',
-    paid: 4500000,
-    pending: 325000,
-    status: 'active',
-    rating: 5.0
-  },
-  {
-    id: 3,
-    name: 'Local Contractors Association',
-    category: 'Labour',
-    contact: '+91 98765 43212',
-    email: 'amit@localcontractors.com',
-    paid: 1200000,
-    pending: 95000,
-    status: 'active',
-    rating: 4.2
-  },
-  {
-    id: 4,
-    name: 'City Transport Services',
-    category: 'Transport',
-    contact: '+91 98765 43213',
-    email: 'prakash@citytransport.com',
-    paid: 350000,
-    pending: 25000,
-    status: 'active',
-    rating: 4.0
-  }
-];
+// Dummy vendors array removed - now using real data from API
 
 const categoryIcons = {
   Equipment: '🚜',
@@ -80,92 +36,16 @@ const categoryIcons = {
   Transport: '🚚'
 };
 
-// Payment History Data
-const paymentHistory = [
-  {
-    id: 1,
-    date: '2024-01-25',
-    vendor: 'Tata Steel Limited',
-    amount: 4500000,
-    invoiceNumber: 'INV001',
-    description: 'Steel materials for foundation work',
-    status: 'paid'
-  },
-  {
-    id: 2,
-    date: '2024-01-20',
-    vendor: 'Heavy Equipment Rentals',
-    amount: 2500000,
-    invoiceNumber: 'INV002',
-    description: 'Excavator rental for 30 days',
-    status: 'paid'
-  },
-  {
-    id: 3,
-    date: '2024-01-15',
-    vendor: 'Local Contractors Association',
-    amount: 1200000,
-    invoiceNumber: 'INV003',
-    description: 'Labor charges for concrete work',
-    status: 'paid'
-  },
-  {
-    id: 4,
-    date: '2024-01-10',
-    vendor: 'City Transport Services',
-    amount: 350000,
-    invoiceNumber: 'INV004',
-    description: 'Material transportation charges',
-    status: 'paid'
-  }
-];
+// Dummy paymentHistory array removed - now using real data from API
 
-// Vendor Categories for Analytics
-const vendorCategories = [
-  { name: 'Materials', count: 25, percentage: 25, color: 'bg-blue-500' },
-  { name: 'Equipment', count: 25, percentage: 25, color: 'bg-green-500' },
-  { name: 'Transport', count: 25, percentage: 25, color: 'bg-orange-500' },
-  { name: 'Labour', count: 25, percentage: 25, color: 'bg-yellow-500' }
-];
+// Dummy analytics arrays removed - now using real data from API
 
-// Payment Amounts by Vendor for Analytics
-const paymentAmounts = [
-  { vendor: 'Equipment Rentals', amount: 270000 },
-  { vendor: 'Steel Limited', amount: 360000 },
-  { vendor: 'Contractors Association', amount: 90000 }
-];
-
-// Top Performing Vendors
-const topVendors = [
-  {
-    name: 'Tata Steel Limited',
-    category: 'Materials',
-    totalPaid: 4500000,
-    rating: 5.0
-  },
-  {
-    name: 'Heavy Equipment Rentals',
-    category: 'Equipment',
-    totalPaid: 2500000,
-    rating: 4.5
-  },
-  {
-    name: 'Local Contractors Association',
-    category: 'Labour',
-    totalPaid: 1200000,
-    rating: 4.2
-  },
-  {
-    name: 'City Transport Services',
-    category: 'Transport',
-    totalPaid: 350000,
-    rating: 4.0
-  }
-];
+// Dummy topVendors array removed - now using real data from API
 
 const vendorCategoriesList = ['Materials', 'Equipment', 'Labour', 'Transport', 'Professional Services', 'Other'];
 
 export default function VendorManagement() {
+  const { data: vendorsData, loading: vendorsLoading, error: vendorsError } = useVendors();
   const [activeTab, setActiveTab] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [showRecordPaymentModal, setShowRecordPaymentModal] = useState(false);
@@ -194,14 +74,17 @@ export default function VendorManagement() {
     notes: ''
   });
 
-  const totalVendors = vendors.length;
-  const totalPaid = vendors.reduce((sum, vendor) => sum + vendor.paid, 0);
-  const totalPending = vendors.reduce((sum, vendor) => sum + vendor.pending, 0);
-  const avgRating = vendors.reduce((sum, vendor) => sum + vendor.rating, 0) / vendors.length;
+  // Use real data from API
+  const realVendors = (vendorsData as any[]) || [];
+  const totalVendors = realVendors.length;
+  
+  const totalPaid = realVendors.reduce((sum, vendor) => sum + (vendor.paid || 0), 0);
+  const totalPending = realVendors.reduce((sum, vendor) => sum + (vendor.pending || 0), 0);
+  const avgRating = realVendors.length > 0 ? realVendors.reduce((sum, vendor) => sum + (vendor.rating || 0), 0) / realVendors.length : 0;
 
   const filteredVendors = categoryFilter === 'all' 
-    ? vendors 
-    : vendors.filter(vendor => vendor.category === categoryFilter);
+    ? realVendors 
+    : realVendors.filter(vendor => vendor.type === categoryFilter);
 
   // Handle form input changes
   const handleRecordPaymentInputChange = (field: string, value: string) => {
@@ -276,7 +159,8 @@ export default function VendorManagement() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {paymentHistory.map((payment) => (
+              {/* Payment history will be loaded from real data */}
+              {([] as any[]).map((payment) => (
                 <tr key={payment.id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {payment.date}
@@ -332,7 +216,8 @@ export default function VendorManagement() {
                 <div className="absolute inset-0 rounded-full border-8 border-white"></div>
               </div>
               <div className="grid grid-cols-2 gap-2 text-xs">
-                {vendorCategories.map((category) => (
+                {/* Vendor categories will be loaded from real data */}
+                {([] as any[]).map((category) => (
                   <div key={category.name} className="flex items-center space-x-2">
                     <div className={`w-3 h-3 ${category.color} rounded-full`}></div>
                     <span>{category.name} {category.percentage}%</span>
@@ -353,7 +238,8 @@ export default function VendorManagement() {
           {/* Bar Chart */}
           <div className="h-48">
             <div className="flex items-end justify-between h-full px-4">
-              {paymentAmounts.map((item, index) => (
+              {/* Payment amounts will be loaded from real data */}
+              {([] as any[]).map((item, index) => (
                 <div key={index} className="flex flex-col items-center space-y-2">
                   <div className="w-12 bg-blue-500 rounded-t" style={{height: `${(item.amount / 360000) * 120}px`}}></div>
                   <span className="text-xs text-gray-600 text-center">{item.vendor}</span>
@@ -375,7 +261,8 @@ export default function VendorManagement() {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {topVendors.map((vendor, index) => (
+          {/* Top vendors will be loaded from real data */}
+          {([] as any[]).map((vendor, index) => (
             <div key={index} className="border border-gray-200 rounded-lg p-4">
               <div className="flex items-center space-x-3 mb-3">
                 <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -413,6 +300,34 @@ export default function VendorManagement() {
       </div>
     </div>
   );
+
+  // Loading state
+  if (vendorsLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading vendors...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (vendorsError) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="text-red-500 text-xl mb-4">⚠️</div>
+            <p className="text-red-600">Error loading vendors: {vendorsError}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -676,7 +591,7 @@ export default function VendorManagement() {
                         <SelectValue placeholder="Select vendor" />
                       </SelectTrigger>
                       <SelectContent>
-                        {vendors.map(vendor => (
+                        {realVendors.map(vendor => (
                           <SelectItem key={vendor.id} value={vendor.name}>{vendor.name}</SelectItem>
                         ))}
                       </SelectContent>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   DollarSign, 
   Plus, 
@@ -26,84 +26,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
+import { useExpenses, useSites } from '@/hooks/useApi';
 
-// Sample expense data matching your design
-const expenses = [
-  {
-    id: 1,
-    title: 'Mason Work',
-    description: 'Brickwork for ground floor',
-    category: 'Labour',
-    amount: 125000,
-    date: '28/01/2024',
-    vendor: 'Local Contractors',
-    site: 'Residential Complex A',
-    status: 'paid',
-    receipt: 'RCT001'
-  },
-  {
-    id: 2,
-    title: 'Excavator Rental',
-    description: 'Excavator rental for foundation',
-    category: 'Equipment',
-    amount: 85000,
-    date: '30/01/2024',
-    vendor: 'Heavy Equipment Rentals',
-    site: 'Residential Complex A',
-    status: 'paid',
-    receipt: 'RCT002'
-  },
-  {
-    id: 3,
-    title: 'Steel',
-    description: 'Steel bars procurement',
-    category: 'Materials',
-    amount: 325000,
-    date: '10/02/2024',
-    vendor: 'Tata Steel',
-    site: 'Commercial Plaza B',
-    status: 'pending',
-    receipt: 'RCT003'
-  },
-  {
-    id: 4,
-    title: 'Electrical Work',
-    description: 'Electrical wiring installation',
-    category: 'Labour',
-    amount: 95000,
-    date: '15/02/2024',
-    vendor: 'Spark Electricals',
-    site: 'Commercial Plaza B',
-    status: 'paid',
-    receipt: 'RCT004'
-  },
-  {
-    id: 5,
-    title: 'Material Transport',
-    description: 'Cement and steel transport',
-    category: 'Transport',
-    amount: 25000,
-    date: '12/02/2024',
-    vendor: 'City Transport',
-    site: 'Highway Bridge Project',
-    status: 'paid',
-    receipt: 'RCT005'
-  },
-  {
-    id: 6,
-    title: 'Electricity',
-    description: 'Site electricity charges',
-    category: 'Utilities',
-    amount: 15000,
-    date: '20/02/2024',
-    vendor: 'MSEB',
-    site: 'Residential Complex A',
-    status: 'overdue',
-    receipt: 'RCT006'
-  }
-];
+// Dummy expenses array removed - now using real data from API
 
-const sites = ['Residential Complex A', 'Commercial Plaza B', 'Highway Bridge Project'];
+// Dummy sites array removed - now using real data from API
 
 const statusColors = {
   paid: 'bg-green-100 text-green-800',
@@ -112,15 +39,17 @@ const statusColors = {
 };
 
 const categoryIcons = {
-  Labour: Users,
-  Materials: Package,
-  Equipment: Truck,
-  Transport: Truck,
-  Utilities: Zap,
-  Other: FileText
+  labor: Users,
+  materials: Package,
+  equipment: Truck,
+  fuel: Zap,
+  utilities: Zap,
+  transport: Truck,
+  miscellaneous: FileText
 };
 
 export default function ExpenseManagement() {
+  const { data: expensesData, loading: expensesLoading, error: expensesError } = useExpenses();
   const [activeTab, setActiveTab] = useState('All Expenses');
   const [viewMode, setViewMode] = useState('overall');
   const [selectedSite, setSelectedSite] = useState('All Sites');
@@ -138,14 +67,19 @@ export default function ExpenseManagement() {
     approvedBy: ''
   });
 
+  // Use real data from API
+  const realExpenses = (expensesData as any[]) || [];
+  const sitesData = useSites();
+  const realSites = (sitesData?.data as any[]) || [];
+  
   // Calculate summary data
-  const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
-  const paidExpenses = expenses.filter(e => e.status === 'paid').reduce((sum, expense) => sum + expense.amount, 0);
-  const pendingExpenses = expenses.filter(e => e.status === 'pending').reduce((sum, expense) => sum + expense.amount, 0);
-  const overdueExpenses = expenses.filter(e => e.status === 'overdue').reduce((sum, expense) => sum + expense.amount, 0);
-  const paidCount = expenses.filter(e => e.status === 'paid').length;
-  const pendingCount = expenses.filter(e => e.status === 'pending').length;
-  const overdueCount = expenses.filter(e => e.status === 'overdue').length;
+  const totalExpenses = realExpenses.reduce((sum, expense) => sum + (parseFloat(expense.amount) || 0), 0);
+  const paidExpenses = realExpenses.filter(e => e.status === 'paid').reduce((sum, expense) => sum + (parseFloat(expense.amount) || 0), 0);
+  const pendingExpenses = realExpenses.filter(e => e.status === 'pending').reduce((sum, expense) => sum + (parseFloat(expense.amount) || 0), 0);
+  const overdueExpenses = realExpenses.filter(e => e.status === 'overdue').reduce((sum, expense) => sum + (parseFloat(expense.amount) || 0), 0);
+  const paidCount = realExpenses.filter(e => e.status === 'paid').length;
+  const pendingCount = realExpenses.filter(e => e.status === 'pending').length;
+  const overdueCount = realExpenses.filter(e => e.status === 'overdue').length;
 
   // Handle form input changes
   const handleFormInputChange = (field: string, value: string | Date | undefined) => {
@@ -174,12 +108,26 @@ export default function ExpenseManagement() {
     });
   };
 
+  // Map tab names to database categories
+  const getTabCategory = (tabName: string) => {
+    const categoryMap: { [key: string]: string } = {
+      'Labour': 'labor',
+      'Materials': 'materials', 
+      'Equipment': 'equipment',
+      'Transport': 'transport',
+      'Utilities': 'utilities',
+      'Other': 'miscellaneous'
+    };
+    return categoryMap[tabName] || tabName.toLowerCase();
+  };
+
   // Filter expenses based on active tab
   const getFilteredExpenses = () => {
-    let filtered = expenses;
+    let filtered = realExpenses;
     
     if (activeTab !== 'All Expenses') {
-      filtered = expenses.filter(expense => expense.category === activeTab);
+      const categoryToFilter = getTabCategory(activeTab);
+      filtered = realExpenses.filter(expense => expense.category === categoryToFilter);
     }
     
     if (viewMode === 'site' && selectedSite !== 'All Sites') {
@@ -197,8 +145,9 @@ export default function ExpenseManagement() {
 
   // Get category-specific data
   const getCategoryData = (category: string) => {
-    const categoryExpenses = expenses.filter(expense => expense.category === category);
-    const total = categoryExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+    const categoryToFilter = getTabCategory(category);
+    const categoryExpenses = realExpenses.filter(expense => expense.category === categoryToFilter);
+    const total = categoryExpenses.reduce((sum, expense) => sum + (parseFloat(expense.amount) || 0), 0);
     return {
       expenses: categoryExpenses,
       total,
@@ -246,8 +195,8 @@ export default function ExpenseManagement() {
           {/* Site-Based View - Grouped by Site */}
           <div className="space-y-6">
             {Object.entries(expensesBySite).map(([siteName, siteExpenses]) => {
-              const totalValue = siteExpenses.reduce((sum, expense) => sum + expense.amount, 0);
-              const expenseCount = siteExpenses.length;
+              const totalValue = (siteExpenses as any[]).reduce((sum, expense) => sum + expense.amount, 0);
+              const expenseCount = (siteExpenses as any[]).length;
 
               return (
                 <div key={siteName} className="bg-white border border-gray-200 rounded-lg p-6">
@@ -278,12 +227,12 @@ export default function ExpenseManagement() {
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {siteExpenses.map((expense) => {
-                          const IconComponent = categoryIcons[expense.category as keyof typeof categoryIcons];
+                        {(siteExpenses as any[]).map((expense) => {
+                          const IconComponent = categoryIcons[expense.category as keyof typeof categoryIcons] || FileText;
                           return (
                             <tr key={expense.id}>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm font-medium text-gray-900">{expense.title}</div>
+                                <div className="text-sm font-medium text-gray-900">{expense.description}</div>
                                 <div className="text-sm text-gray-500">{expense.description}</div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
@@ -350,8 +299,8 @@ export default function ExpenseManagement() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="All Sites">All Sites</SelectItem>
-                  {sites.map(site => (
-                    <SelectItem key={site} value={site}>{site}</SelectItem>
+                  {realSites.map(site => (
+                    <SelectItem key={site.id} value={site.name}>{site.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -390,11 +339,11 @@ export default function ExpenseManagement() {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredExpenses.map((expense) => {
-                const IconComponent = categoryIcons[expense.category as keyof typeof categoryIcons];
+                const IconComponent = categoryIcons[expense.category as keyof typeof categoryIcons] || FileText;
                 return (
                   <tr key={expense.id}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{expense.title}</div>
+                      <div className="text-sm font-medium text-gray-900">{expense.description}</div>
                       <div className="text-sm text-gray-500">{expense.description}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -435,7 +384,7 @@ export default function ExpenseManagement() {
 
   const renderCategoryView = (category: string) => {
     const categoryData = getCategoryData(category);
-    const IconComponent = categoryIcons[category as keyof typeof categoryIcons];
+    const IconComponent = categoryIcons[category as keyof typeof categoryIcons] || FileText;
 
     return (
       <div className="space-y-6">
@@ -459,7 +408,7 @@ export default function ExpenseManagement() {
               </div>
               
               <div className="mb-4">
-                <h4 className="text-lg font-semibold text-gray-900 mb-1">{expense.title}</h4>
+                <h4 className="text-lg font-semibold text-gray-900 mb-1">{expense.description}</h4>
                 <p className="text-sm text-gray-600">{expense.description}</p>
               </div>
 
@@ -557,23 +506,18 @@ export default function ExpenseManagement() {
           </div>
           
           <div className="space-y-3">
-            {[
-              { name: 'Materials', icon: Package, amount: 325000, items: 1 },
-              { name: 'Labour', icon: Users, amount: 220000, items: 2 },
-              { name: 'Equipment', icon: Truck, amount: 85000, items: 1 },
-              { name: 'Transport', icon: Truck, amount: 25000, items: 1 },
-              { name: 'Utilities', icon: Zap, amount: 15000, items: 1 }
-            ].map((category, index) => {
-              const IconComponent = category.icon;
+            {['Labour', 'Materials', 'Equipment', 'Transport', 'Utilities', 'Other'].map((categoryName, index) => {
+              const categoryData = getCategoryData(categoryName);
+              const IconComponent = categoryIcons[getTabCategory(categoryName) as keyof typeof categoryIcons] || FileText;
               return (
                 <div key={index} className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <IconComponent className="h-4 w-4 text-gray-600" />
-                    <span className="text-sm text-gray-600">{category.name}</span>
+                    <span className="text-sm text-gray-600">{categoryName}</span>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm font-medium text-gray-900">₹{(category.amount / 100000).toFixed(1)}L</div>
-                    <div className="text-xs text-gray-500">{category.items} item{category.items > 1 ? 's' : ''}</div>
+                    <div className="text-sm font-medium text-gray-900">₹{(categoryData.total / 100000).toFixed(1)}L</div>
+                    <div className="text-xs text-gray-500">{categoryData.count} item{categoryData.count > 1 ? 's' : ''}</div>
                   </div>
                 </div>
               );
@@ -590,16 +534,16 @@ export default function ExpenseManagement() {
         </div>
         
         <div className="space-y-3">
-          {expenses
+          {realExpenses
             .sort((a, b) => new Date(b.date.split('/').reverse().join('-')).getTime() - new Date(a.date.split('/').reverse().join('-')).getTime())
             .slice(0, 5)
             .map((expense) => {
-              const IconComponent = categoryIcons[expense.category as keyof typeof categoryIcons];
+              const IconComponent = categoryIcons[expense.category as keyof typeof categoryIcons] || FileText;
               return (
                 <div key={expense.id} className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <IconComponent className="h-4 w-4 text-gray-600" />
-                    <span className="text-sm text-gray-600">{expense.title}</span>
+                    <span className="text-sm text-gray-600">{expense.description}</span>
                   </div>
                   <div className="text-right">
                     <div className="text-sm font-medium text-gray-900">₹{expense.amount.toLocaleString()}</div>
@@ -630,6 +574,34 @@ export default function ExpenseManagement() {
         return renderAllExpenses();
     }
   };
+
+  // Loading state
+  if (expensesLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading expenses...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (expensesError) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="text-red-500 text-xl mb-4">⚠️</div>
+            <p className="text-red-600">Error loading expenses: {expensesError}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -664,7 +636,7 @@ export default function ExpenseManagement() {
             <div>
               <p className="text-sm text-gray-600">Total Expenses</p>
               <p className="text-2xl font-bold text-gray-900">₹{(totalExpenses / 100000).toFixed(1)}L</p>
-              <p className="text-xs text-gray-500">{expenses.length} transactions</p>
+              <p className="text-xs text-gray-500">{realExpenses?.length || 0} transactions</p>
             </div>
           </div>
         </div>
@@ -846,8 +818,8 @@ export default function ExpenseManagement() {
                         <SelectValue placeholder="Select site" />
                       </SelectTrigger>
                       <SelectContent>
-                        {sites.map(site => (
-                          <SelectItem key={site} value={site}>{site}</SelectItem>
+                        {realSites.map(site => (
+                          <SelectItem key={site.id} value={site.name}>{site.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>

@@ -14,6 +14,7 @@ import {
   Building2,
   Calendar
 } from 'lucide-react';
+import { useMaterials } from '@/hooks/useApi';
 
 interface Site {
   id: number;
@@ -34,56 +35,7 @@ interface SiteMaterialsProps {
   site: Site;
 }
 
-const siteMaterials = [
-  {
-    id: 1,
-    name: 'Portland Cement',
-    category: 'cement',
-    quantity: 150,
-    unit: 'bags',
-    costPerUnit: 350,
-    supplier: 'ACC Limited',
-    lastUpdated: '2024-01-20',
-    minThreshold: 50,
-    status: 'low'
-  },
-  {
-    id: 2,
-    name: 'Steel Rods (12mm)',
-    category: 'steel',
-    quantity: 2500,
-    unit: 'kg',
-    costPerUnit: 65,
-    supplier: 'Tata Steel',
-    lastUpdated: '2024-01-18',
-    minThreshold: 1000,
-    status: 'good'
-  },
-  {
-    id: 3,
-    name: 'Red Bricks',
-    category: 'bricks',
-    quantity: 5000,
-    unit: 'pieces',
-    costPerUnit: 8,
-    supplier: 'Local Supplier',
-    lastUpdated: '2024-01-19',
-    minThreshold: 2000,
-    status: 'good'
-  },
-  {
-    id: 4,
-    name: 'Fine Sand',
-    category: 'sand',
-    quantity: 15,
-    unit: 'cubic meters',
-    costPerUnit: 1200,
-    supplier: 'River Sand Co.',
-    lastUpdated: '2024-01-17',
-    minThreshold: 30,
-    status: 'critical'
-  }
-];
+// Materials data will be fetched from API
 
 const statusColors = {
   good: 'bg-green-100 text-green-800',
@@ -105,16 +57,45 @@ export default function SiteMaterials({ site }: SiteMaterialsProps) {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
 
+  // Fetch materials data from API
+  const materialsData = useMaterials();
+  const realMaterials = (materialsData?.data as any[]) || [];
+  
+  // Handle loading and error states
+  if (materialsData?.loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading materials...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (materialsData?.error) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <p className="text-red-600">Error loading materials: {materialsData.error}</p>
+        </div>
+      </div>
+    );
+  }
+  
+  // Since materials don't have site_id assigned, show all materials for now
+  // TODO: In the future, materials should be assigned to specific sites
+  const siteMaterials = realMaterials;
+
   const filteredMaterials = siteMaterials.filter(material => {
-    const matchesSearch = material.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         material.supplier.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = material.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === 'all' || material.category === categoryFilter;
-    const matchesStatus = statusFilter === 'all' || material.status === statusFilter;
-    return matchesSearch && matchesCategory && matchesStatus;
+    return matchesSearch && matchesCategory;
   });
 
-  const totalValue = siteMaterials.reduce((sum, material) => sum + (material.quantity * material.costPerUnit), 0);
-  const lowStockCount = siteMaterials.filter(m => m.status === 'low' || m.status === 'critical').length;
+  const totalValue = siteMaterials.reduce((sum, material) => sum + (material.quantity * material.cost_per_unit), 0);
+  const lowStockCount = siteMaterials.filter(m => m.quantity < 10).length; // Simple low stock logic
 
   return (
     <div className="space-y-6">
@@ -122,7 +103,7 @@ export default function SiteMaterials({ site }: SiteMaterialsProps) {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">Material Management - {site.name}</h3>
-          <p className="text-sm text-gray-600">Track inventory and manage materials for this site</p>
+          <p className="text-sm text-gray-600">Track inventory and manage materials (showing all available materials)</p>
         </div>
         <button className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
           <Plus className="h-4 w-4" />
@@ -215,9 +196,20 @@ export default function SiteMaterials({ site }: SiteMaterialsProps) {
       </div>
 
       {/* Materials Table */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+      {filteredMaterials.length === 0 ? (
+        <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+          <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No Materials Found</h3>
+          <p className="text-gray-500 mb-6">No materials are currently assigned to this site.</p>
+          <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2 mx-auto">
+            <Plus className="h-4 w-4" />
+            <span>Add Material</span>
+          </button>
+        </div>
+      ) : (
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -256,7 +248,7 @@ export default function SiteMaterials({ site }: SiteMaterialsProps) {
                       </span>
                       <div>
                         <div className="text-sm font-medium text-gray-900">{material.name}</div>
-                        <div className="text-sm text-gray-500">{material.supplier}</div>
+                        <div className="text-sm text-gray-500">Supplier: Not linked</div>
                       </div>
                     </div>
                   </td>
@@ -270,21 +262,21 @@ export default function SiteMaterials({ site }: SiteMaterialsProps) {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
-                      {material.minThreshold} {material.unit}
+                      N/A
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">₹{material.costPerUnit}</div>
+                    <div className="text-sm text-gray-900">₹{material.cost_per_unit}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[material.status as keyof typeof statusColors]}`}>
-                      {material.status}
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${material.quantity < 10 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+                      {material.quantity < 10 ? 'Low Stock' : 'Available'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <Calendar className="h-4 w-4 text-gray-400 mr-2" />
-                      <span className="text-sm text-gray-900">{material.lastUpdated}</span>
+                      <span className="text-sm text-gray-900">Recently updated</span>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -299,6 +291,7 @@ export default function SiteMaterials({ site }: SiteMaterialsProps) {
           </table>
         </div>
       </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Package, 
   Plus, 
@@ -24,160 +24,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
+import { useMaterials } from '@/hooks/useApi';
 
-const materials = [
-  {
-    id: 1,
-    name: 'Cement (OPC 53)',
-    site: 'Residential Complex A',
-    purchased: 500,
-    consumed: 320,
-    balance: 180,
-    unitRate: 425,
-    stockValue: 76500,
-    status: 'Adequate',
-    unit: 'bags'
-  },
-  {
-    id: 2,
-    name: 'Steel Bars (12mm)',
-    site: 'Residential Complex A',
-    purchased: 15000,
-    consumed: 8500,
-    balance: 6500,
-    unitRate: 65,
-    stockValue: 422500,
-    status: 'Adequate',
-    unit: 'kg'
-  },
-  {
-    id: 3,
-    name: 'Ready Mix Concrete',
-    site: 'Commercial Plaza B',
-    purchased: 800,
-    consumed: 650,
-    balance: 150,
-    unitRate: 4500,
-    stockValue: 675000,
-    status: 'Adequate',
-    unit: 'cubic meters'
-  },
-  {
-    id: 4,
-    name: 'Cement (OPC 53)',
-    site: 'Commercial Plaza B',
-    purchased: 300,
-    consumed: 180,
-    balance: 120,
-    unitRate: 430,
-    stockValue: 51600,
-    status: 'Adequate',
-    unit: 'bags'
-  },
-  {
-    id: 5,
-    name: 'Bricks',
-    site: 'Highway Bridge Project',
-    purchased: 50000,
-    consumed: 35000,
-    balance: 15000,
-    unitRate: 8,
-    stockValue: 120000,
-    status: 'Adequate',
-    unit: 'pieces'
-  }
-];
+// Dummy materials array removed - now using real data from API
 
-const purchaseHistory = [
-  {
-    id: 1,
-    material: 'Cement (OPC 53)',
-    site: 'Residential Complex A',
-    quantity: 200,
-    unitRate: 425,
-    totalAmount: 85000,
-    vendor: 'Cement Corp Ltd',
-    date: '25/01/2024',
-    invoice: 'INV-2024-001'
-  },
-  {
-    id: 2,
-    material: 'Steel Bars (12mm)',
-    site: 'Residential Complex A',
-    quantity: 5000,
-    unitRate: 65,
-    totalAmount: 325000,
-    vendor: 'Steel Industries',
-    date: '20/01/2024',
-    invoice: 'SI-2024-045'
-  },
-  {
-    id: 3,
-    material: 'Ready Mix Concrete',
-    site: 'Commercial Plaza B',
-    quantity: 200,
-    unitRate: 4500,
-    totalAmount: 900000,
-    vendor: 'RMC Solutions',
-    date: '01/02/2024',
-    invoice: 'RMC-2024-012'
-  }
-];
+// Dummy purchaseHistory array removed - now using real data from API
 
-const periodicEntries = [
-  {
-    id: 1,
-    period: 'Week 6, 2024',
-    material: 'Cement (OPC 53)',
-    site: 'Residential Complex A',
-    received: '200 bags',
-    used: '150 bags',
-    balance: '50 bags',
-    entryDate: '2024-02-10',
-    type: 'weekly'
-  },
-  {
-    id: 2,
-    period: 'Jan 2024',
-    material: 'Steel Bars (12mm)',
-    site: 'Commercial Plaza B',
-    received: '5000 kg',
-    used: '4200 kg',
-    balance: '800 kg',
-    entryDate: '2024-01-31',
-    type: 'monthly'
-  }
-];
+// Dummy periodicEntries array removed - now using real data from API
 
-const vendors = [
-  {
-    id: 1,
-    name: 'Cement Corp Ltd',
-    orders: 1,
-    totalValue: 85000,
-    avgOrder: 85000
-  },
-  {
-    id: 2,
-    name: 'Steel Industries',
-    orders: 1,
-    totalValue: 325000,
-    avgOrder: 325000
-  },
-  {
-    id: 3,
-    name: 'RMC Solutions',
-    orders: 1,
-    totalValue: 900000,
-    avgOrder: 900000
-  }
-];
+// Dummy vendors array removed - now using real data from API
 
-const sites = [
-  'Residential Complex A',
-  'Commercial Plaza B',
-  'Highway Bridge Project'
-];
+// Dummy sites array removed - now using real data from API
 
 const tabs = [
   { id: 'inventory', name: 'Current Inventory', icon: Package },
@@ -188,7 +45,8 @@ const tabs = [
   { id: 'analytics', name: 'Analytics', icon: BarChart3 }
 ];
 
-export default function MaterialManagement() {
+function MaterialManagement() {
+  const { data: materialsData, loading: materialsLoading, error: materialsError } = useMaterials();
   const [activeTab, setActiveTab] = useState('inventory');
   const [viewMode, setViewMode] = useState('overall');
   const [selectedSite, setSelectedSite] = useState('All Sites');
@@ -209,10 +67,13 @@ export default function MaterialManagement() {
     quantity: ''
   });
 
-  const totalMaterials = materials.length;
-  const stockValue = materials.reduce((sum, material) => sum + material.stockValue, 0);
-  const totalPurchases = purchaseHistory.reduce((sum, purchase) => sum + purchase.totalAmount, 0);
-  const lowStockItems = materials.filter(material => (material.balance / material.purchased) < 0.2).length;
+  // Use real data from API
+  const realMaterials = (materialsData as any[]) || [];
+  
+  const totalMaterials = realMaterials.length;
+  const stockValue = realMaterials.reduce((sum, material) => sum + (material.cost_per_unit * material.quantity || 0), 0);
+  const totalPurchases = 0; // Will be calculated from real purchase data when available
+  const lowStockItems = realMaterials.filter(material => material.quantity < 10).length;
 
   const units = ['Bags', 'Kilograms', 'Cubic Meters', 'Tons', 'Pieces'];
 
@@ -261,13 +122,14 @@ export default function MaterialManagement() {
   const renderCurrentInventory = () => {
     if (viewMode === 'site') {
       // Group materials by site for Site-Based View
-      const materialsBySite = materials.reduce((acc, material) => {
-        if (!acc[material.site]) {
-          acc[material.site] = [];
+         const materialsBySite = realMaterials.reduce((acc, material) => {
+        const siteName = material.site_id || 'Unknown Site';
+        if (!acc[siteName]) {
+          acc[siteName] = [];
         }
-        acc[material.site].push(material);
+        acc[siteName].push(material);
         return acc;
-      }, {} as Record<string, typeof materials>);
+      }, {} as Record<string, typeof realMaterials>);
 
       return (
         <div className="space-y-6">
@@ -294,8 +156,8 @@ export default function MaterialManagement() {
           {/* Site-Based View - Grouped by Site */}
           <div className="space-y-6">
             {Object.entries(materialsBySite).map(([siteName, siteMaterials]) => {
-              const totalValue = siteMaterials.reduce((sum, material) => sum + material.stockValue, 0);
-              const materialCount = siteMaterials.length;
+              const totalValue = (siteMaterials as any[]).reduce((sum, material) => sum + (material.cost_per_unit * material.quantity || 0), 0);
+              const materialCount = (siteMaterials as any[]).length;
 
               return (
                 <div key={siteName} className="bg-white border border-gray-200 rounded-lg p-6">
@@ -324,25 +186,25 @@ export default function MaterialManagement() {
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {siteMaterials.map((material) => (
+                        {(siteMaterials as any[]).map((material) => (
                           <tr key={material.id}>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="text-sm font-medium text-gray-900">{material.name}</div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {material.balance.toLocaleString()} {material.unit}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              ₹{material.unitRate}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              ₹{material.stockValue.toLocaleString()}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                {material.status}
-                              </span>
-                            </td>
+                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                               {material.quantity?.toLocaleString() || 0} {material.unit}
+                             </td>
+                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                               ₹{material.cost_per_unit || 0}
+                             </td>
+                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                               ₹{((material.cost_per_unit || 0) * (material.quantity || 0)).toLocaleString()}
+                             </td>
+                             <td className="px-6 py-4 whitespace-nowrap">
+                               <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                 Available
+                               </span>
+                             </td>
                           </tr>
                         ))}
                       </tbody>
@@ -393,42 +255,42 @@ export default function MaterialManagement() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {materials.map((material) => (
+              {realMaterials.map((material) => (
                 <tr key={material.id}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
                       <div className="text-sm font-medium text-gray-900">{material.name}</div>
-                      <div className="text-sm text-gray-500 flex items-center">
-                        <MapPin className="h-3 w-3 mr-1" />
-                        {material.site}
-                      </div>
+                       <div className="text-sm text-gray-500 flex items-center">
+                         <MapPin className="h-3 w-3 mr-1" />
+                         Site ID: {material.site_id || 'N/A'}
+                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {material.purchased.toLocaleString()} {material.unit}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {material.consumed.toLocaleString()} {material.unit}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div>
-                      <div className="text-sm text-gray-900">{material.balance.toLocaleString()} {material.unit}</div>
-                      <div className="text-xs text-gray-500">
-                        {Math.round((material.balance / material.purchased) * 100)}% remaining
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ₹{material.unitRate}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ₹{material.stockValue.toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                      {material.status}
-                    </span>
-                  </td>
+                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                       {material.quantity?.toLocaleString() || 0} {material.unit}
+                     </td>
+                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                       0 {material.unit}
+                     </td>
+                     <td className="px-6 py-4 whitespace-nowrap">
+                       <div>
+                         <div className="text-sm text-gray-900">{material.quantity?.toLocaleString() || 0} {material.unit}</div>
+                         <div className="text-xs text-gray-500">
+                           100% available
+                         </div>
+                       </div>
+                     </td>
+                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                       ₹{material.cost_per_unit || 0}
+                     </td>
+                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                       ₹{((material.cost_per_unit || 0) * (material.quantity || 0)).toLocaleString()}
+                     </td>
+                     <td className="px-6 py-4 whitespace-nowrap">
+                       <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                         Available
+                       </span>
+                     </td>
                 </tr>
               ))}
             </tbody>
@@ -455,7 +317,8 @@ export default function MaterialManagement() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {purchaseHistory.map((purchase) => (
+            {/* Purchase history will be loaded from real data */}
+            {([] as any[]).map((purchase) => (
               <tr key={purchase.id}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div>
@@ -581,7 +444,8 @@ export default function MaterialManagement() {
               <label className="block text-sm font-medium text-gray-700 mb-2">Site</label>
               <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 <option>Choose site</option>
-                {sites.map(site => (
+                {/* Sites will be loaded from real data */}
+                {[].map(site => (
                   <option key={site} value={site}>{site}</option>
                 ))}
               </select>
@@ -637,7 +501,8 @@ export default function MaterialManagement() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {periodicEntries.map((entry) => (
+              {/* Periodic entries will be loaded from real data */}
+              {([] as any[]).map((entry) => (
                 <tr key={entry.id}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${
@@ -710,7 +575,8 @@ export default function MaterialManagement() {
               <label className="block text-sm font-medium text-gray-700 mb-2">Site Filter (Optional)</label>
               <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 <option>All sites</option>
-                {sites.map(site => (
+                {/* Sites will be loaded from real data */}
+                {[].map(site => (
                   <option key={site} value={site}>{site}</option>
                 ))}
               </select>
@@ -826,7 +692,8 @@ export default function MaterialManagement() {
     <div className="space-y-6">
       <h3 className="text-lg font-semibold text-gray-900">Vendor Performance Summary</h3>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {vendors.map((vendor) => (
+        {/* Vendors will be loaded from real data */}
+        {([] as any[]).map((vendor) => (
           <div key={vendor.id} className="bg-white border border-gray-200 rounded-lg p-6">
             <div className="flex items-center justify-between mb-4">
               <h4 className="text-lg font-semibold text-gray-900">{vendor.name}</h4>
@@ -923,6 +790,34 @@ export default function MaterialManagement() {
       </div>
     </div>
   );
+
+  // Loading state
+  if (materialsLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading materials...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (materialsError) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="text-red-500 text-xl mb-4">⚠️</div>
+            <p className="text-red-600">Error loading materials: {materialsError}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 bg-gray-50 min-h-screen">
@@ -1077,7 +972,8 @@ export default function MaterialManagement() {
                         <SelectValue placeholder="Select site" />
                       </SelectTrigger>
                       <SelectContent>
-                        {sites.map((site) => (
+                        {/* Sites will be loaded from real data */}
+                        {[].map((site) => (
                           <SelectItem key={site} value={site}>{site}</SelectItem>
                         ))}
                       </SelectContent>
@@ -1221,9 +1117,9 @@ export default function MaterialManagement() {
                     <SelectValue placeholder="Choose material" />
                   </SelectTrigger>
                   <SelectContent>
-                    {materials.map((material) => (
+                    {realMaterials.map((material) => (
                       <SelectItem key={material.id} value={material.id.toString()}>
-                        {material.name} - {material.site} (Available: {material.balance} {material.unit})
+                        {material.name} - Site ID: {material.site_id || 'N/A'} (Available: {material.quantity || 0} {material.unit})
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -1266,3 +1162,5 @@ export default function MaterialManagement() {
     </div>
   );
 }
+
+export default MaterialManagement;

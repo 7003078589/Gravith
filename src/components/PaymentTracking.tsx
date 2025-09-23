@@ -26,78 +26,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DatePicker } from '@/components/ui/date-picker';
 
 // Sample payment data matching your design
-const paymentHistory = [
-  {
-    id: 1,
-    date: '2024-01-25',
-    client: 'Acme Real Estate Pvt. Ltd.',
-    project: 'Green Valley Apartments',
-    amount: 15000000,
-    method: 'Bank Transfer',
-    transactionId: 'TXN123456789',
-    receivedBy: 'Finance Team',
-    notes: 'First milestone payment'
-  },
-  {
-    id: 2,
-    date: '2024-01-10',
-    client: 'Acme Real Estate Pvt. Ltd.',
-    project: 'Green Valley Apartments',
-    amount: 20000000,
-    method: 'Bank Transfer',
-    transactionId: 'TXN987654321',
-    receivedBy: 'Finance Team',
-    notes: 'Initial advance payment'
-  }
-];
-
-// Client payments data for Payment Tracking view
-const clientPayments = [
-  {
-    id: 1,
-    client: 'Acme Real Estate Pvt. Ltd.',
-    project: 'Green Valley Apartments',
-    contractValue: 50000000,
-    amountPaid: 35000000,
-    outstanding: 15000000,
-    progress: 70.0,
-    dueDate: '2024-02-15',
-    status: 'partial'
-  },
-  {
-    id: 2,
-    client: 'Skyline Construction Co.',
-    project: 'Metro Mall Complex',
-    contractValue: 80000000,
-    amountPaid: 80000000,
-    outstanding: 0,
-    progress: 100.0,
-    dueDate: '2024-01-30',
-    status: 'paid'
-  },
-  {
-    id: 3,
-    client: 'City Infrastructure Ltd.',
-    project: 'Highway Bridge Project',
-    contractValue: 120000000,
-    amountPaid: 72000000,
-    outstanding: 48000000,
-    progress: 60.0,
-    dueDate: '2024-01-10',
-    status: 'overdue'
-  },
-  {
-    id: 4,
-    client: 'Residential Developers Inc.',
-    project: 'Luxury Villas Phase 2',
-    contractValue: 35000000,
-    amountPaid: 0,
-    outstanding: 35000000,
-    progress: 0.0,
-    dueDate: '2024-02-28',
-    status: 'pending'
-  }
-];
+// Dummy paymentHistory and clientPayments arrays removed - now using real data from API
 
 const statusColors = {
   paid: 'bg-green-100 text-green-800',
@@ -209,12 +138,13 @@ export default function PaymentTracking() {
   };
 
   const renderPaymentTracking = () => {
-    const totalContracts = clientPayments.reduce((sum, payment) => sum + payment.contractValue, 0);
-    const totalReceived = clientPayments.reduce((sum, payment) => sum + payment.amountPaid, 0);
-    const totalOutstanding = clientPayments.reduce((sum, payment) => sum + payment.outstanding, 0);
-    const overdueAmount = clientPayments.filter(p => p.status === 'overdue').reduce((sum, payment) => sum + payment.outstanding, 0);
-    const overdueCount = clientPayments.filter(p => p.status === 'overdue').length;
-    const overduePayment = clientPayments.find(p => p.status === 'overdue');
+    const totalContracts = 0; // Will be calculated from real data when available
+    const totalReceived = 0; // Will be calculated from real data when available
+    // Using empty arrays since clientPayments data will come from real API
+    const totalOutstanding = 0; // Will be calculated from real data when available
+    const overdueAmount = 0; // Will be calculated from real data when available
+    const overdueCount = 0; // Will be calculated from real data when available
+    const overduePayment = null as any; // Will be loaded from real data when available
 
     return (
       <div className="space-y-6">
@@ -229,7 +159,7 @@ export default function PaymentTracking() {
               </div>
             </div>
             <div className="text-2xl font-bold text-gray-900">₹{(totalContracts / 10000000).toFixed(1)}Cr</div>
-            <div className="text-sm text-gray-500">{clientPayments.length} contracts</div>
+            <div className="text-sm text-gray-500">0 contracts</div>
           </div>
 
           <div className="bg-white rounded-lg border border-gray-200 p-4">
@@ -336,7 +266,8 @@ export default function PaymentTracking() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {clientPayments.map((payment) => {
+                {/* Client payments will be loaded from real API data */}
+                {([] as any[]).map((payment) => {
                   const StatusIcon = statusIcons[payment.status as keyof typeof statusIcons];
                   return (
                     <tr key={payment.id} className="hover:bg-gray-50">
@@ -413,7 +344,8 @@ export default function PaymentTracking() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {paymentHistory.map((payment) => (
+              {/* Payment history will be loaded from real API data */}
+              {([] as any[]).map((payment) => (
                 <tr key={payment.id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {payment.date}

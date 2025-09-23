@@ -20,32 +20,39 @@ import {
   MapPin,
   Target
 } from 'lucide-react';
+import { useDashboard, useSites } from '@/hooks/useApi';
 
 export default function DashboardOverview() {
-  const [selectedSite, setSelectedSite] = useState('Residential Complex A');
+  const { data: dashboardData, loading: dashboardLoading, error: dashboardError } = useDashboard();
+  const { data: sites, loading: sitesLoading, error: sitesError } = useSites();
+  const [selectedSite, setSelectedSite] = useState('');
+
+  // Calculate overview data from real database
+  const stats = (dashboardData as any)?.data?.stats;
+  const sitesData = (sites as any[]) || [];
 
   const overviewCards = [
     {
       title: 'Active Sites',
-      value: '3',
+      value: dashboardLoading ? '...' : (stats?.active_sites || sitesData.filter(site => site.status === 'active').length),
       icon: Building2,
       color: 'bg-blue-500'
     },
     {
       title: 'Vehicles',
-      value: '12',
+      value: dashboardLoading ? '...' : (stats?.active_vehicles || '0'),
       icon: Truck,
       color: 'bg-green-500'
     },
     {
-      title: 'Material Value',
-      value: '₹1.9Cr',
+      title: 'Total Budget',
+      value: dashboardLoading ? '...' : `₹${((stats?.total_budget || 0) / 10000000).toFixed(1)}Cr`,
       icon: Leaf,
       color: 'bg-emerald-500'
     },
     {
-      title: 'Monthly Expenses',
-      value: '₹32.0L',
+      title: 'Total Spent',
+      value: dashboardLoading ? '...' : `₹${((stats?.total_spent || 0) / 100000).toFixed(1)}L`,
       icon: DollarSign,
       color: 'bg-yellow-500'
     },

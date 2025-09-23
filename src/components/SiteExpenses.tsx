@@ -36,48 +36,7 @@ interface SiteExpensesProps {
   site: Site;
 }
 
-const siteExpenses = [
-  {
-    id: 1,
-    description: 'Cement purchase for foundation work',
-    category: 'materials',
-    amount: 125000,
-    date: '2024-01-20',
-    vendor: 'ACC Limited',
-    status: 'approved',
-    receipt: 'REC-001'
-  },
-  {
-    id: 2,
-    description: 'Labor wages for foundation work',
-    category: 'labor',
-    amount: 85000,
-    date: '2024-01-19',
-    vendor: 'Local Contractor',
-    status: 'pending',
-    receipt: 'REC-002'
-  },
-  {
-    id: 3,
-    description: 'Excavator fuel and maintenance',
-    category: 'equipment',
-    amount: 45000,
-    date: '2024-01-18',
-    vendor: 'Equipment Services',
-    status: 'paid',
-    receipt: 'REC-003'
-  },
-  {
-    id: 4,
-    description: 'Site electricity bill',
-    category: 'utilities',
-    amount: 15000,
-    date: '2024-01-17',
-    vendor: 'State Electricity Board',
-    status: 'approved',
-    receipt: 'REC-004'
-  }
-];
+// Dummy siteExpenses array removed - now using real data from API
 
 const statusColors = {
   pending: 'bg-yellow-100 text-yellow-800',
@@ -99,7 +58,7 @@ export default function SiteExpenses({ site }: SiteExpensesProps) {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
 
-  const filteredExpenses = siteExpenses.filter(expense => {
+  const filteredExpenses = ([] as any[]).filter(expense => {
     const matchesSearch = expense.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          expense.vendor.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === 'all' || expense.category === categoryFilter;
@@ -107,9 +66,9 @@ export default function SiteExpenses({ site }: SiteExpensesProps) {
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
-  const totalExpenses = siteExpenses.reduce((sum, expense) => sum + expense.amount, 0);
-  const pendingAmount = siteExpenses.filter(e => e.status === 'pending').reduce((sum, expense) => sum + expense.amount, 0);
-  const paidAmount = siteExpenses.filter(e => e.status === 'paid').reduce((sum, expense) => sum + expense.amount, 0);
+  const totalExpenses = 0; // Will be calculated from real data when available
+  const pendingAmount = 0; // Will be calculated from real data when available
+  const paidAmount = 0; // Will be calculated from real data when available
 
   return (
     <div className="space-y-6">

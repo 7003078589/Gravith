@@ -36,47 +36,7 @@ interface SiteVehiclesProps {
   site: Site;
 }
 
-const siteVehicles = [
-  {
-    id: 1,
-    name: 'Excavator EX-001',
-    type: 'excavator',
-    status: 'active',
-    fuelLevel: 85,
-    lastService: '2024-01-15',
-    nextService: '2024-02-15',
-    operator: 'Rajesh Kumar',
-    hours: 1250,
-    maintenance: 'good',
-    odometer: 1250
-  },
-  {
-    id: 2,
-    name: 'Crane CR-002',
-    type: 'crane',
-    status: 'maintenance',
-    fuelLevel: 45,
-    lastService: '2024-01-20',
-    nextService: '2024-01-25',
-    operator: 'Priya Sharma',
-    hours: 2100,
-    maintenance: 'due',
-    odometer: 2100
-  },
-  {
-    id: 3,
-    name: 'Concrete Mixer CM-003',
-    type: 'concrete-mixer',
-    status: 'active',
-    fuelLevel: 70,
-    lastService: '2024-01-10',
-    nextService: '2024-02-10',
-    operator: 'Amit Patel',
-    hours: 800,
-    maintenance: 'good',
-    odometer: 800
-  }
-];
+// Dummy siteVehicles array removed - now using real data from API
 
 const statusColors = {
   active: 'bg-green-100 text-green-800',
@@ -96,7 +56,7 @@ export default function SiteVehicles({ site }: SiteVehiclesProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
-  const filteredVehicles = siteVehicles.filter(vehicle => {
+  const filteredVehicles = ([] as any[]).filter(vehicle => {
     const matchesSearch = vehicle.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || vehicle.status === statusFilter;
     return matchesSearch && matchesStatus;

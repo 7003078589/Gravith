@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { 
   Building2, 
   MapPin, 
@@ -32,7 +32,8 @@ import {
   UserPlus,
   Phone,
   PieChart,
-  Info
+  Info,
+  AlertTriangle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -44,49 +45,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Site } from '@/types';
 import { useSiteVehicle } from '@/contexts/SiteVehicleContext';
-
-// Mock data for sites
-const mockSites: Site[] = [
-  {
-    id: '1',
-    name: 'Residential Complex A',
-    location: 'Sector 15, Navi Mumbai',
-    status: 'active',
-    progress: 64,
-    budget: 50000000,
-    spent: 32000000,
-    client: 'ABC Developers',
-    manager: 'Rajesh Kumar',
-    startDate: '2024-01-15',
-    endDate: '2024-12-15'
-  },
-  {
-    id: '2',
-    name: 'Commercial Plaza B',
-    location: 'Business District, Pune',
-    status: 'active',
-    progress: 55,
-    budget: 75000000,
-    spent: 41250000,
-    client: 'XYZ Corp',
-    manager: 'Priya Sharma',
-    startDate: '2024-02-01',
-    endDate: '2024-11-30'
-  },
-  {
-    id: '3',
-    name: 'Highway Bridge Project',
-    location: 'Mumbai-Pune Highway',
-    status: 'active',
-    progress: 96,
-    budget: 120000000,
-    spent: 115200000,
-    client: 'Government of Maharashtra',
-    manager: 'Amit Patel',
-    startDate: '2023-06-01',
-    endDate: '2024-03-31'
-  }
-];
+import { useSites, useMaterials, useVehicles, useExpenses, useLabour } from '@/hooks/useApi';
 
 const tabs = [
   { id: 'overview', label: 'Overview', icon: BarChart3 },
@@ -221,88 +180,9 @@ const mockMilestones = [
 ];
 
 // Mock data for materials
-const mockMaterials = [
-  {
-    id: '1',
-    name: 'Cement (OPC 53)',
-    category: 'Cement',
-    quantity: 1000,
-    unit: 'bags',
-    costPerUnit: 350,
-    totalCost: 350000,
-    supplier: 'UltraTech',
-    used: 650,
-    left: 350,
-    usagePercentage: 65.0,
-    status: 'available'
-  },
-  {
-    id: '2',
-    name: 'Steel Bars (16mm)',
-    category: 'Steel',
-    quantity: 5000,
-    unit: 'kg',
-    costPerUnit: 65,
-    totalCost: 325000,
-    supplier: 'Tata Steel',
-    used: 3200,
-    left: 1800,
-    usagePercentage: 64.0,
-    status: 'available'
-  }
-];
+// Materials data will be fetched from API
 
-// Mock data for vehicles
-const mockVehicles = [
-  {
-    id: '1',
-    name: 'CAT 320D Excavator',
-    type: 'Excavator',
-    registrationNumber: 'MH-12-AB-1234',
-    operator: 'Ravi Kumar',
-    operatorCompany: 'Heavy Equipment Rentals',
-    rentalCostPerDay: 8500,
-    fuelCostPerDay: 2500,
-    startDate: '2024-01-20',
-    endDate: '2024-03-20',
-    duration: 60,
-    totalCost: 660000,
-    status: 'active',
-    lastMaintenance: '2024-02-15'
-  },
-  {
-    id: '2',
-    name: 'Ashok Leyland Truck',
-    type: 'Truck',
-    registrationNumber: 'MH-12-CD-5678',
-    operator: 'Sunil Patil',
-    operatorCompany: 'City Transport Services',
-    rentalCostPerDay: 3500,
-    fuelCostPerDay: 1800,
-    startDate: '2024-01-15',
-    endDate: '2024-12-15',
-    duration: 335,
-    totalCost: 1775500,
-    status: 'active',
-    lastMaintenance: '2024-02-01'
-  },
-  {
-    id: '3',
-    name: 'DG Set 125 KVA',
-    type: 'Generator',
-    registrationNumber: 'N/A',
-    operator: 'Site Electrician',
-    operatorCompany: 'Power Solutions Inc',
-    rentalCostPerDay: 2200,
-    fuelCostPerDay: 1500,
-    startDate: '2024-01-15',
-    endDate: '2024-12-15',
-    duration: 335,
-    totalCost: 1239500,
-    status: 'active',
-    lastMaintenance: '2024-02-10'
-  }
-];
+// Vehicles data will be fetched from API
 
 const vehicleTypes = [
   { value: 'excavator', label: 'Excavator' },
@@ -317,56 +197,7 @@ const vehicleTypes = [
 ];
 
 // Mock data for expenses
-const mockExpenses = [
-  {
-    id: '1',
-    category: 'Labour',
-    description: 'Mason work - Week 3',
-    amount: 125000,
-    date: '2024-01-28',
-    vendor: 'Local Contractors',
-    receiptNumber: 'RCT001'
-  },
-  {
-    id: '2',
-    category: 'Equipment',
-    description: 'Excavator rental',
-    amount: 85000,
-    date: '2024-01-30',
-    vendor: 'Heavy Equipment Rentals',
-    receiptNumber: 'RCT002'
-  }
-];
-
-// Mock data for labour
-const mockLabour = [
-  {
-    id: '1',
-    name: 'Ramesh Patil',
-    role: 'Mason',
-    age: 32,
-    contact: '+91 98765 43210',
-    dailyWage: 800,
-    hourlyRate: 100,
-    daysWorked: 25,
-    hoursWorked: 200,
-    wagesOwed: 40000,
-    status: 'active'
-  },
-  {
-    id: '2',
-    name: 'Suresh Kumar',
-    role: 'Helper',
-    age: 28,
-    contact: '+91 98765 43211',
-    dailyWage: 600,
-    hourlyRate: 75,
-    daysWorked: 20,
-    hoursWorked: 160,
-    wagesOwed: 24000,
-    status: 'active'
-  }
-];
+// Expenses and Labour data will be fetched from API
 
 const expenseCategories = [
   { value: 'labour', label: 'Labour' },
@@ -448,8 +279,25 @@ const schedulingViews = [
 ];
 
 export default function SiteManagement() {
-  const [selectedSite, setSelectedSite] = useState<Site>(mockSites[0]);
-  const [activeTab, setActiveTab] = useState('overview');
+  const { data: sites, loading: sitesLoading, error: sitesError } = useSites();
+  const { data: materials, loading: materialsLoading, error: materialsError } = useMaterials();
+  const { data: vehicles, loading: vehiclesLoading, error: vehiclesError } = useVehicles();
+  const { data: expenses, loading: expensesLoading, error: expensesError } = useExpenses();
+  const { data: labour, loading: labourLoading, error: labourError } = useLabour();
+  const sitesData = (sites as any[]) || [];
+  const materialsData = (materials as any[]) || [];
+  const vehiclesData = (vehicles as any[]) || [];
+  const expensesData = (expenses as any[]) || [];
+  const labourData = (labour as any[]) || [];
+  const [selectedSite, setSelectedSite] = useState<Site | null>(null);
+  const [activeTab, setActiveTab] = useState<string>('overview');
+
+  // Set first site as selected when data loads
+  React.useEffect(() => {
+    if (sitesData && sitesData.length > 0 && !selectedSite) {
+      setSelectedSite(sitesData[0]);
+    }
+  }, [sitesData, selectedSite]);
   const [isAddSiteModalOpen, setIsAddSiteModalOpen] = useState(false);
   
   // Use shared context for vehicle-site interconnections
@@ -529,14 +377,14 @@ export default function SiteManagement() {
 
   // Timeline synchronization functions
   const validateDateWithinSitePeriod = (date: string, fieldName: string) => {
-    if (!date || !selectedSite.startDate || !selectedSite.endDate) return true;
+    if (!date || !selectedSite?.startDate || !selectedSite?.endDate) return true;
     
     const inputDate = new Date(date);
-    const siteStart = new Date(selectedSite.startDate);
-    const siteEnd = new Date(selectedSite.endDate);
+    const siteStart = new Date(selectedSite!.startDate);
+    const siteEnd = new Date(selectedSite!.endDate);
     
     if (inputDate < siteStart || inputDate > siteEnd) {
-      console.log(`Warning: ${fieldName} date (${date}) is outside site period (${selectedSite.startDate} to ${selectedSite.endDate})`);
+      console.log(`Warning: ${fieldName} date (${date}) is outside site period (${selectedSite!.startDate} to ${selectedSite!.endDate})`);
       return false;
     }
     return true;
@@ -1038,6 +886,46 @@ export default function SiteManagement() {
     return colors[category] || colors.Other;
   };
 
+  // Show loading state
+  if (sitesLoading) {
+    return (
+      <div className="p-6 bg-gray-50 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading sites...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (sitesError) {
+    return (
+      <div className="p-6 bg-gray-50 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">Error loading sites: {sitesError}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show message if no sites
+  if (!sitesData || sitesData.length === 0) {
+    return (
+      <div className="p-6 bg-gray-50 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">No sites found. Create your first site to get started.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
         {/* Page Header */}
@@ -1063,7 +951,7 @@ export default function SiteManagement() {
         <div className="mb-8">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Select Active Site</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {mockSites.map((site) => (
+            {sitesData.map((site) => (
               <div
                 key={site.id}
                 onClick={() => {
@@ -1071,7 +959,7 @@ export default function SiteManagement() {
                   setContextSelectedSite(site);
                 }}
                 className={`bg-white rounded-lg border-2 p-6 cursor-pointer transition-all hover:shadow-md ${
-                  selectedSite.id === site.id 
+                  selectedSite?.id === site.id 
                     ? 'border-blue-500 shadow-md' 
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
@@ -1142,7 +1030,15 @@ export default function SiteManagement() {
         </div>
 
         {/* Tab Content */}
-        {activeTab === 'overview' && (
+        {!selectedSite && (
+          <div className="text-center py-12">
+            <Building2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No Site Selected</h3>
+            <p className="text-gray-600">Please select a site from the list above to view details and manage resources.</p>
+          </div>
+        )}
+        
+        {activeTab === 'overview' && selectedSite && (
           <div className="space-y-6">
             {/* Overview Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -1276,7 +1172,7 @@ export default function SiteManagement() {
         )}
 
         {/* Documents Tab Content */}
-        {activeTab === 'documents' && (
+        {activeTab === 'documents' && selectedSite && (
           <div className="space-y-6">
             {/* Documents Header */}
             <div className="flex items-center justify-between">
@@ -1414,7 +1310,7 @@ export default function SiteManagement() {
         )}
 
         {/* Scheduling Tab Content */}
-        {activeTab === 'scheduling' && (
+        {activeTab === 'scheduling' && selectedSite && (
           <div className="space-y-6">
             {/* Scheduling Header */}
             <div className="flex items-center justify-between">
@@ -1891,8 +1787,31 @@ export default function SiteManagement() {
         )}
 
         {/* Materials Tab Content */}
-        {activeTab === 'materials' && (
+        {activeTab === 'materials' && selectedSite && (
           <div className="space-y-6">
+            {/* Loading State */}
+            {materialsLoading && (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600">Loading materials...</p>
+                </div>
+              </div>
+            )}
+            
+            {/* Error State */}
+            {materialsError && (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                  <p className="text-red-600">Error loading materials: {materialsError}</p>
+                </div>
+              </div>
+            )}
+            
+            {/* Materials Content */}
+            {!materialsLoading && !materialsError && (
+              <div className="space-y-6">
             {/* Materials Header */}
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">Site Materials</h3>
@@ -2040,7 +1959,7 @@ export default function SiteManagement() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {mockMaterials.map((material) => (
+                    {materialsData.map((material) => (
                       <tr key={material.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
@@ -2052,29 +1971,29 @@ export default function SiteManagement() {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{material.quantity} {material.unit}</div>
-                          <div className="text-sm text-gray-500">₹{material.costPerUnit}/{material.unit}</div>
+                          <div className="text-sm text-gray-900">{material.quantity} {material.unit || 'units'}</div>
+                          <div className="text-sm text-gray-500">₹{material.cost_per_unit}/{material.unit || 'unit'}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          ₹{material.totalCost.toLocaleString()}
+                          ₹{(material.quantity * material.cost_per_unit).toLocaleString()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {material.supplier}
+                          Not assigned
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">Used: {material.used}</div>
+                          <div className="text-sm text-gray-900">Usage: N/A</div>
                           <div className="w-20 bg-gray-200 rounded-full h-2 mt-1">
                             <div 
                               className="bg-gradient-to-r from-red-500 via-orange-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 h-2 rounded-full"
-                              style={{ width: `${material.usagePercentage}%` }}
+                              style={{ width: '0%' }}
                             ></div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">Left: {material.left}</div>
-                          <div className="text-sm text-gray-500">{material.usagePercentage}% used</div>
+                          <div className="text-sm text-gray-900">Stock: {material.quantity}</div>
+                          <div className="text-sm text-gray-500">0% used</div>
                           <Button variant="outline" size="sm" className="mt-1">
-                            Available
+                            {material.quantity > 0 ? 'Available' : 'Out of Stock'}
                           </Button>
                         </td>
                       </tr>
@@ -2084,11 +2003,36 @@ export default function SiteManagement() {
               </div>
             </div>
           </div>
+            )}
+          </div>
         )}
 
         {/* Vehicles Tab Content */}
-        {activeTab === 'vehicles' && (
+        {activeTab === 'vehicles' && selectedSite && (
           <div className="space-y-6">
+            {/* Loading State */}
+            {vehiclesLoading && (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600">Loading vehicles...</p>
+                </div>
+              </div>
+            )}
+            
+            {/* Error State */}
+            {vehiclesError && (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                  <p className="text-red-600">Error loading vehicles: {vehiclesError}</p>
+                </div>
+              </div>
+            )}
+            
+            {/* Vehicles Content */}
+            {!vehiclesLoading && !vehiclesError && (
+              <div className="space-y-6">
             {/* Vehicles Header */}
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">Vehicles & Equipment</h3>
@@ -2220,7 +2164,7 @@ export default function SiteManagement() {
 
             {/* Vehicles Table */}
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto max-h-96 overflow-y-auto">
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
@@ -2245,7 +2189,7 @@ export default function SiteManagement() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {mockVehicles.map((vehicle) => (
+                    {vehiclesData.map((vehicle) => (
                       <tr key={vehicle.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div>
@@ -2254,29 +2198,29 @@ export default function SiteManagement() {
                               <Truck className="h-3 w-3 inline mr-1" />
                               {vehicle.type}
                             </div>
-                            <div className="text-sm text-gray-500">ID: {vehicle.registrationNumber}</div>
+                            <div className="text-sm text-gray-500">ID: {vehicle.registration_number || 'N/A'}</div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{vehicle.operator}</div>
-                          <div className="text-sm text-gray-500">{vehicle.operatorCompany}</div>
+                          <div className="text-sm text-gray-900">Not assigned</div>
+                          <div className="text-sm text-gray-500">No operator linked</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">Rental: ₹{vehicle.rentalCostPerDay}/day</div>
-                          <div className="text-sm text-gray-900">Fuel: ₹{vehicle.fuelCostPerDay}/day</div>
+                          <div className="text-sm text-gray-900">Purchase: ₹{vehicle.purchase_price || 0}</div>
+                          <div className="text-sm text-gray-900">Fuel Level: {vehicle.fuel_level || 0}%</div>
                           <div className="text-sm text-gray-500 flex items-center">
                             <Fuel className="h-3 w-3 mr-1" />
-                            ₹{((vehicle.rentalCostPerDay + vehicle.fuelCostPerDay) * vehicle.duration).toLocaleString()}
+                            Location: {vehicle.location || 'Not specified'}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{vehicle.duration} days</div>
+                          <div className="text-sm text-gray-900">N/A</div>
                           <div className="text-sm text-gray-500">
-                            {formatDate(vehicle.startDate)} - {formatDate(vehicle.endDate)}
+                            {vehicle.purchase_date ? new Date(vehicle.purchase_date).toLocaleDateString('en-GB') : 'No date'}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          ₹{vehicle.totalCost.toLocaleString()}
+                          ₹{(vehicle.purchase_price || 0).toLocaleString()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center space-x-2">
@@ -2285,7 +2229,7 @@ export default function SiteManagement() {
                             </span>
                             <div className="flex items-center text-sm text-gray-500">
                               <Wrench className="h-3 w-3 mr-1" />
-                              {formatDate(vehicle.lastMaintenance)}
+                              {vehicle.last_service_date ? new Date(vehicle.last_service_date).toLocaleDateString('en-GB') : 'No service date'}
                             </div>
                           </div>
                         </td>
@@ -2294,13 +2238,49 @@ export default function SiteManagement() {
                   </tbody>
                 </table>
               </div>
+              
+              {/* Empty State */}
+              {vehiclesData.length === 0 && !vehiclesLoading && (
+                <div className="text-center py-12">
+                  <Truck className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No vehicles found</h3>
+                  <p className="text-gray-600 mb-4">Get started by adding your first vehicle or equipment.</p>
+                  <Button onClick={() => setIsVehicleModalOpen(true)} className="bg-blue-600 hover:bg-blue-700">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Vehicle/Equipment
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         )}
 
         {/* Expenses Tab Content */}
-        {activeTab === 'expenses' && (
+        {(activeTab as string) === 'expenses' && selectedSite && (
           <div className="space-y-6">
+            {/* Loading State */}
+            {expensesLoading && (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600">Loading expenses...</p>
+                </div>
+              </div>
+            )}
+            
+            {/* Error State */}
+            {expensesError && (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                  <p className="text-red-600">Error loading expenses: {expensesError}</p>
+                </div>
+              </div>
+            )}
+            
+            {/* Expenses Content */}
+            {!expensesLoading && !expensesError && (
+              <div className="space-y-6">
             {/* Expenses Header */}
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">Site Expenses</h3>
@@ -2394,7 +2374,7 @@ export default function SiteManagement() {
 
             {/* Expenses Table */}
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto max-h-96 overflow-y-auto">
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
@@ -2419,7 +2399,7 @@ export default function SiteManagement() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {mockExpenses.map((expense) => (
+                    {expensesData.map((expense) => (
                       <tr key={expense.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getExpenseCategoryColor(expense.category)}`}>
@@ -2430,28 +2410,43 @@ export default function SiteManagement() {
                           {expense.description}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          ₹{expense.amount.toLocaleString()}
+                          ₹{(parseFloat(expense.amount) || 0).toLocaleString()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {formatDate(expense.date)}
+                          {expense.date || 'No date'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {expense.vendor}
+                          {expense.vendor || 'Not assigned'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {expense.receiptNumber}
+                          {expense.receipt_number || 'N/A'}
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
+              
+              {/* Empty State */}
+              {expensesData.length === 0 && !expensesLoading && (
+                <div className="text-center py-12">
+                  <Receipt className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No expenses found</h3>
+                  <p className="text-gray-600 mb-4">Get started by recording your first expense.</p>
+                  <Button onClick={() => setIsExpenseModalOpen(true)} className="bg-blue-600 hover:bg-blue-700">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Record Expense
+                  </Button>
+                </div>
+              )}
             </div>
+          </div>
+            )}
           </div>
         )}
 
         {/* Labour Tab Content */}
-        {activeTab === 'labour' && (
+        {(activeTab as string) === 'labour' && selectedSite && (
           <div className="space-y-6">
             {/* Labour Header */}
             <div className="flex items-center justify-between">
@@ -2554,7 +2549,7 @@ export default function SiteManagement() {
 
             {/* Labour Table */}
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto max-h-96 overflow-y-auto">
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
@@ -2579,31 +2574,31 @@ export default function SiteManagement() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {mockLabour.map((worker) => (
+                    {labourData.map((worker) => (
                       <tr key={worker.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div>
                             <div className="text-sm font-medium text-gray-900">{worker.name}</div>
-                            <div className="text-sm text-gray-500">{worker.role}</div>
-                            <div className="text-sm text-gray-500">Age: {worker.age}</div>
+                            <div className="text-sm text-gray-500">{worker.skill}</div>
+                            <div className="text-sm text-gray-500">Experience: {worker.experience_years} years</div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <Phone className="h-4 w-4 text-gray-400 mr-2" />
-                            <span className="text-sm text-gray-900">{worker.contact}</span>
+                            <span className="text-sm text-gray-900">{worker.phone}</span>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">Daily: ₹{worker.dailyWage}</div>
-                          <div className="text-sm text-gray-900">Hourly: ₹{worker.hourlyRate}</div>
+                          <div className="text-sm text-gray-900">Daily: ₹{worker.wage_per_day}</div>
+                          <div className="text-sm text-gray-900">Hourly: ₹{worker.wage_per_hour}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{worker.daysWorked} days</div>
-                          <div className="text-sm text-gray-900">{worker.hoursWorked} hours</div>
+                          <div className="text-sm text-gray-900">N/A days</div>
+                          <div className="text-sm text-gray-900">N/A hours</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          ₹{worker.wagesOwed.toLocaleString()}
+                          N/A
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <Button variant="outline" size="sm" className="bg-blue-600 text-white border-blue-600 hover:bg-blue-700">
@@ -2615,12 +2610,27 @@ export default function SiteManagement() {
                   </tbody>
                 </table>
               </div>
+              
+              {/* Empty State */}
+              {labourData.length === 0 && !labourLoading && (
+                <div className="text-center py-12">
+                  <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No labour records found</h3>
+                  <p className="text-gray-600 mb-4">Get started by adding your first worker.</p>
+                  <Button onClick={() => setIsLabourModalOpen(true)} className="bg-blue-600 hover:bg-blue-700">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Worker
+                  </Button>
+                </div>
+              )}
             </div>
+          </div>
+            )}
           </div>
         )}
 
         {/* Analytics Tab Content */}
-        {activeTab === 'analytics' && (
+        {activeTab === 'analytics' && selectedSite && (
           <div className="space-y-6">
             {/* Overview Metrics Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
