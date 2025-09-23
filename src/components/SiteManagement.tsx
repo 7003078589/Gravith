@@ -31,7 +31,8 @@ import {
   Wrench,
   UserPlus,
   Phone,
-  PieChart
+  PieChart,
+  Info
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -469,6 +470,12 @@ export default function SiteManagement() {
     vehicleTypes: ['excavator', 'crane', 'truck', 'concrete-mixer', 'bulldozer', 'generator']
   });
 
+  // State for material cost calculation
+  const [materialCostCalculation, setMaterialCostCalculation] = useState({
+    estimatedCost: 0,
+    isCalculated: false
+  });
+
   // Form interconnection functions
   const updateTotalExpenses = (amount: number) => {
     setSharedData(prev => ({
@@ -715,10 +722,21 @@ export default function SiteManagement() {
     }
     
     // Auto-calculate total cost when quantity or cost changes
-    if ((field === 'quantity' || field === 'costPerUnit') && 
-        materialForm.quantity && materialForm.costPerUnit) {
-      const totalCost = parseFloat(materialForm.quantity) * parseFloat(materialForm.costPerUnit);
-      console.log(`Estimated material cost: ₹${totalCost}`);
+    if ((field === 'quantity' || field === 'costPerUnit')) {
+      const currentForm = { ...materialForm, [field]: value };
+      if (currentForm.quantity && currentForm.costPerUnit) {
+        const totalCost = parseFloat(currentForm.quantity) * parseFloat(currentForm.costPerUnit);
+        setMaterialCostCalculation({
+          estimatedCost: totalCost,
+          isCalculated: true
+        });
+        console.log(`Estimated material cost: ₹${totalCost}`);
+      } else {
+        setMaterialCostCalculation({
+          estimatedCost: 0,
+          isCalculated: false
+        });
+      }
     }
   };
 
@@ -915,6 +933,12 @@ export default function SiteManagement() {
       costPerUnit: '',
       supplier: '',
       purchaseDate: ''
+    });
+    
+    // Reset material cost calculation
+    setMaterialCostCalculation({
+      estimatedCost: 0,
+      isCalculated: false
     });
   };
 
@@ -1953,6 +1977,29 @@ export default function SiteManagement() {
                         placeholder="Select purchase date"
                       />
                     </div>
+
+                    {/* Material Cost Calculation Display */}
+                    {materialCostCalculation.isCalculated && materialCostCalculation.estimatedCost > 0 && (
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <Info className="h-5 w-5 text-green-600 mr-2" />
+                            <span className="text-sm font-medium text-green-900">Estimated Material Cost</span>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-2xl font-bold text-green-900">
+                              ₹{materialCostCalculation.estimatedCost.toLocaleString()}
+                            </div>
+                            <div className="text-xs text-green-700">
+                              {materialForm.quantity} {materialForm.unit || 'units'} × ₹{materialForm.costPerUnit}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="mt-2 text-xs text-green-700">
+                          This cost will be automatically added to the site's expenses
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <DialogFooter>
                     <Button variant="outline" onClick={() => setIsMaterialModalOpen(false)}>
