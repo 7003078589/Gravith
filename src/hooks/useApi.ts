@@ -15,14 +15,19 @@ export function useApi<T>(
       try {
         setLoading(true);
         setError(null);
+        console.log('Fetching data...');
         const response = await apiCall();
+        console.log('API response:', response);
         
         if (response.success) {
           setData(response.data || null);
+          console.log('Data set successfully:', response.data);
         } else {
           setError(response.error || 'API call failed');
+          console.error('API call failed:', response.error);
         }
       } catch (err) {
+        console.error('Error in fetchData:', err);
         setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
         setLoading(false);
@@ -40,8 +45,8 @@ export function useSites() {
   return useApi(() => apiService.getSites());
 }
 
-export function useLabour() {
-  return useApi(() => apiService.getLabour());
+export function useLabour(siteId?: string) {
+  return useApi(() => apiService.getLabour(siteId), [siteId]);
 }
 
 export function useVehicles(siteId?: string) {

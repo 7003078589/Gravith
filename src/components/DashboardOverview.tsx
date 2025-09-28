@@ -21,20 +21,31 @@ import {
   Target
 } from 'lucide-react';
 import { useDashboard, useSites } from '@/hooks/useApi';
+import { useUnits } from '@/contexts/UnitContext';
+import UnitConversionDemo from './UnitConversionDemo';
+import LivePriceTracker from './LivePriceTracker';
 
 export default function DashboardOverview() {
   const { data: dashboardData, loading: dashboardLoading, error: dashboardError } = useDashboard();
   const { data: sites, loading: sitesLoading, error: sitesError } = useSites();
+  const { formatCurrency, formatDistance, formatWeight, formatVolume, formatArea, units } = useUnits();
   const [selectedSite, setSelectedSite] = useState('');
 
   // Calculate overview data from real database
   const stats = (dashboardData as any)?.data?.stats;
   const sitesData = (sites as any[]) || [];
 
+  // Debug logging
+  console.log('Dashboard Data:', dashboardData);
+  console.log('Sites Data:', sites);
+  console.log('Stats:', stats);
+  console.log('Dashboard Loading:', dashboardLoading);
+  console.log('Dashboard Error:', dashboardError);
+
   const overviewCards = [
     {
       title: 'Active Sites',
-      value: dashboardLoading ? '...' : (stats?.active_sites || sitesData.filter(site => site.status === 'active').length),
+      value: dashboardLoading ? '...' : (stats?.active_sites || sitesData.filter(site => site.status === 'active').length || 0),
       icon: Building2,
       color: 'bg-blue-500'
     },
@@ -46,25 +57,25 @@ export default function DashboardOverview() {
     },
     {
       title: 'Total Budget',
-      value: dashboardLoading ? '...' : `₹${((stats?.total_budget || 0) / 10000000).toFixed(1)}Cr`,
+      value: dashboardLoading ? '...' : `${formatCurrency((stats?.total_budget || 0) / 10000000)}Cr`,
       icon: Leaf,
       color: 'bg-emerald-500'
     },
     {
       title: 'Total Spent',
-      value: dashboardLoading ? '...' : `₹${((stats?.total_spent || 0) / 100000).toFixed(1)}L`,
+      value: dashboardLoading ? '...' : `${formatCurrency((stats?.total_spent || 0) / 100000)}L`,
       icon: DollarSign,
       color: 'bg-yellow-500'
     },
     {
       title: 'Active Vendors',
-      value: '8',
+      value: dashboardLoading ? '...' : (stats?.active_vendors || '8'),
       icon: Users,
       color: 'bg-purple-500'
     },
     {
       title: 'Completion Rate',
-      value: '78%',
+      value: dashboardLoading ? '...' : (stats?.completion_rate || '78%'),
       icon: TrendingUp,
       color: 'bg-indigo-500'
     }
@@ -194,6 +205,21 @@ export default function DashboardOverview() {
         <p className="text-sm sm:text-base text-gray-600">Here's an overview of your construction projects and operations.</p>
       </div>
 
+      {/* Error Display */}
+      {(dashboardError || sitesError) && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <div className="flex items-center">
+            <AlertTriangle className="h-5 w-5 text-red-500 mr-2" />
+            <div>
+              <h3 className="text-sm font-medium text-red-800">Data Loading Error</h3>
+              <p className="text-sm text-red-600 mt-1">
+                {dashboardError || sitesError}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {overviewCards.map((card, index) => (
@@ -207,13 +233,19 @@ export default function DashboardOverview() {
         ))}
       </div>
 
+      {/* Live Price Tracker */}
+      <LivePriceTracker />
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Active Construction Sites */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-gray-900">Active Construction Sites</h3>
-              <button className="text-blue-600 hover:text-blue-700 font-medium flex items-center">
+              <button 
+                onClick={() => window.location.href = '/sites'}
+                className="text-blue-600 hover:text-blue-700 font-medium flex items-center"
+              >
                 View All <ArrowRight className="h-4 w-4 ml-1" />
               </button>
             </div>
@@ -285,7 +317,10 @@ export default function DashboardOverview() {
                     <div className="flex-1">
                       <h4 className="font-medium text-gray-900 text-sm">{alert.type}</h4>
                       <p className="text-sm text-gray-600 mt-1">{alert.message}</p>
-                      <button className="mt-2 text-blue-600 hover:text-blue-700 text-sm font-medium">
+                      <button 
+                        onClick={() => window.alert(`Viewing details for ${alert.type}... Feature coming soon!`)}
+                        className="mt-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
+                      >
                         {alert.action}
                       </button>
                     </div>
@@ -302,7 +337,12 @@ export default function DashboardOverview() {
                 <Info className="h-5 w-5 text-blue-500 mr-2" />
                 <h3 className="text-lg font-semibold text-gray-900">Recent Activities</h3>
               </div>
-              <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">View All</button>
+              <button 
+                onClick={() => alert('Viewing all recent activities... Feature coming soon!')}
+                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+              >
+                View All
+              </button>
             </div>
             
             <div className="space-y-3">
@@ -345,6 +385,11 @@ export default function DashboardOverview() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Unit Conversion Demo */}
+      <div className="mt-8">
+        <UnitConversionDemo />
       </div>
     </div>
   );

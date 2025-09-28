@@ -46,6 +46,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Site } from '@/types';
 import { useSiteVehicle } from '@/contexts/SiteVehicleContext';
 import { useSites, useMaterials, useVehicles, useExpenses, useLabour } from '@/hooks/useApi';
+import { formatDateForInput, parseDateFromInput } from '@/lib/dateUtils';
+import PageTitle from './PageTitle';
 
 const tabs = [
   { id: 'overview', label: 'Overview', icon: BarChart3 },
@@ -299,6 +301,9 @@ export default function SiteManagement() {
     }
   }, [sitesData, selectedSite]);
   const [isAddSiteModalOpen, setIsAddSiteModalOpen] = useState(false);
+  const [isEditSiteModalOpen, setIsEditSiteModalOpen] = useState(false);
+  const [editingSite, setEditingSite] = useState<Site | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   
   // Use shared context for vehicle-site interconnections
   const {
@@ -460,11 +465,13 @@ export default function SiteManagement() {
   const [materialForm, setMaterialForm] = useState({
     name: '',
     category: '',
+    site: '',
     quantity: '',
     unit: '',
     costPerUnit: '',
     supplier: '',
-    purchaseDate: ''
+    purchaseDate: '',
+    invoiceNumber: ''
   });
 
   // Vehicles state
@@ -526,6 +533,73 @@ export default function SiteManagement() {
   const handleSiteFormChange = (field: string, value: string) => {
     setSiteForm(prev => ({ ...prev, [field]: value }));
   };
+
+  // Edit site functionality
+  const handleEditSite = (site: Site) => {
+    setEditingSite(site);
+    setSiteForm({
+      siteName: site.name,
+      location: site.location,
+      startDate: site.startDate ? formatDateForInput(new Date(site.startDate)) : '',
+      expectedEndDate: site.endDate ? formatDateForInput(new Date(site.endDate)) : '',
+      totalBudget: site.budget?.toString() || '',
+      projectManager: site.manager || '',
+      description: site.description || ''
+    });
+    setIsEditSiteModalOpen(true);
+  };
+
+  const handleUpdateSite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingSite) return;
+
+    try {
+      const siteData = {
+        name: siteForm.siteName,
+        location: siteForm.location,
+        status: editingSite.status,
+        budget: parseFloat(siteForm.totalBudget) || 0,
+        client_id: editingSite.client,
+        manager_id: siteForm.projectManager ? parseInt(siteForm.projectManager) : null,
+        start_date: siteForm.startDate || null,
+        end_date: siteForm.expectedEndDate || null,
+        description: siteForm.description
+      };
+
+      const response = await fetch(`/api/sites/${editingSite.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(siteData),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setIsEditSiteModalOpen(false);
+        setEditingSite(null);
+        setSiteForm({
+          siteName: '',
+          location: '',
+          startDate: '',
+          expectedEndDate: '',
+          totalBudget: '',
+          projectManager: '',
+          description: ''
+        });
+        window.location.reload(); // Temporary refresh
+      } else {
+        alert('Failed to update site: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Error updating site:', error);
+      alert('Failed to update site');
+    }
+  };
+
+  // Filter sites based on status
+  const filteredSites = sitesData.filter(site => {
+    if (statusFilter === 'all') return true;
+    return site.status === statusFilter;
+  });
 
   // Enhanced form change handlers with interconnections
   const handleActivityFormChange = (field: string, value: string) => {
@@ -644,19 +718,63 @@ export default function SiteManagement() {
     }
   };
 
-  const handleAddSite = (e: React.FormEvent) => {
+  const handleAddSite = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('New site data:', siteForm);
-    setIsAddSiteModalOpen(false);
-    setSiteForm({
-      siteName: '',
-      location: '',
-      startDate: '',
-      expectedEndDate: '',
-      totalBudget: '',
-      projectManager: '',
-      description: ''
-    });
+    try {
+      console.log('New site data:', siteForm);
+      
+      // Transform form data to match API expectations
+      const siteData = {
+        name: siteForm.siteName,
+        location: siteForm.location,
+        status: 'active',
+        budget: parseFloat(siteForm.totalBudget) || 0,
+        client_id: null,
+        manager_id: null,
+        start_date: siteForm.startDate || null,
+        end_date: siteForm.expectedEndDate || null,
+        description: siteForm.description
+      };
+
+      // Call API to create site
+      const response = await fetch('/api/sites', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(siteData),
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        console.log('Site created successfully:', result.data);
+        // Close modal and reset form
+        setIsAddSiteModalOpen(false);
+        setSiteForm({
+          siteName: '',
+          location: '',
+          startDate: '',
+          expectedEndDate: '',
+          totalBudget: '',
+          projectManager: '',
+          description: ''
+        });
+        
+        // Refresh sites data by triggering a page reload
+        // Note: In a production app, you'd want to implement proper state management
+        // to avoid full page reloads, but this ensures the new site appears immediately
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
+      } else {
+        console.error('Failed to create site:', result.error);
+        alert('Failed to create site: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Error creating site:', error);
+      alert('Error creating site. Please try again.');
+    }
   };
 
   const handleUpload = () => {
@@ -776,11 +894,13 @@ export default function SiteManagement() {
     setMaterialForm({
       name: '',
       category: '',
+      site: '',
       quantity: '',
       unit: '',
       costPerUnit: '',
       supplier: '',
-      purchaseDate: ''
+      purchaseDate: '',
+      invoiceNumber: ''
     });
     
     // Reset material cost calculation
@@ -927,41 +1047,58 @@ export default function SiteManagement() {
   }
 
   return (
-    <div className="space-y-8">
-        {/* Page Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">Site-Focused Management</h2>
-              <p className="text-gray-600 mt-1">
-                Comprehensive site management with integrated scheduling, materials, vehicles, expenses, and labour.
-              </p>
-            </div>
-            <Button 
-              className="flex items-center space-x-2"
-              onClick={() => setIsAddSiteModalOpen(true)}
-            >
+    <div className="p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <PageTitle 
+            title="Site-Focused Management" 
+            subtitle="Comprehensive site management with integrated scheduling, materials, vehicles, expenses, and labour" 
+          />
+        </div>
+        <div className="flex items-center space-x-3">
+          <Button 
+            className="flex items-center space-x-2"
+            onClick={() => setIsAddSiteModalOpen(true)}
+          >
               <Plus className="h-4 w-4" />
               <span>Add New Site</span>
             </Button>
-          </div>
         </div>
+      </div>
 
         {/* Site Selection */}
         <div className="mb-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Select Active Site</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {sitesData.map((site) => (
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Select Active Site</h3>
+            <div className="flex items-center space-x-3">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Sites</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="on-hold">On Hold</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="relative">
+            <div className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory pl-4 pr-4">
+            {filteredSites.map((site) => (
               <div
                 key={site.id}
                 onClick={() => {
                   setSelectedSite(site);
                   setContextSelectedSite(site);
                 }}
-                className={`bg-white rounded-lg border-2 p-6 cursor-pointer transition-all hover:shadow-md ${
+                className={`bg-white rounded-lg border-2 p-4 cursor-pointer transition-all hover:shadow-md flex-shrink-0 snap-center w-72 ${
                   selectedSite?.id === site.id 
-                    ? 'border-blue-500 shadow-md' 
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-blue-500 shadow-lg ring-2 ring-blue-100' 
+                    : 'border-gray-200 hover:border-gray-300 hover:scale-102'
                 }`}
               >
                 <div className="flex items-start space-x-4">
@@ -996,10 +1133,24 @@ export default function SiteManagement() {
                         ></div>
                       </div>
                     </div>
+                    <div className="mt-3 flex justify-end">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditSite(site);
+                        }}
+                        className="text-xs"
+                      >
+                        Edit
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
             ))}
+            </div>
           </div>
         </div>
 
@@ -1347,7 +1498,16 @@ export default function SiteManagement() {
                         <Label htmlFor="target-date">Target Date</Label>
                         <DatePicker
                           value={milestoneForm.targetDate ? new Date(milestoneForm.targetDate) : undefined}
-                          onChange={(date) => setMilestoneForm(prev => ({ ...prev, targetDate: date?.toISOString().split('T')[0] || '' }))}
+                          onChange={(date) => {
+                            if (date) {
+                              const year = date.getFullYear();
+                              const month = String(date.getMonth() + 1).padStart(2, '0');
+                              const day = String(date.getDate()).padStart(2, '0');
+                              setMilestoneForm(prev => ({ ...prev, targetDate: `${year}-${month}-${day}` }));
+                            } else {
+                              setMilestoneForm(prev => ({ ...prev, targetDate: '' }));
+                            }
+                          }}
                           placeholder="Select target date"
                         />
                       </div>
@@ -1412,7 +1572,16 @@ export default function SiteManagement() {
                           <Label htmlFor="start-date">Start Date</Label>
                           <DatePicker
                             value={activityForm.startDate ? new Date(activityForm.startDate) : undefined}
-                            onChange={(date) => handleActivityFormChange('startDate', date?.toISOString().split('T')[0] || '')}
+                            onChange={(date) => {
+                              if (date) {
+                                const year = date.getFullYear();
+                                const month = String(date.getMonth() + 1).padStart(2, '0');
+                                const day = String(date.getDate()).padStart(2, '0');
+                                handleActivityFormChange('startDate', `${year}-${month}-${day}`);
+                              } else {
+                                handleActivityFormChange('startDate', '');
+                              }
+                            }}
                             placeholder="Select start date"
                           />
                         </div>
@@ -1822,79 +1991,172 @@ export default function SiteManagement() {
                     Add Material
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
+                <DialogContent className="sm:max-w-2xl">
                   <DialogHeader>
-                    <DialogTitle>Add Site Material</DialogTitle>
+                    <DialogTitle>Record Material Purchase</DialogTitle>
                     <DialogDescription>
-                      Record new material procurement for this site
+                      Add a new material purchase to inventory.
                     </DialogDescription>
                   </DialogHeader>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="material-name">Material Name</Label>
-                        <Input
-                          id="material-name"
-                          placeholder="Cement (OPC 53)"
-                          value={materialForm.name}
-                          onChange={(e) => handleMaterialFormChange('name', e.target.value)}
-                        />
+                  <form onSubmit={handleMaterialSubmit} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Left Column */}
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="material-name" className="text-sm font-medium text-gray-700">
+                            Material Name
+                          </Label>
+                          <Input
+                            id="material-name"
+                            type="text"
+                            value={materialForm.name}
+                            onChange={(e) => handleMaterialFormChange('name', e.target.value)}
+                            placeholder="e.g., Cement (OPC 53)"
+                            className="mt-1"
+                          />
+                        </div>
+
+                        <div>
+                          <Label htmlFor="material-category" className="text-sm font-medium text-gray-700">
+                            Category
+                          </Label>
+                          <Select value={materialForm.category} onValueChange={(value) => handleMaterialFormChange('category', value)}>
+                            <SelectTrigger className="mt-1">
+                              <SelectValue placeholder="Select category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="cement">Cement</SelectItem>
+                              <SelectItem value="steel">Steel</SelectItem>
+                              <SelectItem value="bricks">Bricks</SelectItem>
+                              <SelectItem value="sand">Sand</SelectItem>
+                              <SelectItem value="aggregate">Aggregate</SelectItem>
+                              <SelectItem value="tiles">Tiles</SelectItem>
+                              <SelectItem value="paint">Paint</SelectItem>
+                              <SelectItem value="electrical">Electrical</SelectItem>
+                              <SelectItem value="plumbing">Plumbing</SelectItem>
+                              <SelectItem value="other">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
+                          <Label htmlFor="site" className="text-sm font-medium text-gray-700">
+                            Site
+                          </Label>
+                          <Select value={materialForm.site || selectedSite?.name || ''} onValueChange={(value) => handleMaterialFormChange('site', value)}>
+                            <SelectTrigger className="mt-1">
+                              <SelectValue placeholder="Select site" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {sitesData.map((site) => (
+                                <SelectItem key={site.id} value={site.name}>{site.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
+                          <Label htmlFor="quantity" className="text-sm font-medium text-gray-700">
+                            Quantity
+                          </Label>
+                          <Input
+                            id="quantity"
+                            type="number"
+                            value={materialForm.quantity}
+                            onChange={(e) => handleMaterialFormChange('quantity', e.target.value)}
+                            placeholder="100"
+                            className="mt-1"
+                          />
+                        </div>
+
+                        <div>
+                          <Label htmlFor="unit" className="text-sm font-medium text-gray-700">
+                            Unit
+                          </Label>
+                          <Select value={materialForm.unit} onValueChange={(value) => handleMaterialFormChange('unit', value)}>
+                            <SelectTrigger className="mt-1">
+                              <SelectValue placeholder="Select unit" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="bags">Bags</SelectItem>
+                              <SelectItem value="kg">Kilograms</SelectItem>
+                              <SelectItem value="tons">Tons</SelectItem>
+                              <SelectItem value="cubic-meters">Cubic Meters</SelectItem>
+                              <SelectItem value="pieces">Pieces</SelectItem>
+                              <SelectItem value="liters">Liters</SelectItem>
+                              <SelectItem value="meters">Meters</SelectItem>
+                              <SelectItem value="square-meters">Square Meters</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="material-category">Category</Label>
-                        <Input
-                          id="material-category"
-                          placeholder="Cement"
-                          value={materialForm.category}
-                          onChange={(e) => handleMaterialFormChange('category', e.target.value)}
-                        />
+
+                      {/* Right Column */}
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="cost-per-unit" className="text-sm font-medium text-gray-700">
+                            Unit Rate (₹)
+                          </Label>
+                          <Input
+                            id="cost-per-unit"
+                            type="number"
+                            value={materialForm.costPerUnit}
+                            onChange={(e) => handleMaterialFormChange('costPerUnit', e.target.value)}
+                            placeholder="425"
+                            className="mt-1"
+                          />
+                        </div>
+
+                        <div>
+                          <Label htmlFor="supplier" className="text-sm font-medium text-gray-700">
+                            Vendor
+                          </Label>
+                          <Input
+                            id="supplier"
+                            type="text"
+                            value={materialForm.supplier}
+                            onChange={(e) => handleMaterialFormChange('supplier', e.target.value)}
+                            placeholder="Vendor Name"
+                            className="mt-1"
+                          />
+                        </div>
+
+                        <div>
+                          <Label htmlFor="invoice-number" className="text-sm font-medium text-gray-700">
+                            Invoice Number
+                          </Label>
+                          <Input
+                            id="invoice-number"
+                            type="text"
+                            value={materialForm.invoiceNumber || ''}
+                            onChange={(e) => handleMaterialFormChange('invoiceNumber', e.target.value)}
+                            placeholder="INV-2024-001"
+                            className="mt-1"
+                          />
+                        </div>
+
+                        <div>
+                          <Label htmlFor="purchase-date" className="text-sm font-medium text-gray-700">
+                            Purchase Date
+                          </Label>
+                          <div className="mt-1">
+                            <DatePicker
+                              value={materialForm.purchaseDate ? new Date(materialForm.purchaseDate) : undefined}
+                              onChange={(date) => {
+                                if (date) {
+                                  const year = date.getFullYear();
+                                  const month = String(date.getMonth() + 1).padStart(2, '0');
+                                  const day = String(date.getDate()).padStart(2, '0');
+                                  handleMaterialFormChange('purchaseDate', `${year}-${month}-${day}`);
+                                } else {
+                                  handleMaterialFormChange('purchaseDate', '');
+                                }
+                              }}
+                              placeholder="Select purchase date"
+                            />
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="quantity">Quantity</Label>
-                        <Input
-                          id="quantity"
-                          type="number"
-                          value={materialForm.quantity}
-                          onChange={(e) => handleMaterialFormChange('quantity', e.target.value)}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="unit">Unit</Label>
-                        <Input
-                          id="unit"
-                          placeholder="bags"
-                          value={materialForm.unit}
-                          onChange={(e) => handleMaterialFormChange('unit', e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="cost-per-unit">Cost per Unit (₹)</Label>
-                      <Input
-                        id="cost-per-unit"
-                        type="number"
-                        value={materialForm.costPerUnit}
-                        onChange={(e) => handleMaterialFormChange('costPerUnit', e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="supplier">Supplier</Label>
-                      <Input
-                        id="supplier"
-                        placeholder="UltraTech"
-                        value={materialForm.supplier}
-                        onChange={(e) => handleMaterialFormChange('supplier', e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="purchase-date">Purchase Date</Label>
-                      <DatePicker
-                        value={materialForm.purchaseDate ? new Date(materialForm.purchaseDate) : undefined}
-                        onChange={(date) => handleMaterialFormChange('purchaseDate', date?.toISOString().split('T')[0] || '')}
-                        placeholder="Select purchase date"
-                      />
                     </div>
 
                     {/* Material Cost Calculation Display */}
@@ -1919,15 +2181,24 @@ export default function SiteManagement() {
                         </div>
                       </div>
                     )}
-                  </div>
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setIsMaterialModalOpen(false)}>
-                      Cancel
-                    </Button>
-                    <Button onClick={handleMaterialSubmit} disabled={!materialForm.name || !materialForm.category || !materialForm.quantity}>
-                      Add Material
-                    </Button>
-                  </DialogFooter>
+
+                    {/* Form Actions */}
+                    <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setIsMaterialModalOpen(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={!materialForm.name || !materialForm.category || !materialForm.quantity}
+                      >
+                        Record Purchase
+                      </Button>
+                    </div>
+                  </form>
                 </DialogContent>
               </Dialog>
             </div>
@@ -2118,7 +2389,16 @@ export default function SiteManagement() {
                         <Label htmlFor="start-date">Start Date</Label>
                         <DatePicker
                           value={vehicleForm.startDate ? new Date(vehicleForm.startDate) : undefined}
-                          onChange={(date) => handleVehicleFormChange('startDate', date?.toISOString().split('T')[0] || '')}
+                          onChange={(date) => {
+                            if (date) {
+                              const year = date.getFullYear();
+                              const month = String(date.getMonth() + 1).padStart(2, '0');
+                              const day = String(date.getDate()).padStart(2, '0');
+                              handleVehicleFormChange('startDate', `${year}-${month}-${day}`);
+                            } else {
+                              handleVehicleFormChange('startDate', '');
+                            }
+                          }}
                           placeholder="Select start date"
                         />
                       </div>
@@ -2126,7 +2406,16 @@ export default function SiteManagement() {
                         <Label htmlFor="end-date">End Date</Label>
                         <DatePicker
                           value={vehicleForm.endDate ? new Date(vehicleForm.endDate) : undefined}
-                          onChange={(date) => handleVehicleFormChange('endDate', date?.toISOString().split('T')[0] || '')}
+                          onChange={(date) => {
+                            if (date) {
+                              const year = date.getFullYear();
+                              const month = String(date.getMonth() + 1).padStart(2, '0');
+                              const day = String(date.getDate()).padStart(2, '0');
+                              handleVehicleFormChange('endDate', `${year}-${month}-${day}`);
+                            } else {
+                              handleVehicleFormChange('endDate', '');
+                            }
+                          }}
                           placeholder="Select end date"
                         />
                       </div>
@@ -2337,7 +2626,16 @@ export default function SiteManagement() {
                       <Label htmlFor="expense-date">Date</Label>
                       <DatePicker
                         value={expenseForm.date ? new Date(expenseForm.date) : undefined}
-                        onChange={(date) => handleExpenseFormChange('date', date?.toISOString().split('T')[0] || '')}
+                        onChange={(date) => {
+                          if (date) {
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            handleExpenseFormChange('date', `${year}-${month}-${day}`);
+                          } else {
+                            handleExpenseFormChange('date', '');
+                          }
+                        }}
                         placeholder="Select expense date"
                       />
                     </div>
@@ -2530,7 +2828,16 @@ export default function SiteManagement() {
                       <Label htmlFor="join-date">Join Date</Label>
                       <DatePicker
                         value={labourForm.joinDate ? new Date(labourForm.joinDate) : undefined}
-                        onChange={(date) => handleLabourFormChange('joinDate', date?.toISOString().split('T')[0] || '')}
+                        onChange={(date) => {
+                          if (date) {
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            handleLabourFormChange('joinDate', `${year}-${month}-${day}`);
+                          } else {
+                            handleLabourFormChange('joinDate', '');
+                          }
+                        }}
                         placeholder="Select join date"
                       />
                     </div>
@@ -2803,8 +3110,8 @@ export default function SiteManagement() {
                   <div className="space-y-2">
                     <Label htmlFor="start-date">Start Date</Label>
                     <DatePicker
-                      value={siteForm.startDate ? new Date(siteForm.startDate) : undefined}
-                      onChange={(date) => handleSiteFormChange('startDate', date?.toISOString().split('T')[0] || '')}
+                      value={parseDateFromInput(siteForm.startDate) || undefined}
+                      onChange={(date) => handleSiteFormChange('startDate', formatDateForInput(date))}
                       placeholder="Select start date"
                     />
                   </div>
@@ -2848,8 +3155,8 @@ export default function SiteManagement() {
                   <div className="space-y-2">
                     <Label htmlFor="expected-end-date">Expected End Date</Label>
                     <DatePicker
-                      value={siteForm.expectedEndDate ? new Date(siteForm.expectedEndDate) : undefined}
-                      onChange={(date) => handleSiteFormChange('expectedEndDate', date?.toISOString().split('T')[0] || '')}
+                      value={parseDateFromInput(siteForm.expectedEndDate) || undefined}
+                      onChange={(date) => handleSiteFormChange('expectedEndDate', formatDateForInput(date))}
                       placeholder="Select expected end date"
                     />
                   </div>
@@ -2877,6 +3184,114 @@ export default function SiteManagement() {
                 </Button>
                 <Button type="submit">
                   Add Site
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Site Modal */}
+        <Dialog open={isEditSiteModalOpen} onOpenChange={setIsEditSiteModalOpen}>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Edit Construction Site</DialogTitle>
+              <DialogDescription>Update the construction project site details</DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleUpdateSite} className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Left Column */}
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-site-name">Site Name</Label>
+                    <Input
+                      id="edit-site-name"
+                      type="text"
+                      value={siteForm.siteName}
+                      onChange={(e) => handleSiteFormChange('siteName', e.target.value)}
+                      placeholder="Enter site name"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-start-date">Start Date</Label>
+                    <DatePicker
+                      value={parseDateFromInput(siteForm.startDate) || undefined}
+                      onChange={(date) => handleSiteFormChange('startDate', formatDateForInput(date))}
+                      placeholder="Select start date"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-total-budget">Total Budget (₹)</Label>
+                    <Input
+                      id="edit-total-budget"
+                      type="number"
+                      value={siteForm.totalBudget}
+                      onChange={(e) => handleSiteFormChange('totalBudget', e.target.value)}
+                      placeholder="Enter total budget"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-description">Description</Label>
+                    <Textarea
+                      id="edit-description"
+                      value={siteForm.description}
+                      onChange={(e) => handleSiteFormChange('description', e.target.value)}
+                      placeholder="Enter project description"
+                      rows={3}
+                    />
+                  </div>
+                </div>
+
+                {/* Right Column */}
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-location">Location</Label>
+                    <Input
+                      id="edit-location"
+                      type="text"
+                      value={siteForm.location}
+                      onChange={(e) => handleSiteFormChange('location', e.target.value)}
+                      placeholder="Enter location"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-expected-end-date">Expected End Date</Label>
+                    <DatePicker
+                      value={parseDateFromInput(siteForm.expectedEndDate) || undefined}
+                      onChange={(date) => handleSiteFormChange('expectedEndDate', formatDateForInput(date))}
+                      placeholder="Select expected end date"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-project-manager">Project Manager</Label>
+                    <Input
+                      id="edit-project-manager"
+                      type="text"
+                      value={siteForm.projectManager}
+                      onChange={(e) => handleSiteFormChange('projectManager', e.target.value)}
+                      placeholder="Enter project manager name"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setIsEditSiteModalOpen(false);
+                    setEditingSite(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit">
+                  Update Site
                 </Button>
               </DialogFooter>
             </form>

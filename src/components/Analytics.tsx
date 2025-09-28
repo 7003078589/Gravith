@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   BarChart3, 
   TrendingUp, 
@@ -30,33 +30,261 @@ import {
   Star,
   ArrowUpRight,
   ArrowDownRight,
-  Info
+  Info,
+  Box,
+  Wrench,
+  HardHat,
+  MapPin,
+  BarChart,
+  PieChart as PieChartIcon,
+  LineChart as LineChartIcon,
+  RefreshCw
 } from 'lucide-react';
+import {
+  BarChart as RechartsBarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart as RechartsPieChart,
+  Pie,
+  Cell,
+  LineChart as RechartsLineChart,
+  Line,
+  Area,
+  AreaChart,
+  ComposedChart,
+  Legend
+} from 'recharts';
+import { format, subMonths, subDays, startOfMonth, endOfMonth } from 'date-fns';
+import { useUnits } from '@/contexts/UnitContext';
+import PageTitle from './PageTitle';
 
 // Sample data for comprehensive analytics
-// Dummy kpiData array removed - now using real data from API
-// KPI data will be fetched from API
-const kpiData: any[] = [];
+const generateKPIData = () => [
+  {
+    title: 'Total Revenue',
+    value: '₹4.2Cr',
+    change: '+12.5%',
+    trend: 'up',
+    icon: DollarSign,
+    color: 'text-green-600',
+    bgColor: 'bg-green-100',
+    borderColor: 'border-green-200'
+  },
+  {
+    title: 'Active Projects',
+    value: '8',
+    change: '+2',
+    trend: 'up',
+    icon: Building2,
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-100',
+    borderColor: 'border-blue-200'
+  },
+  {
+    title: 'Total Expenses',
+    value: '₹2.8Cr',
+    change: '+8.3%',
+    trend: 'up',
+    icon: TrendingDown,
+    color: 'text-red-600',
+    bgColor: 'bg-red-100',
+    borderColor: 'border-red-200'
+  },
+  {
+    title: 'Net Profit',
+    value: '₹1.4Cr',
+    change: '+18.2%',
+    trend: 'up',
+    icon: TrendingUp,
+    color: 'text-green-600',
+    bgColor: 'bg-green-100',
+    borderColor: 'border-green-200'
+  },
+  {
+    title: 'Active Workers',
+    value: '156',
+    change: '+12',
+    trend: 'up',
+    icon: Users,
+    color: 'text-purple-600',
+    bgColor: 'bg-purple-100',
+    borderColor: 'border-purple-200'
+  },
+  {
+    title: 'Equipment Count',
+    value: '24',
+    change: '+3',
+    trend: 'up',
+    icon: Truck,
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-100',
+    borderColor: 'border-orange-200'
+  }
+];
 
-// Project performance data will be fetched from API
-const projectPerformance: any[] = [];
+const generateMonthlyTrends = () => {
+  const months = [];
+  for (let i = 11; i >= 0; i--) {
+    const date = subMonths(new Date(), i);
+    months.push({
+      month: format(date, 'MMM'),
+      fullMonth: format(date, 'MMMM yyyy'),
+      revenue: Math.floor(Math.random() * 5000000) + 2000000,
+      expenses: Math.floor(Math.random() * 3000000) + 1500000,
+      profit: Math.floor(Math.random() * 2000000) + 500000,
+      materials: Math.floor(Math.random() * 1500000) + 800000,
+      labour: Math.floor(Math.random() * 1000000) + 500000,
+      equipment: Math.floor(Math.random() * 800000) + 300000
+    });
+  }
+  return months;
+};
 
-// Expense categories data will be fetched from API
-const expenseCategories: any[] = [];
+const generateExpenseCategories = () => [
+  { name: 'Materials', amount: '₹1.2Cr', percentage: 42.8, color: '#3B82F6', trend: '+5.2%' },
+  { name: 'Labour', amount: '₹85L', percentage: 30.4, color: '#10B981', trend: '+8.1%' },
+  { name: 'Equipment', amount: '₹45L', percentage: 16.1, color: '#F59E0B', trend: '+2.3%' },
+  { name: 'Transport', amount: '₹20L', percentage: 7.1, color: '#EF4444', trend: '-1.2%' },
+  { name: 'Utilities', amount: '₹10L', percentage: 3.6, color: '#8B5CF6', trend: '+0.8%' }
+];
 
-// Monthly trends data will be fetched from API
-const monthlyTrends: any[] = [];
+const generateProjectPerformance = () => [
+  {
+    name: 'BRL Tower',
+    status: 'On Track',
+    progress: 78,
+    budget: '₹2.5Cr',
+    spent: '₹1.9Cr',
+    efficiency: 92,
+    safety: 88,
+    timeline: 85
+  },
+  {
+    name: 'Ranchi Complex',
+    status: 'Ahead',
+    progress: 65,
+    budget: '₹1.8Cr',
+    spent: '₹1.1Cr',
+    efficiency: 95,
+    safety: 90,
+    timeline: 92
+  },
+  {
+    name: 'Test Site Fixed',
+    status: 'At Risk',
+    progress: 45,
+    budget: '₹1.2Cr',
+    spent: '₹0.8Cr',
+    efficiency: 75,
+    safety: 82,
+    timeline: 68
+  },
+  {
+    name: 'Greenfield Project',
+    status: 'On Track',
+    progress: 32,
+    budget: '₹3.2Cr',
+    spent: '₹1.0Cr',
+    efficiency: 88,
+    safety: 85,
+    timeline: 78
+  }
+];
 
-// Site performance data will be fetched from API
-const sitePerformance: any[] = [];
+const generateSitePerformance = () => [
+  { name: 'BRL Tower', efficiency: 92, safety: 88, budget: 85, timeline: 90 },
+  { name: 'Ranchi Complex', efficiency: 95, safety: 90, budget: 88, timeline: 92 },
+  { name: 'Test Site Fixed', efficiency: 75, safety: 82, budget: 72, timeline: 68 },
+  { name: 'Greenfield Project', efficiency: 88, safety: 85, budget: 90, timeline: 78 }
+];
 
-// Alerts data will be fetched from API
-const alerts: any[] = [];
+const generateAlerts = () => [
+  {
+    type: 'warning',
+    message: 'Budget overrun detected at Test Site Fixed - 15% above allocated budget',
+    time: '2 hours ago',
+    priority: 'High'
+  },
+  {
+    type: 'info',
+    message: 'New equipment delivery scheduled for BRL Tower tomorrow',
+    time: '4 hours ago',
+    priority: 'Medium'
+  },
+  {
+    type: 'success',
+    message: 'Safety inspection completed at Ranchi Complex - All clear',
+    time: '6 hours ago',
+    priority: 'Low'
+  },
+  {
+    type: 'error',
+    message: 'Equipment maintenance overdue for 3 vehicles',
+    time: '1 day ago',
+    priority: 'High'
+  }
+];
+
+const generateCostBreakdown = () => [
+  { category: 'Materials', amount: 12000000, percentage: 42.8 },
+  { category: 'Labour', amount: 8500000, percentage: 30.4 },
+  { category: 'Equipment', amount: 4500000, percentage: 16.1 },
+  { category: 'Transport', amount: 2000000, percentage: 7.1 },
+  { category: 'Utilities', amount: 1000000, percentage: 3.6 }
+];
+
+const generateEfficiencyTrends = () => {
+  const weeks = [];
+  for (let i = 11; i >= 0; i--) {
+    const date = subDays(new Date(), i * 7);
+    weeks.push({
+      week: `Week ${12 - i}`,
+      efficiency: Math.floor(Math.random() * 20) + 75,
+      productivity: Math.floor(Math.random() * 15) + 80,
+      safety: Math.floor(Math.random() * 10) + 85
+    });
+  }
+  return weeks;
+};
 
 export default function Analytics() {
   const [selectedPeriod, setSelectedPeriod] = useState('6months');
   const [selectedView, setSelectedView] = useState('overview');
   const [showExportModal, setShowExportModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [data, setData] = useState({
+    kpis: generateKPIData(),
+    monthlyTrends: generateMonthlyTrends(),
+    expenseCategories: generateExpenseCategories(),
+    projectPerformance: generateProjectPerformance(),
+    sitePerformance: generateSitePerformance(),
+    alerts: generateAlerts(),
+    costBreakdown: generateCostBreakdown(),
+    efficiencyTrends: generateEfficiencyTrends()
+  });
+
+  const { formatCurrency } = useUnits();
+
+  const refreshData = async () => {
+    setIsLoading(true);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setData({
+      kpis: generateKPIData(),
+      monthlyTrends: generateMonthlyTrends(),
+      expenseCategories: generateExpenseCategories(),
+      projectPerformance: generateProjectPerformance(),
+      sitePerformance: generateSitePerformance(),
+      alerts: generateAlerts(),
+      costBreakdown: generateCostBreakdown(),
+      efficiencyTrends: generateEfficiencyTrends()
+    });
+    setIsLoading(false);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -87,15 +315,27 @@ export default function Analytics() {
     }
   };
 
+  const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
+
   return (
-    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 bg-gray-50 min-h-screen">
+    <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Reports & Analytics</h1>
-          <p className="text-sm sm:text-base text-gray-600 mt-1">Comprehensive insights and performance metrics for your construction business</p>
+          <PageTitle 
+            title="Analytics Dashboard" 
+            subtitle="Comprehensive insights and performance metrics for your construction business" 
+          />
         </div>
         <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+          <button
+            onClick={refreshData}
+            disabled={isLoading}
+            className="flex items-center space-x-2 bg-gray-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors text-sm disabled:opacity-50"
+          >
+            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">Refresh</span>
+          </button>
           <div className="relative">
             <select
               value={selectedPeriod}
@@ -155,7 +395,7 @@ export default function Analytics() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        {kpiData.map((kpi, index) => (
+        {data.kpis.map((kpi, index) => (
           <div key={index} className={`bg-white rounded-xl border-2 ${kpi.borderColor} p-4 shadow-sm hover:shadow-md transition-all duration-200`}>
             <div className="flex items-center justify-between mb-3">
               <div className={`p-2 rounded-lg ${kpi.bgColor}`}>
@@ -190,9 +430,9 @@ export default function Analytics() {
         <div className="space-y-6">
           {/* Financial Performance Chart */}
           <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-semibold text-gray-900">Financial Performance Trend</h3>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-1">
                   <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                   <span className="text-sm text-gray-600">Revenue</span>
@@ -208,56 +448,58 @@ export default function Analytics() {
               </div>
             </div>
             
-            {/* Custom Bar Chart */}
-            <div className="h-80 flex items-end justify-between px-4">
-              {monthlyTrends.map((data, index) => (
-                <div key={index} className="flex flex-col items-center space-y-2">
-                  <div className="flex flex-col space-y-1">
-                    {/* Revenue Bar */}
-                    <div 
-                      className="w-8 bg-green-500 rounded-t"
-                      style={{ height: `${(data.revenue / 7000000) * 200}px` }}
-                    ></div>
-                    {/* Expenses Bar */}
-                    <div 
-                      className="w-8 bg-red-500"
-                      style={{ height: `${(data.expenses / 7000000) * 200}px` }}
-                    ></div>
-                    {/* Profit Bar */}
-                    <div 
-                      className="w-8 bg-blue-500 rounded-b"
-                      style={{ height: `${(data.profit / 7000000) * 200}px` }}
-                    ></div>
-                  </div>
-                  <span className="text-xs text-gray-600 font-medium">{data.month}</span>
-                </div>
-              ))}
-            </div>
+            <ResponsiveContainer width="100%" height={400}>
+              <ComposedChart data={data.monthlyTrends}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis tickFormatter={(value) => `₹${(value / 100000).toFixed(0)}L`} />
+                <Tooltip 
+                  formatter={(value: number, name: string) => [
+                    formatCurrency(value), 
+                    name.charAt(0).toUpperCase() + name.slice(1)
+                  ]}
+                  labelFormatter={(label) => `Month: ${label}`}
+                />
+                <Legend />
+                <Bar dataKey="revenue" fill="#10B981" name="Revenue" />
+                <Bar dataKey="expenses" fill="#EF4444" name="Expenses" />
+                <Line type="monotone" dataKey="profit" stroke="#3B82F6" strokeWidth={3} name="Profit" />
+              </ComposedChart>
+            </ResponsiveContainer>
           </div>
 
           {/* Expense Categories & Project Performance */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Expense Categories */}
             <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">Expense Distribution</h3>
-                <PieChart className="h-5 w-5 text-gray-400" />
+                <PieChartIcon className="h-5 w-5 text-gray-400" />
               </div>
               
-              {/* Pie Chart */}
-              <div className="flex items-center justify-center h-48 mb-6">
-                <div className="relative w-32 h-32">
-                  <div className="absolute inset-0 rounded-full border-8 border-blue-500" style={{clipPath: 'polygon(50% 50%, 50% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 50%)'}}></div>
-                  <div className="absolute inset-0 rounded-full border-8 border-green-500" style={{clipPath: 'polygon(50% 50%, 100% 0%, 100% 50%)'}}></div>
-                  <div className="absolute inset-0 rounded-full border-8 border-yellow-500" style={{clipPath: 'polygon(50% 50%, 100% 50%, 100% 100%)'}}></div>
-                  <div className="absolute inset-0 rounded-full border-8 border-purple-500" style={{clipPath: 'polygon(50% 50%, 0% 50%, 0% 100%)'}}></div>
-                  <div className="absolute inset-0 rounded-full border-8 border-red-500" style={{clipPath: 'polygon(50% 50%, 0% 0%, 0% 50%)'}}></div>
-                  <div className="absolute inset-0 rounded-full border-8 border-white"></div>
-                </div>
+              <div className="flex items-center justify-center mb-4">
+                <ResponsiveContainer width={200} height={200}>
+                  <RechartsPieChart>
+                    <Pie
+                      data={data.expenseCategories}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={40}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="percentage"
+                    >
+                      {data.expenseCategories.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value: number) => `${value}%`} />
+                  </RechartsPieChart>
+                </ResponsiveContainer>
               </div>
               
               <div className="space-y-3">
-                {expenseCategories.map((category, index) => (
+                {data.expenseCategories.map((category, index) => (
                   <div key={index} className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div 
@@ -283,11 +525,11 @@ export default function Analytics() {
             <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-gray-900">Project Performance</h3>
-                <LineChart className="h-5 w-5 text-gray-400" />
+                <LineChartIcon className="h-5 w-5 text-gray-400" />
               </div>
               
               <div className="space-y-4">
-                {projectPerformance.map((project, index) => (
+                {data.projectPerformance.map((project, index) => (
                   <div key={index} className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors">
                     <div className="flex items-center justify-between mb-2">
                       <h4 className="font-medium text-gray-900">{project.name}</h4>
@@ -316,6 +558,40 @@ export default function Analytics() {
               </div>
             </div>
           </div>
+
+          {/* Efficiency Trends */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold text-gray-900">Efficiency Trends</h3>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-1">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                  <span className="text-sm text-gray-600">Efficiency</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <span className="text-sm text-gray-600">Productivity</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                  <span className="text-sm text-gray-600">Safety</span>
+                </div>
+              </div>
+            </div>
+            
+            <ResponsiveContainer width="100%" height={300}>
+              <RechartsLineChart data={data.efficiencyTrends}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="week" />
+                <YAxis domain={[0, 100]} />
+                <Tooltip formatter={(value: number) => `${value}%`} />
+                <Legend />
+                <Line type="monotone" dataKey="efficiency" stroke="#3B82F6" strokeWidth={2} name="Efficiency" />
+                <Line type="monotone" dataKey="productivity" stroke="#10B981" strokeWidth={2} name="Productivity" />
+                <Line type="monotone" dataKey="safety" stroke="#8B5CF6" strokeWidth={2} name="Safety" />
+              </RechartsLineChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       )}
 
@@ -337,7 +613,7 @@ export default function Analytics() {
                   </tr>
                 </thead>
                 <tbody>
-                  {sitePerformance.map((site, index) => {
+                  {data.sitePerformance.map((site, index) => {
                     const overall = Math.round((site.efficiency + site.safety + site.budget + site.timeline) / 4);
                     return (
                       <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
@@ -402,6 +678,22 @@ export default function Analytics() {
               </table>
             </div>
           </div>
+
+          {/* Project Cost Breakdown */}
+          <div className="chart-card bg-white rounded-xl border border-gray-200 shadow-sm">
+            <h3 className="chart-title text-xl font-semibold text-gray-900 mb-6">Project Cost Breakdown</h3>
+            <div className="chart-container">
+              <ResponsiveContainer width="100%" height={400}>
+                <RechartsBarChart data={data.costBreakdown} layout="horizontal" className="recharts-bar-chart">
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" tickFormatter={(value) => `₹${(value / 100000).toFixed(0)}L`} />
+                <YAxis dataKey="category" type="category" width={100} />
+                <Tooltip formatter={(value: number) => [formatCurrency(value), 'Amount']} />
+                <Bar dataKey="amount" fill="#3B82F6" />
+              </RechartsBarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </div>
       )}
 
@@ -417,8 +709,8 @@ export default function Analytics() {
                 <TrendingUp className="h-5 w-5 text-green-600" />
               </div>
               <h3 className="text-lg font-semibold text-green-900 mb-2">Net Profit</h3>
-              <p className="text-3xl font-bold text-green-900 mb-1">₹24.3Cr</p>
-              <p className="text-sm text-green-700">+15.2% from last period</p>
+              <p className="text-3xl font-bold text-green-900 mb-1">₹1.4Cr</p>
+              <p className="text-sm text-green-700">+18.2% from last period</p>
             </div>
             
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-xl p-6">
@@ -445,6 +737,29 @@ export default function Analytics() {
               <p className="text-sm text-purple-700">+12.8% from last period</p>
             </div>
           </div>
+
+          {/* Revenue vs Expenses Area Chart */}
+          <div className="chart-card bg-white rounded-xl border border-gray-200 shadow-sm">
+            <h3 className="chart-title text-xl font-semibold text-gray-900 mb-6">Revenue vs Expenses Trend</h3>
+            <div className="chart-container">
+                <ResponsiveContainer width="100%" height={400}>
+                <AreaChart data={data.monthlyTrends} className="recharts-area-chart">
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis tickFormatter={(value) => `₹${(value / 100000).toFixed(0)}L`} />
+                <Tooltip 
+                  formatter={(value: number, name: string) => [
+                    formatCurrency(value), 
+                    name.charAt(0).toUpperCase() + name.slice(1)
+                  ]}
+                />
+                <Legend />
+                <Area type="monotone" dataKey="revenue" stackId="1" stroke="#10B981" fill="#10B981" fillOpacity={0.6} name="Revenue" />
+                <Area type="monotone" dataKey="expenses" stackId="2" stroke="#EF4444" fill="#EF4444" fillOpacity={0.6} name="Expenses" />
+              </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </div>
       )}
 
@@ -461,7 +776,7 @@ export default function Analytics() {
             </div>
             
             <div className="space-y-4">
-              {alerts.map((alert, index) => (
+              {data.alerts.map((alert, index) => (
                 <div key={index} className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors">
                   <div className="flex-shrink-0 mt-1">
                     {getAlertIcon(alert.type)}
@@ -480,6 +795,80 @@ export default function Analytics() {
                   </button>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Operations Efficiency */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="chart-card bg-white rounded-xl border border-gray-200 shadow-sm">
+              <h3 className="chart-title text-lg font-semibold text-gray-900 mb-6">Resource Utilization</h3>
+              <div className="chart-container">
+                <ResponsiveContainer width="100%" height={300}>
+                  <RechartsBarChart data={data.monthlyTrends} className="recharts-bar-chart">
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis tickFormatter={(value) => `₹${(value / 100000).toFixed(0)}L`} />
+                  <Tooltip formatter={(value: number, name: string) => [formatCurrency(value), name]} />
+                  <Legend />
+                  <Bar dataKey="materials" fill="#3B82F6" name="Materials" />
+                  <Bar dataKey="labour" fill="#10B981" name="Labour" />
+                  <Bar dataKey="equipment" fill="#F59E0B" name="Equipment" />
+                </RechartsBarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">Safety Metrics</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-green-500 rounded-lg">
+                      <Shield className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">Safety Score</p>
+                      <p className="text-sm text-gray-600">Overall safety rating</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-green-600">92%</p>
+                    <p className="text-sm text-green-600">+5% this month</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-blue-500 rounded-lg">
+                      <HardHat className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">Incidents</p>
+                      <p className="text-sm text-gray-600">Reported this month</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-blue-600">2</p>
+                    <p className="text-sm text-blue-600">-1 from last month</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between p-4 bg-purple-50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-purple-500 rounded-lg">
+                      <Award className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">Compliance</p>
+                      <p className="text-sm text-gray-600">Regulatory compliance</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-purple-600">98%</p>
+                    <p className="text-sm text-purple-600">Fully compliant</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -533,7 +922,10 @@ export default function Analytics() {
                 Cancel
               </button>
               <button
-                onClick={() => setShowExportModal(false)}
+                onClick={() => {
+                  setShowExportModal(false);
+                  alert('Report exported successfully!');
+                }}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Export

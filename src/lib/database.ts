@@ -63,25 +63,11 @@ export const db = {
     return result.rows[0];
   },
 
-  // Vehicles
-  getVehicles: async () => {
-    const result = await query('SELECT * FROM vehicles ORDER BY created_at DESC');
-    return result.rows;
+  deleteSite: async (id: string) => {
+    const result = await query('DELETE FROM sites WHERE id = $1', [id]);
+    return (result.rowCount || 0) > 0;
   },
-  
-  getVehiclesBySite: async (siteId: string) => {
-    const result = await query('SELECT * FROM vehicles WHERE site_id = $1', [siteId]);
-    return result.rows;
-  },
-  
-  createVehicle: async (vehicleData: any) => {
-    const { name, type, registration_number, status, location, fuel_level, last_service_date, next_service_date, operator_id, site_id, vendor_id, purchase_date, purchase_price } = vehicleData;
-    const result = await query(
-      'INSERT INTO vehicles (name, type, registration_number, status, location, fuel_level, last_service_date, next_service_date, operator_id, site_id, vendor_id, purchase_date, purchase_price) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *',
-      [name, type, registration_number, status, location, fuel_level, last_service_date, next_service_date, operator_id, site_id, vendor_id, purchase_date, purchase_price]
-    );
-    return result.rows[0];
-  },
+
 
   // Materials
   getMaterials: async () => {
@@ -111,6 +97,9 @@ export const db = {
         description,
         category,
         amount::numeric,
+        quantity::numeric,
+        unit,
+        cost_per_unit::numeric,
         TO_CHAR(expense_date, 'DD/MM/YYYY') as date,
         site_id as "siteId",
         vendor_id as vendor,
@@ -130,6 +119,9 @@ export const db = {
         description,
         category,
         amount::numeric,
+        quantity::numeric,
+        unit,
+        cost_per_unit::numeric,
         TO_CHAR(expense_date, 'DD/MM/YYYY') as date,
         site_id as "siteId",
         vendor_id as vendor,
@@ -144,10 +136,10 @@ export const db = {
   },
   
   createExpense: async (expenseData: any) => {
-    const { description, category, amount, expense_date, site_id, vendor_id, vehicle_id, material_id, labour_id, status, created_by } = expenseData;
+    const { description, category, amount, quantity, unit, cost_per_unit, expense_date, site_id, vendor_id, vehicle_id, material_id, labour_id, status, created_by } = expenseData;
     const result = await query(
-      'INSERT INTO expenses (description, category, amount, expense_date, site_id, vendor_id, vehicle_id, material_id, labour_id, status, created_by) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *',
-      [description, category, amount, expense_date, site_id, vendor_id, vehicle_id, material_id, labour_id, status, created_by]
+      'INSERT INTO expenses (description, category, amount, quantity, unit, cost_per_unit, expense_date, site_id, vendor_id, vehicle_id, material_id, labour_id, status, created_by) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *',
+      [description, category, amount, quantity, unit, cost_per_unit, expense_date, site_id, vendor_id, vehicle_id, material_id, labour_id, status, created_by]
     );
     return result.rows[0];
   },
@@ -165,6 +157,40 @@ export const db = {
       [name, type, contact_person, email, phone, address, city, state, pincode, gst_number, rating]
     );
     return result.rows[0];
+  },
+
+  // Vehicles
+  getVehicles: async () => {
+    const result = await query('SELECT * FROM vehicles ORDER BY created_at DESC');
+    return result.rows;
+  },
+  
+  getVehiclesBySite: async (siteId: string) => {
+    const result = await query('SELECT * FROM vehicles WHERE site_id = $1 ORDER BY created_at DESC', [siteId]);
+    return result.rows;
+  },
+  
+  createVehicle: async (vehicleData: any) => {
+    const { name, type, registration_number, status, location, fuel_level, last_service_date, next_service_date, operator_id, site_id, vendor_id, purchase_date, purchase_price, warranty_expiry, insurance_expiry } = vehicleData;
+    const result = await query(
+      'INSERT INTO vehicles (name, type, registration_number, status, location, fuel_level, last_service_date, next_service_date, operator_id, site_id, vendor_id, purchase_date, purchase_price, warranty_expiry, insurance_expiry) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *',
+      [name, type, registration_number, status, location, fuel_level, last_service_date, next_service_date, operator_id, site_id, vendor_id, purchase_date, purchase_price, warranty_expiry, insurance_expiry]
+    );
+    return result.rows[0];
+  },
+  
+  updateVehicle: async (id: string, vehicleData: any) => {
+    const { name, type, registration_number, status, location, fuel_level, last_service_date, next_service_date, operator_id, site_id, vendor_id, purchase_date, purchase_price, warranty_expiry, insurance_expiry } = vehicleData;
+    const result = await query(
+      'UPDATE vehicles SET name = $1, type = $2, registration_number = $3, status = $4, location = $5, fuel_level = $6, last_service_date = $7, next_service_date = $8, operator_id = $9, site_id = $10, vendor_id = $11, purchase_date = $12, purchase_price = $13, warranty_expiry = $14, insurance_expiry = $15, updated_at = CURRENT_TIMESTAMP WHERE id = $16 RETURNING *',
+      [name, type, registration_number, status, location, fuel_level, last_service_date, next_service_date, operator_id, site_id, vendor_id, purchase_date, purchase_price, warranty_expiry, insurance_expiry, id]
+    );
+    return result.rows[0];
+  },
+  
+  deleteVehicle: async (id: string) => {
+    const result = await query('DELETE FROM vehicles WHERE id = $1', [id]);
+    return result.rowCount;
   },
 
   // Labour

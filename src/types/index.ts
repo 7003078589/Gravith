@@ -2,7 +2,7 @@ export interface Site {
   id: string;
   name: string;
   location: string;
-  status: 'active' | 'completed' | 'on-hold';
+  status: 'active' | 'inactive' | 'completed' | 'on-hold';
   progress: number;
   startDate: string;
   endDate: string;
@@ -10,6 +10,7 @@ export interface Site {
   spent: number;
   client: string;
   manager: string;
+  description?: string;
 }
 
 export interface Vehicle {

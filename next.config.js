@@ -2,7 +2,7 @@
 const nextConfig = {
   // Remove output: 'export' for API routes to work
   // output: 'export',
-  trailingSlash: true,
+  trailingSlash: false, // Changed to false to fix API route redirects
   images: {
     unoptimized: true
   },

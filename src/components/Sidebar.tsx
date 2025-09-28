@@ -115,7 +115,7 @@ export default function Sidebar() {
                       href={item.href}
                       className={`flex items-center px-4 py-3 text-sm font-medium transition-colors ${
                         isActive
-                          ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
+                          ? 'bg-white text-blue-700 border-r-2 border-blue-700'
                           : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                       }`}
                     >
@@ -134,7 +134,7 @@ export default function Sidebar() {
 
   // Desktop sidebar
   return (
-    <div className={`bg-white border-r border-gray-200 transition-all duration-300 ${
+    <div className={`bg-white border-r border-gray-200 transition-all duration-300 h-full flex flex-col ${
       collapsed ? 'w-16' : 'w-64'
     }`}>
       {/* Header */}
@@ -180,7 +180,7 @@ export default function Sidebar() {
               href={item.href}
               className={`flex items-center px-4 py-3 text-sm font-medium transition-colors ${
                 isActive
-                  ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
+                  ? 'bg-white text-blue-700 border-r-2 border-blue-700'
                   : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
               }`}
             >
@@ -190,6 +190,9 @@ export default function Sidebar() {
           );
         })}
       </nav>
+      
+      {/* Ensure remaining space is white */}
+      <div className="flex-1 bg-white"></div>
     </div>
   );
 }

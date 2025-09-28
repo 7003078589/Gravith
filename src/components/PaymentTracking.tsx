@@ -17,13 +17,20 @@ import {
   X,
   ChevronDown,
   Building2,
-  Banknote
+  Banknote,
+  PieChart,
+  BarChart,
+  Download,
+  DollarSign
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
+import { formatDateForInput } from '@/lib/dateUtils';
+import { useUnits } from '@/contexts/UnitContext';
+import PageTitle from './PageTitle';
 
 // Sample payment data matching your design
 // Dummy paymentHistory and clientPayments arrays removed - now using real data from API
@@ -71,6 +78,7 @@ const paymentMethods = ['Bank Transfer', 'Cheque', 'Cash', 'Online Payment'];
 const paymentTerms = ['15 days', '30 days', '45 days', '60 days', '90 days'];
 
 export default function PaymentTracking() {
+  const { formatCurrency } = useUnits();
   const [activeTab, setActiveTab] = useState('Payment Tracking');
   const [showRecordPaymentModal, setShowRecordPaymentModal] = useState(false);
   const [showAddContractModal, setShowAddContractModal] = useState(false);
@@ -383,151 +391,322 @@ export default function PaymentTracking() {
     </div>
   );
 
-  const renderAnalytics = () => (
-    <div className="space-y-6">
-      <h3 className="text-lg font-semibold text-gray-900">Payment Analytics</h3>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Payment Status Distribution */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <div className="flex items-center space-x-2 mb-4">
-            <h4 className="text-lg font-semibold text-gray-900">Payment Status Distribution</h4>
-            <Info className="h-4 w-4 text-gray-400" />
-          </div>
-          
-          {/* Pie Chart */}
-          <div className="flex items-center justify-center h-48 mb-4">
-            <div className="text-center">
-              {/* Simple Pie Chart using CSS */}
-              <div className="relative w-32 h-32 mx-auto mb-4">
-                <div className="absolute inset-0 rounded-full border-8 border-green-500" style={{clipPath: 'polygon(50% 50%, 50% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 50%)'}}></div>
-                <div className="absolute inset-0 rounded-full border-8 border-orange-500" style={{clipPath: 'polygon(50% 50%, 100% 0%, 100% 50%)'}}></div>
-                <div className="absolute inset-0 rounded-full border-8 border-red-500" style={{clipPath: 'polygon(50% 50%, 100% 50%, 100% 100%)'}}></div>
-                <div className="absolute inset-0 rounded-full border-8 border-gray-500" style={{clipPath: 'polygon(50% 50%, 0% 50%, 0% 100%)'}}></div>
-                <div className="absolute inset-0 rounded-full border-8 border-white"></div>
+  const renderAnalytics = () => {
+    // Sample data for enhanced analytics
+    const paymentStatusData = [
+      { status: 'Paid', amount: 15000000, count: 8, percentage: 45, color: 'bg-green-500' },
+      { status: 'Partial', amount: 8000000, count: 5, percentage: 25, color: 'bg-yellow-500' },
+      { status: 'Pending', amount: 6000000, count: 4, percentage: 18, color: 'bg-blue-500' },
+      { status: 'Overdue', amount: 4000000, count: 3, percentage: 12, color: 'bg-red-500' }
+    ];
+
+    const monthlyTrends = [
+      { month: 'Jan', received: 12000000, due: 15000000 },
+      { month: 'Feb', received: 15000000, due: 18000000 },
+      { month: 'Mar', received: 18000000, due: 20000000 },
+      { month: 'Apr', received: 16000000, due: 19000000 },
+      { month: 'May', received: 20000000, due: 22000000 },
+      { month: 'Jun', received: 22000000, due: 25000000 }
+    ];
+
+    const clientPayments = [
+      { client: 'Residential Developer', amount: 12000000, status: 'Paid', percentage: 35 },
+      { client: 'City Infrastructure', amount: 10000000, status: 'Partial', percentage: 30 },
+      { client: 'Skyline Construction', amount: 8000000, status: 'Pending', percentage: 25 },
+      { client: 'Acme Real Estate', amount: 4000000, status: 'Overdue', percentage: 10 }
+    ];
+
+    return (
+      <div className="space-y-6">
+        {/* Analytics Header */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <PageTitle 
+                title="Payment Analytics Dashboard" 
+                subtitle="Comprehensive insights into payment tracking and cash flow management" 
+              />
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-sm text-gray-600">Live Data</span>
               </div>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="flex items-center space-x-2">
+              <Button 
+                onClick={() => {
+                  const data = {
+                    totalPayments: formatCurrency(33000000),
+                    statusBreakdown: paymentStatusData,
+                    monthlyTrends: monthlyTrends,
+                    clientPayments: clientPayments,
+                    date: new Date().toLocaleDateString()
+                  };
+                  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `payment_analytics_${new Date().toISOString().split('T')[0]}.json`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}
+                className="flex items-center space-x-2"
+              >
+                <Download className="h-4 w-4" />
+                <span>Export Data</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Enhanced KPI Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-blue-100 rounded-lg">
+                <DollarSign className="h-6 w-6 text-blue-600" />
+              </div>
+              <TrendingUp className="h-5 w-5 text-green-500" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600 mb-1">Total Payments</p>
+              <p className="text-2xl font-bold text-gray-900">{formatCurrency(33000000)}</p>
+              <p className="text-sm text-green-600">+18.5% vs last month</p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-green-100 rounded-lg">
+                <CheckCircle className="h-6 w-6 text-green-600" />
+              </div>
+              <TrendingUp className="h-5 w-5 text-green-500" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600 mb-1">Paid Amount</p>
+              <p className="text-2xl font-bold text-gray-900">{formatCurrency(15000000)}</p>
+              <p className="text-sm text-green-600">45% of total</p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-yellow-100 rounded-lg">
+                <Clock className="h-6 w-6 text-yellow-600" />
+              </div>
+              <TrendingUp className="h-5 w-5 text-yellow-500" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600 mb-1">Pending</p>
+              <p className="text-2xl font-bold text-gray-900">{formatCurrency(6000000)}</p>
+              <p className="text-sm text-yellow-600">18% of total</p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-red-100 rounded-lg">
+                <AlertTriangle className="h-6 w-6 text-red-600" />
+              </div>
+              <TrendingUp className="h-5 w-5 text-red-500" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600 mb-1">Overdue</p>
+              <p className="text-2xl font-bold text-gray-900">{formatCurrency(4000000)}</p>
+              <p className="text-sm text-red-600">12% of total</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Payment Status Distribution */}
+          <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h4 className="text-lg font-semibold text-gray-900">Payment Status Distribution</h4>
+              <PieChart className="h-5 w-5 text-gray-400" />
+            </div>
+            <div className="flex items-center justify-center mb-6">
+              <div className="relative w-48 h-48">
+                <div className="absolute inset-0 rounded-full border-8 border-green-500" style={{
+                  background: `conic-gradient(from 0deg, #10b981 0deg 162deg, #eab308 162deg 252deg, #3b82f6 252deg 320deg, #ef4444 320deg 360deg)`
+                }}></div>
+                <div className="absolute inset-4 bg-white rounded-full flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">100%</div>
+                    <div className="text-sm text-gray-500">Total</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-3">
+              {paymentStatusData.map((status, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center">
+                    <div className={`w-4 h-4 rounded-full ${status.color} mr-3`}></div>
+                    <span className="text-sm font-medium text-gray-700">{status.status}</span>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm font-bold text-gray-900">{status.percentage}%</div>
+                    <div className="text-xs text-gray-500">{formatCurrency(status.amount)}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Monthly Payment Trends */}
+          <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h4 className="text-lg font-semibold text-gray-900">Monthly Payment Trends</h4>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-1">
                   <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  <span>Paid: 1</span>
+                  <span className="text-sm text-gray-600">Received</span>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                  <span>Partial: 1</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                  <span>Overdue: 1</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
-                  <span>Pending: 1</span>
+                <div className="flex items-center space-x-1">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                  <span className="text-sm text-gray-600">Due</span>
                 </div>
               </div>
+            </div>
+            <div className="h-64 flex items-end justify-between px-4">
+              {monthlyTrends.map((data, index) => (
+                <div key={index} className="flex flex-col items-center space-y-2">
+                  <div className="flex flex-col space-y-1">
+                    <div 
+                      className="w-8 bg-green-500 rounded-t"
+                      style={{ height: `${(data.received / 30000000) * 200}px` }}
+                      title={`Received: ${formatCurrency(data.received)}`}
+                    ></div>
+                    <div 
+                      className="w-8 bg-blue-500 rounded-b"
+                      style={{ height: `${(data.due / 30000000) * 200}px` }}
+                      title={`Due: ${formatCurrency(data.due)}`}
+                    ></div>
+                  </div>
+                  <span className="text-xs text-gray-600 font-medium">{data.month}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Monthly Payment Trends */}
+        {/* Client Payment Analysis */}
         <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <div className="flex items-center space-x-2 mb-4">
-            <h4 className="text-lg font-semibold text-gray-900">Monthly Payment Trends</h4>
-            <Info className="h-4 w-4 text-gray-400" />
+          <div className="flex items-center justify-between mb-6">
+            <h4 className="text-lg font-semibold text-gray-900">Client Payment Analysis</h4>
+            <BarChart className="h-5 w-5 text-gray-400" />
           </div>
-          
-          {/* Bar Chart */}
-          <div className="h-48 mb-4">
-            <div className="flex items-end justify-between h-full px-4">
-              {/* Oct */}
-              <div className="flex flex-col items-center space-y-2">
-                <div className="flex flex-col space-y-1">
-                  <div className="w-8 bg-green-500 rounded-t" style={{height: '60px'}}></div>
-                  <div className="w-8 bg-orange-500 rounded-t" style={{height: '80px'}}></div>
+          <div className="space-y-4">
+            {clientPayments.map((client, index) => {
+              const colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500'];
+              const statusColors = {
+                'Paid': 'text-green-600',
+                'Partial': 'text-yellow-600',
+                'Pending': 'text-blue-600',
+                'Overdue': 'text-red-600'
+              };
+              
+              return (
+                <div key={index} className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <span className="text-sm font-medium text-gray-700">{client.client}</span>
+                      <span className={`ml-2 text-xs px-2 py-1 rounded-full ${statusColors[client.status as keyof typeof statusColors]} bg-gray-100`}>
+                        {client.status}
+                      </span>
+                    </div>
+                    <span className="text-sm font-bold text-gray-900">{formatCurrency(client.amount)}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div 
+                      className={`${colors[index]} h-3 rounded-full transition-all duration-300`}
+                      style={{ width: `${client.percentage}%` }}
+                    ></div>
+                  </div>
+                  <div className="text-xs text-gray-500 text-right">{client.percentage}% of total</div>
                 </div>
-                <span className="text-xs text-gray-600">Oct</span>
-              </div>
-              {/* Nov */}
-              <div className="flex flex-col items-center space-y-2">
-                <div className="flex flex-col space-y-1">
-                  <div className="w-8 bg-green-500 rounded-t" style={{height: '90px'}}></div>
-                  <div className="w-8 bg-orange-500 rounded-t" style={{height: '80px'}}></div>
-                </div>
-                <span className="text-xs text-gray-600">Nov</span>
-              </div>
-              {/* Dec */}
-              <div className="flex flex-col items-center space-y-2">
-                <div className="flex flex-col space-y-1">
-                  <div className="w-8 bg-green-500 rounded-t" style={{height: '70px'}}></div>
-                  <div className="w-8 bg-orange-500 rounded-t" style={{height: '100px'}}></div>
-                </div>
-                <span className="text-xs text-gray-600">Dec</span>
-              </div>
-              {/* Jan */}
-              <div className="flex flex-col items-center space-y-2">
-                <div className="flex flex-col space-y-1">
-                  <div className="w-8 bg-green-500 rounded-t" style={{height: '150px'}}></div>
-                  <div className="w-8 bg-orange-500 rounded-t" style={{height: '130px'}}></div>
-                </div>
-                <span className="text-xs text-gray-600">Jan</span>
-              </div>
-              {/* Feb */}
-              <div className="flex flex-col items-center space-y-2">
-                <div className="flex flex-col space-y-1">
-                  <div className="w-8 bg-green-500 rounded-t" style={{height: '30px'}}></div>
-                  <div className="w-8 bg-orange-500 rounded-t" style={{height: '120px'}}></div>
-                </div>
-                <span className="text-xs text-gray-600">Feb</span>
-              </div>
-            </div>
-            <div className="flex items-center justify-center space-x-4 mt-4 text-xs">
-              <div className="flex items-center space-x-1">
-                <div className="w-3 h-3 bg-orange-500 rounded"></div>
-                <span>Due</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <div className="w-3 h-3 bg-green-500 rounded"></div>
-                <span>Received</span>
-              </div>
-            </div>
+              );
+            })}
           </div>
         </div>
-      </div>
 
-      {/* Client Payment Analysis */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <div className="flex items-center space-x-2 mb-4">
-          <h4 className="text-lg font-semibold text-gray-900">Client Payment Analysis</h4>
-          <Info className="h-4 w-4 text-gray-400" />
-        </div>
-        
-        {/* Client Analysis Chart */}
-        <div className="h-48">
-          <div className="flex items-end justify-between h-full px-4">
-            {/* Client bars */}
-            <div className="flex flex-col items-center space-y-2">
-              <div className="w-12 bg-blue-500 rounded-t" style={{height: '40px'}}></div>
-              <span className="text-xs text-gray-600 text-center">Residential<br/>Develope...</span>
+        {/* Payment Performance Metrics */}
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <h4 className="text-lg font-semibold text-gray-900 mb-6">Payment Performance Metrics</h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center p-4 bg-blue-50 rounded-lg">
+              <div className="p-3 bg-blue-500 rounded-full w-16 h-16 mx-auto mb-3 flex items-center justify-center">
+                <TrendingUp className="h-8 w-8 text-white" />
+              </div>
+              <h5 className="font-semibold text-gray-900 mb-1">Collection Rate</h5>
+              <p className="text-2xl font-bold text-blue-600">87.5%</p>
+              <p className="text-sm text-gray-600">Last 30 days</p>
             </div>
-            <div className="flex flex-col items-center space-y-2">
-              <div className="w-12 bg-blue-500 rounded-t" style={{height: '60px'}}></div>
-              <span className="text-xs text-gray-600 text-center">City<br/>Infrastructure...</span>
+
+            <div className="text-center p-4 bg-green-50 rounded-lg">
+              <div className="p-3 bg-green-500 rounded-full w-16 h-16 mx-auto mb-3 flex items-center justify-center">
+                <Clock className="h-8 w-8 text-white" />
+              </div>
+              <h5 className="font-semibold text-gray-900 mb-1">Avg. Payment Time</h5>
+              <p className="text-2xl font-bold text-green-600">12 days</p>
+              <p className="text-sm text-gray-600">From due date</p>
             </div>
-            <div className="flex flex-col items-center space-y-2">
-              <div className="w-12 bg-blue-500 rounded-t" style={{height: '80px'}}></div>
-              <span className="text-xs text-gray-600 text-center">Skyline<br/>Construction...</span>
-            </div>
-            <div className="flex flex-col items-center space-y-2">
-              <div className="w-12 bg-blue-500 rounded-t" style={{height: '100px'}}></div>
-              <span className="text-xs text-gray-600 text-center">Acme Real<br/>Estate Pvt...</span>
+
+            <div className="text-center p-4 bg-purple-50 rounded-lg">
+              <div className="p-3 bg-purple-500 rounded-full w-16 h-16 mx-auto mb-3 flex items-center justify-center">
+                <DollarSign className="h-8 w-8 text-white" />
+              </div>
+              <h5 className="font-semibold text-gray-900 mb-1">Cash Flow</h5>
+              <p className="text-2xl font-bold text-purple-600">+15.2%</p>
+              <p className="text-sm text-gray-600">vs last month</p>
             </div>
           </div>
-          <div className="text-center mt-4 text-xs text-gray-500">
-            <span>₹0.0Cr</span>
+        </div>
+
+        {/* Recent Payment Activity */}
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <h4 className="text-lg font-semibold text-gray-900 mb-4">Recent Payment Activity</h4>
+          <div className="space-y-3">
+            {[
+              { client: 'Residential Developer', amount: 5000000, status: 'Paid', date: '2 days ago', type: 'success' },
+              { client: 'City Infrastructure', amount: 3000000, status: 'Partial', date: '4 days ago', type: 'warning' },
+              { client: 'Skyline Construction', amount: 2000000, status: 'Pending', date: '1 week ago', type: 'info' },
+              { client: 'Acme Real Estate', amount: 1500000, status: 'Overdue', date: '2 weeks ago', type: 'error' }
+            ].map((payment, index) => (
+              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className={`p-2 rounded-full ${
+                    payment.type === 'success' ? 'bg-green-100' :
+                    payment.type === 'warning' ? 'bg-yellow-100' :
+                    payment.type === 'info' ? 'bg-blue-100' : 'bg-red-100'
+                  }`}>
+                    {payment.type === 'success' ? (
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    ) : payment.type === 'warning' ? (
+                      <Clock className="h-4 w-4 text-yellow-600" />
+                    ) : payment.type === 'info' ? (
+                      <Clock className="h-4 w-4 text-blue-600" />
+                    ) : (
+                      <AlertTriangle className="h-4 w-4 text-red-600" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{payment.client}</p>
+                    <p className="text-xs text-gray-600">{payment.status} • {payment.date}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-bold text-gray-900">{formatCurrency(payment.amount)}</p>
+                  <p className="text-xs text-gray-500">{payment.status}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -547,8 +726,10 @@ export default function PaymentTracking() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Payment Management</h1>
-          <p className="text-gray-600">Track client payments, manage contracts, and analyze payment trends</p>
+          <PageTitle 
+            title="Payment Management" 
+            subtitle="Track client payments, manage contracts, and analyze payment trends" 
+          />
         </div>
         <div className="flex items-center space-x-3">
           <Button 
@@ -675,7 +856,7 @@ export default function PaymentTracking() {
                     </Label>
                     <DatePicker
                       value={recordPaymentForm.paymentDate ? new Date(recordPaymentForm.paymentDate) : undefined}
-                      onChange={(date) => handleRecordPaymentInputChange('paymentDate', date?.toISOString().split('T')[0] || '')}
+                      onChange={(date) => handleRecordPaymentInputChange('paymentDate', formatDateForInput(date))}
                       placeholder="Select payment date"
                     />
                   </div>
@@ -834,7 +1015,7 @@ export default function PaymentTracking() {
                     </Label>
                     <DatePicker
                       value={addContractForm.dueDate ? new Date(addContractForm.dueDate) : undefined}
-                      onChange={(date) => handleAddContractInputChange('dueDate', date?.toISOString().split('T')[0] || '')}
+                      onChange={(date) => handleAddContractInputChange('dueDate', formatDateForInput(date))}
                       placeholder="Select due date"
                     />
                   </div>

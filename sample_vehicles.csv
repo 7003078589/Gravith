@@ -1,0 +1,11 @@
+type,make,model,year,registration_number,capacity,fuel_type,per_day_cost,per_hour_cost,status
+excavator,Caterpillar,320D,2020,KA01AB1234,2000,diesel,5000,500,active
+crane,Liebherr,LTM 1100,2019,KA02CD5678,100,diesel,8000,800,active
+truck,Tata,Prima 4038,2021,KA03EF9012,25000,diesel,3000,300,active
+concrete-mixer,Schwing,SP 500,2020,KA04GH3456,5000,diesel,4000,400,maintenance
+bulldozer,Komatsu,D65PX-18,2019,KA05IJ7890,15000,diesel,6000,600,active
+excavator,JCB,220X,2021,KA06KL1234,1800,diesel,4500,450,active
+truck,Ashok Leyland,1616,2020,KA07MN5678,16000,diesel,2800,280,active
+crane,Grove,RT9150E,2018,KA08OP9012,150,diesel,7500,750,idle
+concrete-mixer,Putzmeister,M 36-4,2021,KA09QR3456,4000,diesel,4200,420,active
+bulldozer,Caterpillar,D6T,2020,KA10ST7890,12000,diesel,5500,550,active

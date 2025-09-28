@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import { UnitProvider } from '@/contexts/UnitContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -34,7 +35,9 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Gravith CMS" />
       </head>
       <body className={inter.className}>
-        {children}
+        <UnitProvider>
+          {children}
+        </UnitProvider>
       </body>
     </html>
   )

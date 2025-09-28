@@ -1,5 +1,5 @@
 // API service layer for frontend components
-const API_BASE_URL = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3000';
+const API_BASE_URL = ''; // Use relative URLs for same-origin requests
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -10,15 +10,23 @@ export interface ApiResponse<T> {
 class ApiService {
   private async request<T>(endpoint: string, options?: RequestInit): Promise<ApiResponse<T>> {
     try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      // Use absolute URL to avoid redirect issues
+      const url = `http://localhost:3000${endpoint}`;
+      console.log('Making API request to:', url);
+      
+      const response = await fetch(url, {
+        method: options?.method || 'GET',
         headers: {
           'Content-Type': 'application/json',
           ...options?.headers,
         },
-        ...options,
+        body: options?.body,
+        cache: 'no-cache', // Prevent caching issues
       });
 
+      console.log('Response status:', response.status);
       const data = await response.json();
+      console.log('Response data:', data);
       
       if (!response.ok) {
         throw new Error(data.error || 'Request failed');
@@ -109,8 +117,9 @@ class ApiService {
   }
 
   // Labour API
-  async getLabour() {
-    return this.request('/api/labour');
+  async getLabour(siteId?: string) {
+    const url = siteId ? `/api/labour?siteId=${siteId}` : '/api/labour';
+    return this.request(url);
   }
 
   async createLabour(labourData: any) {

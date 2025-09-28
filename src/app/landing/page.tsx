@@ -4,8 +4,8 @@ import SaaSHomepage from '@/components/SaaSHomepage';
 
 export default function Landing() {
   const handleGetStarted = () => {
-    // Navigate to login page for new users
-    window.location.href = '/login';
+    // Navigate to pricing page for new users
+    window.location.href = '/pricing';
   };
 
   const handleLogin = () => {
